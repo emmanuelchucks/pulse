@@ -1,13 +1,7 @@
-import "expo-sqlite/localStorage/install";
 import { useSyncExternalStore } from "react";
-import {
-  MetricKey,
-  METRIC_KEYS,
-  METRIC_CONFIG,
-  formatDate,
-} from "@/constants/metrics";
-
-// --- Types ---
+import { METRIC_CONFIG, METRIC_KEYS, MetricKey, formatDate } from "@/constants/metrics";
+import { onDbChange, sqlite } from "@/db/client";
+import { parseMetricValue, parseMetricWrite } from "@/db/validation";
 
 export type DailyEntry = {
   date: string;
@@ -24,48 +18,80 @@ type WellnessState = {
   goals: Goals;
 };
 
-// --- Constants ---
+const DEFAULT_GOALS: Goals = {
+  water: 8,
+  mood: 5,
+  sleep: 8,
+  exercise: 30,
+};
 
-const STORAGE_KEY_ENTRIES = "pulse_entries";
-const STORAGE_KEY_GOALS = "pulse_goals";
-
-function getDefaultGoals(): Goals {
-  return {
-    water: 8,
-    mood: 5,
-    sleep: 8,
-    exercise: 30,
-  };
-}
+let listeners: (() => void)[] = [];
+let dbSubscriptionAttached = false;
 
 function createEmptyEntry(dateStr: string): DailyEntry {
   return { date: dateStr, water: 0, mood: 0, sleep: 0, exercise: 0 };
 }
 
-// --- Singleton Store (synchronous with localStorage) ---
+function ensureDefaultGoals() {
+  sqlite.withTransactionSync(() => {
+    for (const metric of METRIC_KEYS) {
+      sqlite.runSync(
+        `INSERT OR IGNORE INTO goals (metric, value, updated_at) VALUES (?, ?, ?)` ,
+        metric,
+        DEFAULT_GOALS[metric],
+        Date.now()
+      );
+    }
+  });
+}
 
-let listeners: (() => void)[] = [];
+function loadEntries(): Record<string, DailyEntry> {
+  const rows = sqlite.getAllSync<DailyEntry>(
+    `SELECT date, water, mood, sleep, exercise FROM daily_entries`
+  );
+
+  return rows.reduce<Record<string, DailyEntry>>((acc, row) => {
+    acc[row.date] = row;
+    return acc;
+  }, {});
+}
+
+function loadGoals(): Goals {
+  const rows = sqlite.getAllSync<{ metric: MetricKey; value: number }>(
+    `SELECT metric, value FROM goals`
+  );
+
+  const goals: Goals = { ...DEFAULT_GOALS };
+  for (const row of rows) {
+    goals[row.metric] = row.value;
+  }
+
+  return goals;
+}
 
 function loadState(): WellnessState {
-  const entriesRaw = localStorage.getItem(STORAGE_KEY_ENTRIES);
-  const goalsRaw = localStorage.getItem(STORAGE_KEY_GOALS);
+  ensureDefaultGoals();
   return {
-    entries: entriesRaw ? JSON.parse(entriesRaw) : {},
-    goals: goalsRaw
-      ? { ...getDefaultGoals(), ...JSON.parse(goalsRaw) }
-      : getDefaultGoals(),
+    entries: loadEntries(),
+    goals: loadGoals(),
   };
 }
 
 let state: WellnessState = loadState();
 
 function emit() {
-  state = { ...state };
-  listeners.forEach((l) => l());
+  state = loadState();
+  listeners.forEach((listener) => listener());
 }
 
 function subscribe(listener: () => void) {
   listeners = [...listeners, listener];
+
+  if (!dbSubscriptionAttached) {
+    onDbChange(() => emit());
+    dbSubscriptionAttached = true;
+  }
+
   return () => {
     listeners = listeners.filter((l) => l !== listener);
   };
@@ -75,69 +101,80 @@ function getSnapshot(): WellnessState {
   return state;
 }
 
-function saveEntries() {
-  localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(state.entries));
+function ensureEntry(dateStr: string) {
+  sqlite.runSync(
+    `INSERT OR IGNORE INTO daily_entries (date, water, mood, sleep, exercise, updated_at)
+     VALUES (?, 0, 0, 0, 0, ?)`,
+    dateStr,
+    Date.now()
+  );
 }
 
-function saveGoals() {
-  localStorage.setItem(STORAGE_KEY_GOALS, JSON.stringify(state.goals));
-}
+export function updateMetric(dateStr: string, metric: MetricKey, value: number) {
+  const parsed = parseMetricWrite(dateStr, metric, value);
 
-// --- Actions ---
+  ensureEntry(parsed.date);
+  sqlite.runSync(
+    `UPDATE daily_entries SET ${parsed.metric} = ?, updated_at = ? WHERE date = ?`,
+    parsed.value,
+    Date.now(),
+    parsed.date
+  );
 
-function getOrCreateEntry(dateStr: string): DailyEntry {
-  if (!state.entries[dateStr]) {
-    state.entries[dateStr] = createEmptyEntry(dateStr);
-  }
-  return state.entries[dateStr];
-}
-
-export function updateMetric(
-  dateStr: string,
-  metric: MetricKey,
-  value: number
-) {
-  const entry = getOrCreateEntry(dateStr);
-  const config = METRIC_CONFIG[metric];
-  entry[metric] = Math.max(config.min, Math.min(config.max, value));
-  state.entries = { ...state.entries, [dateStr]: { ...entry } };
   emit();
-  saveEntries();
 }
 
 export function incrementMetric(dateStr: string, metric: MetricKey) {
-  const entry = getOrCreateEntry(dateStr);
-  const config = METRIC_CONFIG[metric];
-  updateMetric(dateStr, metric, entry[metric] + config.step);
+  const current = getEntry(state.entries, dateStr)[metric];
+  const nextValue = parseMetricValue(metric, current + METRIC_CONFIG[metric].step);
+  updateMetric(dateStr, metric, nextValue);
 }
 
 export function decrementMetric(dateStr: string, metric: MetricKey) {
-  const entry = getOrCreateEntry(dateStr);
-  const config = METRIC_CONFIG[metric];
-  updateMetric(dateStr, metric, entry[metric] - config.step);
+  const current = getEntry(state.entries, dateStr)[metric];
+  const nextValue = parseMetricValue(metric, current - METRIC_CONFIG[metric].step);
+  updateMetric(dateStr, metric, nextValue);
 }
 
 export function updateGoal(metric: MetricKey, value: number) {
-  state.goals = { ...state.goals, [metric]: value };
+  sqlite.runSync(
+    `INSERT INTO goals (metric, value, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(metric) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+    metric,
+    parseMetricValue(metric, value),
+    Date.now()
+  );
+
   emit();
-  saveGoals();
 }
 
 export function resetDay(dateStr: string) {
-  state.entries = { ...state.entries, [dateStr]: createEmptyEntry(dateStr) };
+  sqlite.runSync(
+    `INSERT INTO daily_entries (date, water, mood, sleep, exercise, updated_at)
+     VALUES (?, 0, 0, 0, 0, ?)
+     ON CONFLICT(date) DO UPDATE SET
+      water = 0,
+      mood = 0,
+      sleep = 0,
+      exercise = 0,
+      updated_at = excluded.updated_at`,
+    dateStr,
+    Date.now()
+  );
+
   emit();
-  saveEntries();
 }
 
 export function clearAllData() {
-  state.entries = {};
-  state.goals = getDefaultGoals();
-  emit();
-  localStorage.removeItem(STORAGE_KEY_ENTRIES);
-  localStorage.removeItem(STORAGE_KEY_GOALS);
-}
+  sqlite.withTransactionSync(() => {
+    sqlite.runSync(`DELETE FROM daily_entries`);
+    sqlite.runSync(`DELETE FROM goals`);
+  });
 
-// --- Computed helpers (take snapshot args for React Compiler compat) ---
+  ensureDefaultGoals();
+  emit();
+}
 
 export function getEntry(
   entries: Record<string, DailyEntry>,
@@ -224,8 +261,6 @@ export function getCompletionRate(
 
   return totalMetrics > 0 ? completedMetrics / totalMetrics : 0;
 }
-
-// --- Hook ---
 
 export function useWellnessStore() {
   return useSyncExternalStore(subscribe, getSnapshot);

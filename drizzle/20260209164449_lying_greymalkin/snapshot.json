@@ -1,0 +1,127 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "66ec551d-21f2-42aa-8349-6292f19d648f",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "name": "daily_entries",
+      "entityType": "tables"
+    },
+    {
+      "name": "goals",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "date",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "water",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "mood",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "sleep",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "exercise",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "metric",
+      "entityType": "columns",
+      "table": "goals"
+    },
+    {
+      "type": "real",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "value",
+      "entityType": "columns",
+      "table": "goals"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "goals"
+    },
+    {
+      "columns": [
+        "date"
+      ],
+      "nameExplicit": false,
+      "name": "daily_entries_pk",
+      "table": "daily_entries",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "metric"
+      ],
+      "nameExplicit": false,
+      "name": "goals_pk",
+      "table": "goals",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}
