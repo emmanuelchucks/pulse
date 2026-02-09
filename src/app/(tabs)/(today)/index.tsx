@@ -8,6 +8,7 @@ import {
   MOOD_EMOJIS,
   formatDate,
 } from "@/constants/metrics";
+import { BG, CARD_BG, TEXT, TEXT_2, TEXT_3 } from "@/constants/colors";
 import {
   useWellnessStore,
   getEntry,
@@ -16,19 +17,17 @@ import {
   getCompletionRate,
   incrementMetric,
 } from "@/store/wellness-store";
-import {
-  card,
-  scrollContainer,
-  sectionHeader,
-  text,
-  iconBox,
-  controlButton,
-  row,
-  statCell,
-} from "@/lib/styles";
 
-const sc = scrollContainer();
-const sh = sectionHeader();
+const CARD = {
+  borderRadius: 20,
+  borderCurve: "continuous" as const,
+  backgroundColor: CARD_BG,
+};
+const CARD_SM = {
+  borderRadius: 16,
+  borderCurve: "continuous" as const,
+  backgroundColor: CARD_BG,
+};
 
 export default function DashboardScreen() {
   const { entries, goals } = useWellnessStore();
@@ -56,45 +55,83 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView
-      className={sc.root()}
+      style={{ flex: 1, backgroundColor: BG }}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName={sc.content()}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: 40,
+        gap: 12,
+      }}
     >
       {/* Date */}
       <Animated.View entering={FadeInDown.duration(400)}>
-        <Text className={text({ variant: "body" })} style={{ marginTop: 4 }}>
+        <Text style={{ fontSize: 13, marginTop: 4, color: TEXT_2 }}>
           {dateLabel}
         </Text>
       </Animated.View>
 
       {/* Summary Card */}
       <Animated.View entering={FadeInDown.duration(400).delay(50)}>
-        <View className={card()}>
-          <View className={row({ gap: "lg" })}>
+        <View style={{ ...CARD, overflow: "hidden", padding: 20 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
             <View
-              className={iconBox({ size: "lg" })}
               style={{
+                width: 76,
+                height: 76,
+                borderRadius: 38,
                 borderWidth: 5,
                 borderColor: overall >= 100 ? "#34d399" : "#0a84ff",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <Text className={text({ variant: "heading" })} style={{ fontWeight: "800", fontVariant: ["tabular-nums"] }}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  fontWeight: "800",
+                  fontVariant: ["tabular-nums"],
+                  color: TEXT,
+                }}
+              >
                 {overall}%
               </Text>
             </View>
-            <View className="flex-1 gap-0.5">
-              <Text className={text({ variant: "heading" })}>{greeting}</Text>
-              <Text className={text({ variant: "body" })}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text
+                style={{ fontSize: 17, fontWeight: "700", color: TEXT }}
+              >
+                {greeting}
+              </Text>
+              <Text style={{ fontSize: 13, color: TEXT_2 }}>
                 {completed}/{METRIC_KEYS.length} goals met today
               </Text>
-              <View className={row({ gap: "lg" })} style={{ marginTop: 8 }}>
+              <View style={{ flexDirection: "row", gap: 20, marginTop: 8 }}>
                 <View>
-                  <Text className={text({ variant: "caption" })}>Weekly</Text>
-                  <Text className={text({ variant: "value" })}>{weeklyRate}%</Text>
+                  <Text style={{ fontSize: 11, color: TEXT_3 }}>Weekly</Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "600",
+                      fontVariant: ["tabular-nums"],
+                      color: TEXT,
+                    }}
+                  >
+                    {weeklyRate}%
+                  </Text>
                 </View>
                 <View>
-                  <Text className={text({ variant: "caption" })}>Best Streak</Text>
-                  <Text className={text({ variant: "value" })}>
+                  <Text style={{ fontSize: 11, color: TEXT_3 }}>
+                    Best Streak
+                  </Text>
+                  <Text
+                    style={{ fontSize: 13, fontWeight: "600", color: TEXT }}
+                  >
                     {bestStreak} {bestStreak === 1 ? "day" : "days"}
                   </Text>
                 </View>
@@ -106,22 +143,39 @@ export default function DashboardScreen() {
 
       {/* Streak Row */}
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
-        <View className={card({ size: "flush" })}>
-          <View className={row({ justify: "around" })} style={{ paddingVertical: 14 }}>
+        <View style={CARD_SM}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              paddingVertical: 14,
+            }}
+          >
             {METRIC_KEYS.map((key) => {
               const config = METRIC_CONFIG[key];
               const streak = getStreak(entries, goals, key);
               return (
-                <View key={key} className={statCell()}>
+                <View
+                  key={key}
+                  style={{ alignItems: "center", gap: 4, paddingVertical: 2 }}
+                >
                   <SymbolView
                     name={config.icon}
                     tintColor={config.color}
                     style={{ width: 16, height: 16 }}
                   />
-                  <Text className={text({ variant: "value" })} style={{ fontWeight: "700" }} selectable>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "700",
+                      fontVariant: ["tabular-nums"],
+                      color: TEXT,
+                    }}
+                    selectable
+                  >
                     {streak}
                   </Text>
-                  <Text className={text({ variant: "tiny" })}>streak</Text>
+                  <Text style={{ fontSize: 10, color: TEXT_3 }}>streak</Text>
                 </View>
               );
             })}
@@ -130,11 +184,13 @@ export default function DashboardScreen() {
       </Animated.View>
 
       {/* Section Header */}
-      <View className={sh.wrapper()}>
-        <Text className={sh.title()} style={{ fontSize: 20 }}>
+      <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
+        <Text style={{ fontSize: 20, fontWeight: "700", color: TEXT }}>
           Today&apos;s Metrics
         </Text>
-        <Text className={sh.subtitle()}>Tap + to quick-add</Text>
+        <Text style={{ fontSize: 13, marginTop: 2, color: TEXT_2 }}>
+          Tap + to quick-add
+        </Text>
       </View>
 
       {/* Metric Cards */}
@@ -153,12 +209,25 @@ export default function DashboardScreen() {
             key={key}
             entering={FadeInDown.duration(400).delay(150 + i * 50)}
           >
-            <View className={card()}>
-              <View className={row({ gap: "md" })} style={{ gap: 14 }}>
-                <View className="items-center">
+            <View style={{ ...CARD, overflow: "hidden", padding: 16 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                }}
+              >
+                <View style={{ alignItems: "center" }}>
                   <View
-                    className={iconBox({ size: "md" })}
-                    style={{ backgroundColor: config.color + "18" }}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 14,
+                      borderCurve: "continuous",
+                      backgroundColor: config.color + "18",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
                     <SymbolView
                       name={config.icon}
@@ -167,10 +236,10 @@ export default function DashboardScreen() {
                     />
                   </View>
                   <View
-                    className="rounded-sm"
                     style={{
                       width: 40,
                       height: 4,
+                      borderRadius: 2,
                       backgroundColor: config.color + "25",
                       marginTop: 6,
                     }}
@@ -185,15 +254,29 @@ export default function DashboardScreen() {
                     />
                   </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="text-[13px] font-medium text-sf-text-2">
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, fontWeight: "500", color: TEXT_2 }}>
                     {config.label}
                   </Text>
-                  <View className="flex-row items-baseline gap-1">
-                    <Text className={text({ variant: "valueLg" })} selectable>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "baseline",
+                      gap: 4,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 21,
+                        fontWeight: "800",
+                        fontVariant: ["tabular-nums"],
+                        color: TEXT,
+                      }}
+                      selectable
+                    >
                       {display}
                     </Text>
-                    <Text className={text({ variant: "caption" })}>{unit}</Text>
+                    <Text style={{ fontSize: 11, color: TEXT_3 }}>{unit}</Text>
                   </View>
                 </View>
                 {key !== "mood" ? (
@@ -206,12 +289,22 @@ export default function DashboardScreen() {
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={`Quick add ${config.label}`}
-                    className={controlButton({ size: "md" })}
-                    style={{ backgroundColor: config.color + "18" }}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      borderCurve: "continuous",
+                      backgroundColor: config.color + "18",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
                     <Text
-                      className="text-xl font-bold"
-                      style={{ color: config.color }}
+                      style={{
+                        fontSize: 20,
+                        fontWeight: "700",
+                        color: config.color,
+                      }}
                     >
                       +
                     </Text>

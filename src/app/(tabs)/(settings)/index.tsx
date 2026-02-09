@@ -3,24 +3,19 @@ import { SymbolView } from "expo-symbols";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { MetricKey, METRIC_KEYS, METRIC_CONFIG } from "@/constants/metrics";
+import { BG, CARD_BG, TEXT, TEXT_2, TEXT_3 } from "@/constants/colors";
 import {
   useWellnessStore,
   Goals,
   updateGoal,
   clearAllData,
 } from "@/store/wellness-store";
-import {
-  card,
-  scrollContainer,
-  sectionHeader,
-  text,
-  iconBox,
-  controlButton,
-  row,
-} from "@/lib/styles";
 
-const sc = scrollContainer();
-const sh = sectionHeader();
+const CARD = {
+  borderRadius: 20,
+  borderCurve: "continuous" as const,
+  backgroundColor: CARD_BG,
+};
 
 function haptic(style = Haptics.ImpactFeedbackStyle.Light) {
   if (process.env.EXPO_OS === "ios") Haptics.impactAsync(style);
@@ -32,9 +27,9 @@ export default function SettingsScreen() {
   const handleClearData = () => {
     clearAllData();
     if (process.env.EXPO_OS === "ios") {
-      Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Warning
-      ).catch(() => {});
+      Haptics
+        .notificationAsync(Haptics.NotificationFeedbackType.Warning)
+        .catch(() => {});
     }
   };
 
@@ -42,22 +37,28 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      className={sc.root()}
+      style={{ flex: 1, backgroundColor: BG }}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName={sc.content()}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: 40,
+        gap: 12,
+      }}
     >
       <Animated.View entering={FadeInDown.duration(400)}>
-        <Text className={text({ variant: "body" })}>
+        <Text style={{ fontSize: 13, color: TEXT_2 }}>
           Customize your goals
         </Text>
       </Animated.View>
 
       {/* Daily Goals Header */}
-      <View className={sh.wrapper()}>
-        <Text className={sh.title()} style={{ fontSize: 20 }}>
+      <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
+        <Text style={{ fontSize: 20, fontWeight: "700", color: TEXT }}>
           Daily Goals
         </Text>
-        <Text className={sh.subtitle()}>Adjust targets for each metric</Text>
+        <Text style={{ fontSize: 13, marginTop: 2, color: TEXT_2 }}>
+          Adjust targets for each metric
+        </Text>
       </View>
 
       {METRIC_KEYS.map((key, i) => (
@@ -70,17 +71,31 @@ export default function SettingsScreen() {
       ))}
 
       {/* Data Header */}
-      <View className={sh.wrapper()} style={{ marginTop: 8 }}>
-        <Text className={sh.title()} style={{ fontSize: 20 }}>
+      <View style={{ paddingHorizontal: 4, marginTop: 8 }}>
+        <Text style={{ fontSize: 20, fontWeight: "700", color: TEXT }}>
           Data
         </Text>
       </View>
 
       <Animated.View entering={FadeInDown.duration(400).delay(250)}>
-        <View className={card()} style={{ gap: 14, padding: 16 }}>
-          <View className={row({ justify: "between" })}>
-            <Text className={text({ variant: "body" })}>Days tracked</Text>
-            <Text className={text({ variant: "value" })} selectable>
+        <View style={{ ...CARD, padding: 16, gap: 14 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontSize: 13, color: TEXT_2 }}>Days tracked</Text>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: "600",
+                fontVariant: ["tabular-nums"],
+                color: TEXT,
+              }}
+              selectable
+            >
               {totalEntries}
             </Text>
           </View>
@@ -88,12 +103,17 @@ export default function SettingsScreen() {
             onPress={handleClearData}
             accessibilityRole="button"
             accessibilityLabel="Clear All Data"
-            className={controlButton({
-              variant: "danger",
-              className: "w-full py-3 rounded-[14px]",
-            })}
+            style={{
+              alignItems: "center",
+              paddingVertical: 12,
+              borderRadius: 14,
+              borderCurve: "continuous",
+              backgroundColor: "rgba(255,59,48,0.12)",
+            }}
           >
-            <Text className="text-[13px] font-semibold text-sf-red">
+            <Text
+              style={{ fontSize: 13, fontWeight: "600", color: "#ff453a" }}
+            >
               Clear All Data
             </Text>
           </Pressable>
@@ -101,20 +121,22 @@ export default function SettingsScreen() {
       </Animated.View>
 
       {/* About Header */}
-      <View className={sh.wrapper()} style={{ marginTop: 8 }}>
-        <Text className={sh.title()} style={{ fontSize: 20 }}>
+      <View style={{ paddingHorizontal: 4, marginTop: 8 }}>
+        <Text style={{ fontSize: 20, fontWeight: "700", color: TEXT }}>
           About
         </Text>
       </View>
 
       <Animated.View entering={FadeInDown.duration(400).delay(300)}>
-        <View className={card()} style={{ padding: 16, gap: 6 }}>
-          <Text className={text({ variant: "title" })}>Pulse</Text>
-          <Text className="text-[13px] leading-5 text-sf-text-2">
+        <View style={{ ...CARD, padding: 16, gap: 6 }}>
+          <Text style={{ fontSize: 15, fontWeight: "600", color: TEXT }}>
+            Pulse
+          </Text>
+          <Text style={{ fontSize: 13, lineHeight: 20, color: TEXT_2 }}>
             Your daily wellness companion. Track water intake, mood, sleep, and
             exercise to build healthier habits.
           </Text>
-          <Text className={text({ variant: "caption" })} style={{ marginTop: 6 }}>
+          <Text style={{ fontSize: 11, marginTop: 6, color: TEXT_3 }}>
             Version 1.0.0
           </Text>
         </View>
@@ -128,11 +150,24 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const current = goals[metric];
 
   return (
-    <View className={card()} style={{ padding: 16 }}>
-      <View className={row({ gap: "md" })}>
+    <View style={{ ...CARD, padding: 16 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
         <View
-          className={iconBox()}
-          style={{ backgroundColor: config.color + "20" }}
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 11,
+            borderCurve: "continuous",
+            backgroundColor: config.color + "20",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <SymbolView
             name={config.icon}
@@ -141,14 +176,16 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
           />
         </View>
 
-        <View className="flex-1">
-          <Text className="text-[13px] font-medium text-sf-text">
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 13, fontWeight: "500", color: TEXT }}>
             {config.label}
           </Text>
-          <Text className={text({ variant: "caption" })}>Daily goal</Text>
+          <Text style={{ fontSize: 11, color: TEXT_3 }}>Daily goal</Text>
         </View>
 
-        <View className={row({ gap: "sm" })} style={{ gap: 10 }}>
+        <View
+          style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+        >
           <Pressable
             onPress={() => {
               haptic();
@@ -157,25 +194,38 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             disabled={current <= config.step}
             accessibilityRole="button"
             accessibilityLabel={`Decrease ${config.label} goal`}
-            className={controlButton({ size: "sm" })}
             style={{
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              borderCurve: "continuous",
               backgroundColor: config.color + "15",
+              alignItems: "center",
+              justifyContent: "center",
               opacity: current <= config.step ? 0.3 : 1,
             }}
           >
             <Text
-              className="text-lg font-bold"
-              style={{ color: config.color }}
+              style={{ fontSize: 18, fontWeight: "700", color: config.color }}
             >
               −
             </Text>
           </Pressable>
 
-          <View className="items-center min-w-[44px]">
-            <Text className={text({ variant: "value" })} style={{ fontSize: 17 }}>
+          <View style={{ alignItems: "center", minWidth: 44 }}>
+            <Text
+              style={{
+                fontSize: 17,
+                fontWeight: "700",
+                fontVariant: ["tabular-nums"],
+                color: TEXT,
+              }}
+            >
               {current}
             </Text>
-            <Text className={text({ variant: "tiny" })}>{config.unit}</Text>
+            <Text style={{ fontSize: 10, color: TEXT_3 }}>
+              {config.unit}
+            </Text>
           </View>
 
           <Pressable
@@ -185,10 +235,19 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             }}
             accessibilityRole="button"
             accessibilityLabel={`Increase ${config.label} goal`}
-            className={controlButton({ size: "sm" })}
-            style={{ backgroundColor: config.color }}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              borderCurve: "continuous",
+              backgroundColor: config.color,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Text className="text-base font-bold text-white">+</Text>
+            <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff" }}>
+              +
+            </Text>
           </Pressable>
         </View>
       </View>

@@ -11,6 +11,7 @@ import {
   formatDate,
   isToday,
 } from "@/constants/metrics";
+import { BG, CARD_BG, TEXT, TEXT_2, TEXT_3 } from "@/constants/colors";
 import {
   useWellnessStore,
   DailyEntry,
@@ -20,17 +21,17 @@ import {
   getCompletionRate,
   getStreak,
 } from "@/store/wellness-store";
-import {
-  card,
-  scrollContainer,
-  sectionHeader,
-  text,
-  navButton,
-  row,
-} from "@/lib/styles";
 
-const sc = scrollContainer();
-const sh = sectionHeader();
+const CARD = {
+  borderRadius: 20,
+  borderCurve: "continuous" as const,
+  backgroundColor: CARD_BG,
+};
+const CARD_SM = {
+  borderRadius: 16,
+  borderCurve: "continuous" as const,
+  backgroundColor: CARD_BG,
+};
 
 type WeekAction = { type: "prev" } | { type: "next" };
 
@@ -58,12 +59,16 @@ export default function HistoryScreen() {
 
   return (
     <ScrollView
-      className={sc.root()}
+      style={{ flex: 1, backgroundColor: BG }}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName={sc.content()}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: 40,
+        gap: 12,
+      }}
     >
       <Animated.View entering={FadeInDown.duration(400)}>
-        <Text className={text({ variant: "body" })}>
+        <Text style={{ fontSize: 13, color: TEXT_2 }}>
           Track your progress over time
         </Text>
       </Animated.View>
@@ -71,33 +76,44 @@ export default function HistoryScreen() {
       {/* Stats row */}
       <Animated.View
         entering={FadeInDown.duration(400).delay(50)}
-        className="flex-row gap-3"
+        style={{ flexDirection: "row", gap: 12 }}
       >
-        <View className={card({ size: "sm", className: "flex-1" })}>
-          <View className={row({ gap: "sm" })}>
+        <View style={{ ...CARD_SM, flex: 1, padding: 12 }}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+          >
             <SymbolView
               name="checkmark.circle.fill"
               tintColor="#0a84ff"
               style={{ width: 16, height: 16 }}
             />
             <View>
-              <Text className={text({ variant: "caption" })}>Completion</Text>
-              <Text className={text({ variant: "value" })} style={{ fontSize: 15 }}>
+              <Text style={{ fontSize: 11, color: TEXT_3 }}>Completion</Text>
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "700",
+                  fontVariant: ["tabular-nums"],
+                  color: TEXT,
+                }}
+              >
                 {completionRate}%
               </Text>
             </View>
           </View>
         </View>
-        <View className={card({ size: "sm", className: "flex-1" })}>
-          <View className={row({ gap: "sm" })}>
+        <View style={{ ...CARD_SM, flex: 1, padding: 12 }}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+          >
             <SymbolView
               name="flame.fill"
               tintColor="#ff9f0a"
               style={{ width: 16, height: 16 }}
             />
             <View>
-              <Text className={text({ variant: "caption" })}>Best Streak</Text>
-              <Text className="text-[15px] font-bold text-sf-text">
+              <Text style={{ fontSize: 11, color: TEXT_3 }}>Best Streak</Text>
+              <Text style={{ fontSize: 15, fontWeight: "700", color: TEXT }}>
                 {bestStreak} {bestStreak === 1 ? "day" : "days"}
               </Text>
             </View>
@@ -107,11 +123,25 @@ export default function HistoryScreen() {
 
       {/* Week nav */}
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
-        <View className={row({ justify: "between", className: "px-1" })}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 4,
+          }}
+        >
           <Pressable
             onPress={() => dispatch({ type: "prev" })}
             accessibilityLabel="Previous week"
-            className={navButton()}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              borderCurve: "continuous",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             <SymbolView
               name="chevron.left"
@@ -119,15 +149,24 @@ export default function HistoryScreen() {
               style={{ width: 14, height: 14 }}
             />
           </Pressable>
-          <Text className="text-[13px] font-medium text-sf-text-2">
+          <Text
+            style={{ fontSize: 13, fontWeight: "500", color: TEXT_2 }}
+          >
             {fmt(weekDates[0])} – {fmt(weekDates[6])}
           </Text>
           <Pressable
             onPress={() => dispatch({ type: "next" })}
             disabled={!canGoNext}
             accessibilityLabel="Next week"
-            className={navButton()}
-            style={{ opacity: canGoNext ? 1 : 0.3 }}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              borderCurve: "continuous",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: canGoNext ? 1 : 0.3,
+            }}
           >
             <SymbolView
               name="chevron.right"
@@ -154,12 +193,12 @@ export default function HistoryScreen() {
       ))}
 
       {/* Averages */}
-      <View className={sh.wrapper()}>
-        <Text className={sh.title()} style={{ fontSize: 20 }}>
+      <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
+        <Text style={{ fontSize: 20, fontWeight: "700", color: TEXT }}>
           Weekly Averages
         </Text>
       </View>
-      <View className="flex-row flex-wrap gap-3">
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
         {METRIC_KEYS.map((key, i) => {
           const config = METRIC_CONFIG[key];
           const avg = getWeeklyAverage(entries, key, referenceDate);
@@ -169,18 +208,31 @@ export default function HistoryScreen() {
               entering={FadeInDown.duration(400).delay(350 + i * 50)}
               style={{ width: "47%" } as any}
             >
-              <View className={card({ size: "sm" })}>
-                <View className={row({ gap: "sm" })}>
+              <View style={{ ...CARD_SM, padding: 12 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
                   <SymbolView
                     name={config.icon}
                     tintColor={config.color}
                     style={{ width: 14, height: 14 }}
                   />
                   <View>
-                    <Text className={text({ variant: "caption" })}>
+                    <Text style={{ fontSize: 11, color: TEXT_3 }}>
                       {config.label}
                     </Text>
-                    <Text className={text({ variant: "value" })}>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: "600",
+                        fontVariant: ["tabular-nums"],
+                        color: TEXT,
+                      }}
+                    >
                       {avg.toFixed(1)} {config.unit}
                     </Text>
                   </View>
@@ -211,23 +263,28 @@ function WeekChart({
   const maxVal = Math.max(...values, goal);
 
   return (
-    <View className={card()} style={{ padding: 16 }}>
+    <View style={{ ...CARD, padding: 16 }}>
       {/* Title */}
-      <View className={row({ gap: "sm" })}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <SymbolView
           name={config.icon}
           tintColor={config.color}
           style={{ width: 15, height: 15 }}
         />
-        <Text className="text-[13px] font-semibold text-sf-text">
+        <Text style={{ fontSize: 13, fontWeight: "600", color: TEXT }}>
           {config.label}
         </Text>
       </View>
 
       {/* Bars */}
       <View
-        className={row({ justify: "around" })}
-        style={{ alignItems: "flex-end", height: 90, marginTop: 12 }}
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-end",
+          justifyContent: "space-around",
+          height: 90,
+          marginTop: 12,
+        }}
       >
         {weekDates.map((date, idx) => {
           const val = values[idx];
@@ -236,8 +293,17 @@ function WeekChart({
           const met = val >= goal;
 
           return (
-            <View key={idx} className="items-center gap-1 flex-1">
-              <Text className="text-[8px] tabular-nums text-sf-text-3">
+            <View
+              key={idx}
+              style={{ alignItems: "center", gap: 4, flex: 1 }}
+            >
+              <Text
+                style={{
+                  fontSize: 8,
+                  fontVariant: ["tabular-nums"],
+                  color: TEXT_3,
+                }}
+              >
                 {val > 0
                   ? metric === "sleep"
                     ? val.toFixed(1)
@@ -254,8 +320,8 @@ function WeekChart({
                 }}
               />
               <Text
-                className="text-[10px]"
                 style={{
+                  fontSize: 10,
                   color: current ? config.color : "#9ca3af",
                   fontWeight: current ? "700" : "400",
                 }}
@@ -268,11 +334,19 @@ function WeekChart({
       </View>
 
       {/* Footer */}
-      <View className={row({ justify: "between" })} style={{ marginTop: 10 }}>
-        <Text className={text({ variant: "tiny" })}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginTop: 10,
+        }}
+      >
+        <Text style={{ fontSize: 10, color: TEXT_3 }}>
           Goal: {goal} {config.unit}
         </Text>
-        <Text className="text-[10px] tabular-nums text-sf-text-3">
+        <Text
+          style={{ fontSize: 10, fontVariant: ["tabular-nums"], color: TEXT_3 }}
+        >
           Avg:{" "}
           {values.filter((v) => v > 0).length > 0
             ? (
