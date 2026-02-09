@@ -11,7 +11,6 @@ import {
   MOOD_LABELS,
   formatDate,
 } from "@/constants/metrics";
-import { BG, TEXT, TEXT_3 } from "@/constants/colors";
 import {
   useWellnessStore,
   DailyEntry,
@@ -31,7 +30,9 @@ import {
   iconBadge,
   stepperButton,
   scrollContent,
-  BORDER_CURVE,
+  numericDisplay,
+  METRIC_CLASSES,
+  MetricColorKey,
 } from "@/lib/styles";
 
 function haptic(style = Haptics.ImpactFeedbackStyle.Medium) {
@@ -63,7 +64,7 @@ export default function TrackScreen() {
         options={{
           headerRight: () => (
             <Pressable onPress={handleReset} accessibilityLabel="Reset Day">
-              <Text style={{ fontSize: 13, fontWeight: "600", color: "#ff453a" }}>
+              <Text className="text-[13px] font-semibold text-sf-red">
                 Reset
               </Text>
             </Pressable>
@@ -71,7 +72,7 @@ export default function TrackScreen() {
         }}
       />
       <ScrollView
-        style={{ flex: 1, backgroundColor: BG }}
+        className="flex-1 bg-sf-bg-grouped"
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName={scrollContent()}
       >
@@ -120,14 +121,14 @@ function NumericCard({
   const value = entry[metric];
   const goal = goals[metric];
   const pct = Math.round(Math.min(goal > 0 ? value / goal : 0, 1) * 100);
+  const mc = METRIC_CLASSES[metric as MetricColorKey];
 
   return (
-    <View className={card({ size: "md" })} style={BORDER_CURVE}>
+    <View className={card({ size: "md" })}>
       {/* Header */}
       <View className={row({ gap: "md" })}>
         <View
-          className={iconBadge({ size: "sm" })}
-          style={{ ...BORDER_CURVE, backgroundColor: config.color + "20" }}
+          className={iconBadge({ size: "sm", className: mc.bg10 })}
         >
           <SymbolView
             name={config.icon}
@@ -144,12 +145,7 @@ function NumericCard({
           </Text>
         </View>
         <Text
-          style={{
-            fontSize: 13,
-            fontWeight: "700",
-            fontVariant: ["tabular-nums"],
-            color: pct > 0 ? config.color : "#8e8e93",
-          }}
+          className={`text-[13px] font-bold tabular-nums ${pct > 0 ? mc.text : "text-sf-gray"}`}
         >
           {pct}%
         </Text>
@@ -157,20 +153,11 @@ function NumericCard({
 
       {/* Progress bar */}
       <View
-        style={{
-          height: 5,
-          borderRadius: 3,
-          backgroundColor: config.color + "20",
-          marginTop: 14,
-        }}
+        className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg10}`}
       >
         <View
-          style={{
-            width: `${pct}%` as unknown as number,
-            height: 5,
-            borderRadius: 3,
-            backgroundColor: config.color,
-          }}
+          className={`h-[5px] rounded-[3px] ${mc.bg}`}
+          style={{ width: `${pct}%` as unknown as number }}
         />
       </View>
 
@@ -184,33 +171,22 @@ function NumericCard({
           disabled={value <= config.min}
           accessibilityRole="button"
           accessibilityLabel={`Decrease ${config.label}`}
-          className={stepperButton({ size: "md" })}
-          style={{
-            ...BORDER_CURVE,
-            backgroundColor: config.color + "15",
-            opacity: value <= config.min ? 0.3 : 1,
-          }}
+          className={stepperButton({ size: "md", className: mc.bg10 })}
+          style={{ opacity: value <= config.min ? 0.3 : 1 }}
         >
-          <Text
-            style={{ fontSize: 22, fontWeight: "700", color: config.color }}
-          >
+          <Text className={`text-[22px] font-bold ${mc.text}`}>
             −
           </Text>
         </Pressable>
 
         <View className="items-center min-w-[72px]">
           <Text
-            style={{
-              fontSize: 31.5,
-              fontWeight: "800",
-              fontVariant: ["tabular-nums"],
-              color: TEXT,
-            }}
+            className={numericDisplay({ size: "xl" })}
             selectable
           >
             {value}
           </Text>
-          <Text style={{ fontSize: 13, color: TEXT_3 }}>{config.unit}</Text>
+          <Text className="text-[13px] text-sf-text-3">{config.unit}</Text>
         </View>
 
         <Pressable
@@ -221,14 +197,10 @@ function NumericCard({
           disabled={value >= config.max}
           accessibilityRole="button"
           accessibilityLabel={`Increase ${config.label}`}
-          className={stepperButton({ size: "md" })}
-          style={{
-            ...BORDER_CURVE,
-            backgroundColor: config.color,
-            opacity: value >= config.max ? 0.3 : 1,
-          }}
+          className={stepperButton({ size: "md", className: mc.bg })}
+          style={{ opacity: value >= config.max ? 0.3 : 1 }}
         >
-          <Text style={{ fontSize: 22, fontWeight: "700", color: "#fff" }}>
+          <Text className="text-[22px] font-bold text-white">
             +
           </Text>
         </Pressable>
@@ -239,13 +211,13 @@ function NumericCard({
 
 function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
   const config = METRIC_CONFIG.mood;
+  const mc = METRIC_CLASSES.mood;
 
   return (
-    <View className={card({ size: "md" })} style={BORDER_CURVE}>
+    <View className={card({ size: "md" })}>
       <View className={row({ gap: "md" })}>
         <View
-          className={iconBadge({ size: "sm" })}
-          style={{ ...BORDER_CURVE, backgroundColor: config.color + "20" }}
+          className={iconBadge({ size: "sm", className: mc.bg10 })}
         >
           <SymbolView
             name={config.icon}
@@ -278,20 +250,16 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
             className="items-center gap-1"
           >
             <View
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 16,
-                ...BORDER_CURVE,
-                backgroundColor:
-                  value === mood ? config.color + "20" : "transparent",
-                borderWidth: value === mood ? 2 : 0,
-                borderColor: config.color,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              className={`w-[52px] h-[52px] rounded-2xl items-center justify-center ${
+                value === mood ? mc.bg10 : ""
+              }`}
+              style={
+                value === mood
+                  ? { borderWidth: 2, borderColor: config.color }
+                  : undefined
+              }
             >
-              <Text style={{ fontSize: 26 }}>{MOOD_EMOJIS[mood]}</Text>
+              <Text className="text-[26px]">{MOOD_EMOJIS[mood]}</Text>
             </View>
             <Text className={statLabel({ className: "text-[10px]" })}>
               {MOOD_LABELS[mood]}
