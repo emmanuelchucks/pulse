@@ -11,7 +11,6 @@ import {
   formatDate,
   isToday,
 } from "@/constants/metrics";
-import { BG, TEXT, TEXT_3 } from "@/constants/colors";
 import {
   useWellnessStore,
   DailyEntry,
@@ -26,11 +25,13 @@ import {
   caption,
   statLabel,
   statValue,
+  numericDisplay,
   sectionHeader,
   sectionTitle,
   scrollContent,
   row,
-  BORDER_CURVE,
+  METRIC_CLASSES,
+  MetricColorKey,
 } from "@/lib/styles";
 
 type WeekAction = { type: "prev" } | { type: "next" };
@@ -59,7 +60,7 @@ export default function HistoryScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: BG }}
+      className="flex-1 bg-sf-bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName={scrollContent()}
     >
@@ -72,7 +73,7 @@ export default function HistoryScreen() {
         entering={FadeInDown.duration(400).delay(50)}
         className="flex-row gap-3"
       >
-        <View className={card({ size: "sm", className: "flex-1 p-3" })} style={BORDER_CURVE}>
+        <View className={card({ size: "sm", className: "flex-1 p-3" })}>
           <View className={row({ gap: "sm" })}>
             <SymbolView
               name="checkmark.circle.fill"
@@ -81,20 +82,13 @@ export default function HistoryScreen() {
             />
             <View>
               <Text className={statLabel()}>Completion</Text>
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "700",
-                  fontVariant: ["tabular-nums"],
-                  color: TEXT,
-                }}
-              >
+              <Text className={numericDisplay({ size: "sm" })}>
                 {completionRate}%
               </Text>
             </View>
           </View>
         </View>
-        <View className={card({ size: "sm", className: "flex-1 p-3" })} style={BORDER_CURVE}>
+        <View className={card({ size: "sm", className: "flex-1 p-3" })}>
           <View className={row({ gap: "sm" })}>
             <SymbolView
               name="flame.fill"
@@ -103,7 +97,7 @@ export default function HistoryScreen() {
             />
             <View>
               <Text className={statLabel()}>Best Streak</Text>
-              <Text className={statValue({ className: "text-[15px] font-bold" })}>
+              <Text className={numericDisplay({ size: "sm" })}>
                 {bestStreak} {bestStreak === 1 ? "day" : "days"}
               </Text>
             </View>
@@ -117,8 +111,7 @@ export default function HistoryScreen() {
           <Pressable
             onPress={() => dispatch({ type: "prev" })}
             accessibilityLabel="Previous week"
-            className="w-9 h-9 rounded-[10px] items-center justify-center"
-            style={BORDER_CURVE}
+            className="w-9 h-9 rounded-[10px] items-center justify-center corner-squircle"
           >
             <SymbolView
               name="chevron.left"
@@ -133,8 +126,7 @@ export default function HistoryScreen() {
             onPress={() => dispatch({ type: "next" })}
             disabled={!canGoNext}
             accessibilityLabel="Next week"
-            className="w-9 h-9 rounded-[10px] items-center justify-center"
-            style={{ ...BORDER_CURVE, opacity: canGoNext ? 1 : 0.3 }}
+            className={`w-9 h-9 rounded-[10px] items-center justify-center corner-squircle ${canGoNext ? "opacity-100" : "opacity-30"}`}
           >
             <SymbolView
               name="chevron.right"
@@ -174,7 +166,7 @@ export default function HistoryScreen() {
               entering={FadeInDown.duration(400).delay(350 + i * 50)}
               style={{ width: "47%" } as any}
             >
-              <View className={card({ size: "sm", className: "p-3" })} style={BORDER_CURVE}>
+              <View className={card({ size: "sm", className: "p-3" })}>
                 <View className={row({ gap: "sm" })}>
                   <SymbolView
                     name={config.icon}
@@ -183,14 +175,7 @@ export default function HistoryScreen() {
                   />
                   <View>
                     <Text className={statLabel()}>{config.label}</Text>
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        fontWeight: "600",
-                        fontVariant: ["tabular-nums"],
-                        color: TEXT,
-                      }}
-                    >
+                    <Text className={numericDisplay({ size: "xs" })}>
                       {avg.toFixed(1)} {config.unit}
                     </Text>
                   </View>
@@ -219,9 +204,10 @@ function WeekChart({
   const goal = goals[metric];
   const values = weekDates.map((d) => getEntry(entries, formatDate(d))[metric]);
   const maxVal = Math.max(...values, goal);
+  const colors = METRIC_CLASSES[metric as MetricColorKey];
 
   return (
-    <View className={card({ padded: true })} style={BORDER_CURVE}>
+    <View className={card({ padded: true })}>
       {/* Title */}
       <View className={row({ gap: "sm" })}>
         <SymbolView
@@ -245,13 +231,7 @@ function WeekChart({
 
           return (
             <View key={idx} className="items-center gap-1 flex-1">
-              <Text
-                style={{
-                  fontSize: 8,
-                  fontVariant: ["tabular-nums"],
-                  color: TEXT_3,
-                }}
-              >
+              <Text className="text-[8px] tabular-nums text-sf-text-3">
                 {val > 0
                   ? metric === "sleep"
                     ? val.toFixed(1)
@@ -259,20 +239,14 @@ function WeekChart({
                   : ""}
               </Text>
               <View
+                className={`rounded-md corner-squircle ${met ? colors.bg : colors.bg40}`}
                 style={{
                   width: 22,
-                  borderRadius: 6,
-                  ...BORDER_CURVE,
                   height: Math.max(h, 3),
-                  backgroundColor: met ? config.color : config.color + "40",
                 }}
               />
               <Text
-                style={{
-                  fontSize: 10,
-                  color: current ? config.color : "#9ca3af",
-                  fontWeight: current ? "700" : "400",
-                }}
+                className={`text-[10px] ${current ? `font-bold ${colors.text}` : "font-normal text-sf-gray"}`}
               >
                 {getDayLabel(date)}
               </Text>
@@ -286,9 +260,7 @@ function WeekChart({
         <Text className={statLabel({ className: "text-[10px]" })}>
           Goal: {goal} {config.unit}
         </Text>
-        <Text
-          style={{ fontSize: 10, fontVariant: ["tabular-nums"], color: TEXT_3 }}
-        >
+        <Text className="text-[10px] tabular-nums text-sf-text-3">
           Avg:{" "}
           {values.filter((v) => v > 0).length > 0
             ? (
