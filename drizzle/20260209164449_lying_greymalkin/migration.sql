@@ -1,4 +1,4 @@
-CREATE TABLE `daily_entries` (
+CREATE TABLE IF NOT EXISTS `daily_entries` (
 	`date` text PRIMARY KEY,
 	`water` real DEFAULT 0 NOT NULL,
 	`mood` integer DEFAULT 0 NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE `daily_entries` (
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `goals` (
+CREATE TABLE IF NOT EXISTS `goals` (
 	`metric` text PRIMARY KEY,
 	`value` real NOT NULL,
 	`updated_at` integer NOT NULL

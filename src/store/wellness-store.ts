@@ -1,7 +1,8 @@
 import { useMemo } from "react";
+import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { METRIC_CONFIG, METRIC_KEYS, MetricKey, formatDate } from "@/constants/metrics";
-import { db, sqlite } from "@/db/client";
+import { db } from "@/db/client";
 import { dailyEntries, goals as goalsTable } from "@/db/schema";
 import { parseMetricValue, parseMetricWrite } from "@/db/validation";
 
@@ -22,99 +23,137 @@ const DEFAULT_GOALS: Goals = {
   exercise: 30,
 };
 
+const METRIC_COLUMN = {
+  water: dailyEntries.water,
+  mood: dailyEntries.mood,
+  sleep: dailyEntries.sleep,
+  exercise: dailyEntries.exercise,
+} as const;
+
+let initialized = false;
+
+export function initializeWellnessData() {
+  if (initialized) return;
+
+  for (const metric of METRIC_KEYS) {
+    db.insert(goalsTable)
+      .values({
+        metric,
+        value: DEFAULT_GOALS[metric],
+        updatedAt: Date.now(),
+      })
+      .onConflictDoNothing({ target: goalsTable.metric })
+      .run();
+  }
+
+  initialized = true;
+}
+
 function createEmptyEntry(dateStr: string): DailyEntry {
   return { date: dateStr, water: 0, mood: 0, sleep: 0, exercise: 0 };
 }
 
-function ensureDefaultGoals() {
-  sqlite.withTransactionSync(() => {
-    for (const metric of METRIC_KEYS) {
-      sqlite.runSync(
-        `INSERT OR IGNORE INTO goals (metric, value, updated_at) VALUES (?, ?, ?)`,
-        metric,
-        DEFAULT_GOALS[metric],
-        Date.now()
-      );
-    }
-  });
-}
-
-ensureDefaultGoals();
-
 function ensureEntry(dateStr: string) {
-  sqlite.runSync(
-    `INSERT OR IGNORE INTO daily_entries (date, water, mood, sleep, exercise, updated_at)
-     VALUES (?, 0, 0, 0, 0, ?)`,
-    dateStr,
-    Date.now()
-  );
+  db.insert(dailyEntries)
+    .values({
+      date: dateStr,
+      water: 0,
+      mood: 0,
+      sleep: 0,
+      exercise: 0,
+      updatedAt: Date.now(),
+    })
+    .onConflictDoNothing({ target: dailyEntries.date })
+    .run();
 }
 
 export function updateMetric(dateStr: string, metric: MetricKey, value: number) {
   const parsed = parseMetricWrite(dateStr, metric, value);
+  const updatedAt = Date.now();
 
   ensureEntry(parsed.date);
-  sqlite.runSync(
-    `UPDATE daily_entries SET ${parsed.metric} = ?, updated_at = ? WHERE date = ?`,
-    parsed.value,
-    Date.now(),
-    parsed.date
-  );
+
+  db.update(dailyEntries)
+    .set(
+      metric === "water"
+        ? { water: parsed.value, updatedAt }
+        : metric === "mood"
+          ? { mood: parsed.value, updatedAt }
+          : metric === "sleep"
+            ? { sleep: parsed.value, updatedAt }
+            : { exercise: parsed.value, updatedAt }
+    )
+    .where(eq(dailyEntries.date, parsed.date))
+    .run();
 }
 
-function getMetricValueSync(dateStr: string, metric: MetricKey): number {
-  const row = sqlite.getFirstSync<{ value: number }>(
-    `SELECT ${metric} as value FROM daily_entries WHERE date = ?`,
-    dateStr
-  );
+function getMetricValue(dateStr: string, metric: MetricKey): number {
+  const row = db
+    .select({ value: METRIC_COLUMN[metric] })
+    .from(dailyEntries)
+    .where(eq(dailyEntries.date, dateStr))
+    .get();
+
   return row?.value ?? 0;
 }
 
 export function incrementMetric(dateStr: string, metric: MetricKey) {
-  const current = getMetricValueSync(dateStr, metric);
+  const current = getMetricValue(dateStr, metric);
   const nextValue = parseMetricValue(metric, current + METRIC_CONFIG[metric].step);
   updateMetric(dateStr, metric, nextValue);
 }
 
 export function decrementMetric(dateStr: string, metric: MetricKey) {
-  const current = getMetricValueSync(dateStr, metric);
+  const current = getMetricValue(dateStr, metric);
   const nextValue = parseMetricValue(metric, current - METRIC_CONFIG[metric].step);
   updateMetric(dateStr, metric, nextValue);
 }
 
 export function updateGoal(metric: MetricKey, value: number) {
-  sqlite.runSync(
-    `INSERT INTO goals (metric, value, updated_at)
-     VALUES (?, ?, ?)
-     ON CONFLICT(metric) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
-    metric,
-    parseMetricValue(metric, value),
-    Date.now()
-  );
+  db.insert(goalsTable)
+    .values({
+      metric,
+      value: parseMetricValue(metric, value),
+      updatedAt: Date.now(),
+    })
+    .onConflictDoUpdate({
+      target: goalsTable.metric,
+      set: {
+        value: parseMetricValue(metric, value),
+        updatedAt: Date.now(),
+      },
+    })
+    .run();
 }
 
 export function resetDay(dateStr: string) {
-  sqlite.runSync(
-    `INSERT INTO daily_entries (date, water, mood, sleep, exercise, updated_at)
-     VALUES (?, 0, 0, 0, 0, ?)
-     ON CONFLICT(date) DO UPDATE SET
-      water = 0,
-      mood = 0,
-      sleep = 0,
-      exercise = 0,
-      updated_at = excluded.updated_at`,
-    dateStr,
-    Date.now()
-  );
+  db.insert(dailyEntries)
+    .values({
+      date: dateStr,
+      water: 0,
+      mood: 0,
+      sleep: 0,
+      exercise: 0,
+      updatedAt: Date.now(),
+    })
+    .onConflictDoUpdate({
+      target: dailyEntries.date,
+      set: {
+        water: 0,
+        mood: 0,
+        sleep: 0,
+        exercise: 0,
+        updatedAt: Date.now(),
+      },
+    })
+    .run();
 }
 
 export function clearAllData() {
-  sqlite.withTransactionSync(() => {
-    sqlite.runSync(`DELETE FROM daily_entries`);
-    sqlite.runSync(`DELETE FROM goals`);
-  });
-
-  ensureDefaultGoals();
+  db.delete(dailyEntries).run();
+  db.delete(goalsTable).run();
+  initialized = false;
+  initializeWellnessData();
 }
 
 export function getEntry(
