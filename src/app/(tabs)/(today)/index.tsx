@@ -279,37 +279,35 @@ export default function DashboardScreen() {
                     <Text style={{ fontSize: 11, color: TEXT_3 }}>{unit}</Text>
                   </View>
                 </View>
-                {key !== "mood" ? (
-                  <Pressable
-                    onPress={() => {
-                      if (process.env.EXPO_OS === "ios") {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                      }
-                      incrementMetric(todayStr, key);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Quick add ${config.label}`}
+                <Pressable
+                  onPress={() => {
+                    if (process.env.EXPO_OS === "ios") {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    incrementMetric(todayStr, key);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Quick add ${config.label}`}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 12,
+                    borderCurve: "continuous",
+                    backgroundColor: config.color + "18",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
-                      borderCurve: "continuous",
-                      backgroundColor: config.color + "18",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      fontSize: 20,
+                      fontWeight: "700",
+                      color: config.color,
                     }}
                   >
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        fontWeight: "700",
-                        color: config.color,
-                      }}
-                    >
-                      +
-                    </Text>
-                  </Pressable>
-                ) : null}
+                    +
+                  </Text>
+                </Pressable>
               </View>
             </View>
           </Animated.View>

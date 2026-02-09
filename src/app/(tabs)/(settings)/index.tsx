@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, Pressable } from "react-native";
+import { ScrollView, View, Text, Pressable, Alert } from "react-native";
 import { SymbolView } from "expo-symbols";
 import * as Haptics from "expo-haptics";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -25,12 +25,25 @@ export default function SettingsScreen() {
   const { entries, goals } = useWellnessStore();
 
   const handleClearData = () => {
-    clearAllData();
-    if (process.env.EXPO_OS === "ios") {
-      Haptics
-        .notificationAsync(Haptics.NotificationFeedbackType.Warning)
-        .catch(() => {});
-    }
+    Alert.alert(
+      "Clear All Data",
+      "This will permanently delete all your wellness entries. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear Data",
+          style: "destructive",
+          onPress: () => {
+            clearAllData();
+            if (process.env.EXPO_OS === "ios") {
+              Haptics
+                .notificationAsync(Haptics.NotificationFeedbackType.Warning)
+                .catch(() => {});
+            }
+          },
+        },
+      ]
+    );
   };
 
   const totalEntries = Object.keys(entries).length;
