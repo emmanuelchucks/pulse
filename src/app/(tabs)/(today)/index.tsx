@@ -8,7 +8,7 @@ import {
   MOOD_EMOJIS,
   formatDate,
 } from "@/constants/metrics";
-import { BG, CARD_BG, TEXT, TEXT_2, TEXT_3 } from "@/constants/colors";
+import { BG, TEXT } from "@/constants/colors";
 import {
   useWellnessStore,
   getEntry,
@@ -17,17 +17,21 @@ import {
   getCompletionRate,
   incrementMetric,
 } from "@/store/wellness-store";
-
-const CARD = {
-  borderRadius: 20,
-  borderCurve: "continuous" as const,
-  backgroundColor: CARD_BG,
-};
-const CARD_SM = {
-  borderRadius: 16,
-  borderCurve: "continuous" as const,
-  backgroundColor: CARD_BG,
-};
+import {
+  card,
+  caption,
+  heading,
+  label,
+  statLabel,
+  statValue,
+  sectionHeader,
+  sectionTitle,
+  sectionSubtitle,
+  scrollContent,
+  iconBadge,
+  row,
+  BORDER_CURVE,
+} from "@/lib/styles";
 
 export default function DashboardScreen() {
   const { entries, goals } = useWellnessStore();
@@ -57,29 +61,17 @@ export default function DashboardScreen() {
     <ScrollView
       style={{ flex: 1, backgroundColor: BG }}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        paddingBottom: 40,
-        gap: 12,
-      }}
+      contentContainerClassName={scrollContent()}
     >
       {/* Date */}
       <Animated.View entering={FadeInDown.duration(400)}>
-        <Text style={{ fontSize: 13, marginTop: 4, color: TEXT_2 }}>
-          {dateLabel}
-        </Text>
+        <Text className={caption({ className: "mt-1" })}>{dateLabel}</Text>
       </Animated.View>
 
       {/* Summary Card */}
       <Animated.View entering={FadeInDown.duration(400).delay(50)}>
-        <View style={{ ...CARD, overflow: "hidden", padding: 20 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
+        <View className={card({ size: "md" })} style={BORDER_CURVE}>
+          <View className={row({ gap: "lg" })}>
             <View
               style={{
                 width: 76,
@@ -102,18 +94,14 @@ export default function DashboardScreen() {
                 {overall}%
               </Text>
             </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text
-                style={{ fontSize: 17, fontWeight: "700", color: TEXT }}
-              >
-                {greeting}
-              </Text>
-              <Text style={{ fontSize: 13, color: TEXT_2 }}>
+            <View className="flex-1 gap-0.5">
+              <Text className={heading()}>{greeting}</Text>
+              <Text className={caption()}>
                 {completed}/{METRIC_KEYS.length} goals met today
               </Text>
-              <View style={{ flexDirection: "row", gap: 20, marginTop: 8 }}>
+              <View className={row({ gap: "lg", className: "mt-2" })}>
                 <View>
-                  <Text style={{ fontSize: 11, color: TEXT_3 }}>Weekly</Text>
+                  <Text className={statLabel()}>Weekly</Text>
                   <Text
                     style={{
                       fontSize: 13,
@@ -126,12 +114,8 @@ export default function DashboardScreen() {
                   </Text>
                 </View>
                 <View>
-                  <Text style={{ fontSize: 11, color: TEXT_3 }}>
-                    Best Streak
-                  </Text>
-                  <Text
-                    style={{ fontSize: 13, fontWeight: "600", color: TEXT }}
-                  >
+                  <Text className={statLabel()}>Best Streak</Text>
+                  <Text className={statValue()}>
                     {bestStreak} {bestStreak === 1 ? "day" : "days"}
                   </Text>
                 </View>
@@ -143,22 +127,13 @@ export default function DashboardScreen() {
 
       {/* Streak Row */}
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
-        <View style={CARD_SM}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-around",
-              paddingVertical: 14,
-            }}
-          >
+        <View className={card({ size: "sm" })} style={BORDER_CURVE}>
+          <View className={row({ justify: "around", className: "py-3.5" })}>
             {METRIC_KEYS.map((key) => {
               const config = METRIC_CONFIG[key];
               const streak = getStreak(entries, goals, key);
               return (
-                <View
-                  key={key}
-                  style={{ alignItems: "center", gap: 4, paddingVertical: 2 }}
-                >
+                <View key={key} className="items-center gap-1 py-0.5">
                   <SymbolView
                     name={config.icon}
                     tintColor={config.color}
@@ -175,7 +150,9 @@ export default function DashboardScreen() {
                   >
                     {streak}
                   </Text>
-                  <Text style={{ fontSize: 10, color: TEXT_3 }}>streak</Text>
+                  <Text className={statLabel({ className: "text-[10px]" })}>
+                    streak
+                  </Text>
                 </View>
               );
             })}
@@ -184,13 +161,9 @@ export default function DashboardScreen() {
       </Animated.View>
 
       {/* Section Header */}
-      <View style={{ paddingHorizontal: 4, marginTop: 4 }}>
-        <Text style={{ fontSize: 20, fontWeight: "700", color: TEXT }}>
-          Today&apos;s Metrics
-        </Text>
-        <Text style={{ fontSize: 13, marginTop: 2, color: TEXT_2 }}>
-          Tap + to quick-add
-        </Text>
+      <View className={sectionHeader()}>
+        <Text className={sectionTitle()}>Today&apos;s Metrics</Text>
+        <Text className={sectionSubtitle()}>Tap + to quick-add</Text>
       </View>
 
       {/* Metric Cards */}
@@ -209,24 +182,14 @@ export default function DashboardScreen() {
             key={key}
             entering={FadeInDown.duration(400).delay(150 + i * 50)}
           >
-            <View style={{ ...CARD, overflow: "hidden", padding: 16 }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 14,
-                }}
-              >
-                <View style={{ alignItems: "center" }}>
+            <View className={card({ size: "md", className: "p-4" })} style={BORDER_CURVE}>
+              <View className={row({ gap: "lg", className: "gap-3.5" })}>
+                <View className="items-center">
                   <View
+                    className={iconBadge({ size: "md" })}
                     style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 14,
-                      borderCurve: "continuous",
+                      ...BORDER_CURVE,
                       backgroundColor: config.color + "18",
-                      alignItems: "center",
-                      justifyContent: "center",
                     }}
                   >
                     <SymbolView
@@ -254,17 +217,9 @@ export default function DashboardScreen() {
                     />
                   </View>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 13, fontWeight: "500", color: TEXT_2 }}>
-                    {config.label}
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "baseline",
-                      gap: 4,
-                    }}
-                  >
+                <View className="flex-1">
+                  <Text className={label()}>{config.label}</Text>
+                  <View className={row({ gap: "sm", className: "items-baseline" })}>
                     <Text
                       style={{
                         fontSize: 21,
@@ -276,7 +231,7 @@ export default function DashboardScreen() {
                     >
                       {display}
                     </Text>
-                    <Text style={{ fontSize: 11, color: TEXT_3 }}>{unit}</Text>
+                    <Text className={statLabel()}>{unit}</Text>
                   </View>
                 </View>
                 <Pressable
@@ -288,14 +243,10 @@ export default function DashboardScreen() {
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={`Quick add ${config.label}`}
+                  className="w-10 h-10 rounded-xl items-center justify-center"
                   style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 12,
-                    borderCurve: "continuous",
+                    ...BORDER_CURVE,
                     backgroundColor: config.color + "18",
-                    alignItems: "center",
-                    justifyContent: "center",
                   }}
                 >
                   <Text

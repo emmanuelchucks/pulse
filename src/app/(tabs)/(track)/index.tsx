@@ -11,7 +11,7 @@ import {
   MOOD_LABELS,
   formatDate,
 } from "@/constants/metrics";
-import { BG, CARD_BG, TEXT, TEXT_2, TEXT_3 } from "@/constants/colors";
+import { BG, TEXT, TEXT_3 } from "@/constants/colors";
 import {
   useWellnessStore,
   DailyEntry,
@@ -22,14 +22,17 @@ import {
   updateMetric,
   resetDay,
 } from "@/store/wellness-store";
-
-const CARD = {
-  borderRadius: 20,
-  borderCurve: "continuous" as const,
-  overflow: "hidden" as const,
-  padding: 20,
-  backgroundColor: CARD_BG,
-};
+import {
+  card,
+  caption,
+  heading,
+  statLabel,
+  row,
+  iconBadge,
+  stepperButton,
+  scrollContent,
+  BORDER_CURVE,
+} from "@/lib/styles";
 
 function haptic(style = Haptics.ImpactFeedbackStyle.Medium) {
   if (process.env.EXPO_OS === "ios") Haptics.impactAsync(style);
@@ -70,16 +73,10 @@ export default function TrackScreen() {
       <ScrollView
         style={{ flex: 1, backgroundColor: BG }}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 40,
-          gap: 12,
-        }}
+        contentContainerClassName={scrollContent()}
       >
         <Animated.View entering={FadeInDown.duration(400)}>
-          <Text style={{ fontSize: 13, color: TEXT_2 }}>
-            Log your daily wellness
-          </Text>
+          <Text className={caption()}>Log your daily wellness</Text>
         </Animated.View>
 
         {METRIC_KEYS.map((key, i) => (
@@ -125,19 +122,12 @@ function NumericCard({
   const pct = Math.round(Math.min(goal > 0 ? value / goal : 0, 1) * 100);
 
   return (
-    <View style={CARD}>
+    <View className={card({ size: "md" })} style={BORDER_CURVE}>
       {/* Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+      <View className={row({ gap: "md" })}>
         <View
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 11,
-            borderCurve: "continuous",
-            backgroundColor: config.color + "20",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className={iconBadge({ size: "sm" })}
+          style={{ ...BORDER_CURVE, backgroundColor: config.color + "20" }}
         >
           <SymbolView
             name={config.icon}
@@ -145,11 +135,11 @@ function NumericCard({
             style={{ width: 18, height: 18 }}
           />
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 15, fontWeight: "600", color: TEXT }}>
+        <View className="flex-1">
+          <Text className={heading({ className: "text-[15px]" })}>
             {config.label}
           </Text>
-          <Text style={{ fontSize: 11, color: TEXT_3 }}>
+          <Text className={statLabel()}>
             Goal: {goal} {config.unit}
           </Text>
         </View>
@@ -185,15 +175,7 @@ function NumericCard({
       </View>
 
       {/* Controls */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 24,
-          marginTop: 18,
-        }}
-      >
+      <View className={row({ justify: "center", className: "gap-6 mt-[18px]" })}>
         <Pressable
           onPress={() => {
             haptic(Haptics.ImpactFeedbackStyle.Light);
@@ -202,14 +184,10 @@ function NumericCard({
           disabled={value <= config.min}
           accessibilityRole="button"
           accessibilityLabel={`Decrease ${config.label}`}
+          className={stepperButton({ size: "md" })}
           style={{
-            width: 48,
-            height: 48,
-            borderRadius: 14,
-            borderCurve: "continuous",
+            ...BORDER_CURVE,
             backgroundColor: config.color + "15",
-            alignItems: "center",
-            justifyContent: "center",
             opacity: value <= config.min ? 0.3 : 1,
           }}
         >
@@ -220,7 +198,7 @@ function NumericCard({
           </Text>
         </Pressable>
 
-        <View style={{ alignItems: "center", minWidth: 72 }}>
+        <View className="items-center min-w-[72px]">
           <Text
             style={{
               fontSize: 31.5,
@@ -243,14 +221,10 @@ function NumericCard({
           disabled={value >= config.max}
           accessibilityRole="button"
           accessibilityLabel={`Increase ${config.label}`}
+          className={stepperButton({ size: "md" })}
           style={{
-            width: 48,
-            height: 48,
-            borderRadius: 14,
-            borderCurve: "continuous",
+            ...BORDER_CURVE,
             backgroundColor: config.color,
-            alignItems: "center",
-            justifyContent: "center",
             opacity: value >= config.max ? 0.3 : 1,
           }}
         >
@@ -267,18 +241,11 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
   const config = METRIC_CONFIG.mood;
 
   return (
-    <View style={CARD}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+    <View className={card({ size: "md" })} style={BORDER_CURVE}>
+      <View className={row({ gap: "md" })}>
         <View
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 11,
-            borderCurve: "continuous",
-            backgroundColor: config.color + "20",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className={iconBadge({ size: "sm" })}
+          style={{ ...BORDER_CURVE, backgroundColor: config.color + "20" }}
         >
           <SymbolView
             name={config.icon}
@@ -287,10 +254,10 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
           />
         </View>
         <View>
-          <Text style={{ fontSize: 15, fontWeight: "600", color: TEXT }}>
+          <Text className={heading({ className: "text-[15px]" })}>
             How are you feeling?
           </Text>
-          <Text style={{ fontSize: 11, color: TEXT_3 }}>
+          <Text className={statLabel()}>
             {value > 0
               ? `${MOOD_LABELS[value]} ${MOOD_EMOJIS[value]}`
               : "Tap to log your mood"}
@@ -298,13 +265,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
         </View>
       </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-around",
-          marginTop: 16,
-        }}
-      >
+      <View className={row({ justify: "around", className: "mt-4" })}>
         {[1, 2, 3, 4, 5].map((mood) => (
           <Pressable
             key={mood}
@@ -314,14 +275,14 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
             }}
             accessibilityRole="button"
             accessibilityLabel={`Mood ${MOOD_LABELS[mood]}`}
-            style={{ alignItems: "center", gap: 4 }}
+            className="items-center gap-1"
           >
             <View
               style={{
                 width: 52,
                 height: 52,
                 borderRadius: 16,
-                borderCurve: "continuous",
+                ...BORDER_CURVE,
                 backgroundColor:
                   value === mood ? config.color + "20" : "transparent",
                 borderWidth: value === mood ? 2 : 0,
@@ -332,7 +293,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
             >
               <Text style={{ fontSize: 26 }}>{MOOD_EMOJIS[mood]}</Text>
             </View>
-            <Text style={{ fontSize: 10, color: TEXT_3 }}>
+            <Text className={statLabel({ className: "text-[10px]" })}>
               {MOOD_LABELS[mood]}
             </Text>
           </Pressable>
