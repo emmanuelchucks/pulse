@@ -1,8 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { METRIC_CONFIG, METRIC_KEYS, MetricKey, formatDate } from "@/constants/metrics";
-import { db } from "@/db/client";
+import { db, sqlite } from "@/db/client";
 import { dailyEntries, goals as goalsTable } from "@/db/schema";
 import { parseMetricValue, parseMetricWrite } from "@/db/validation";
 
@@ -31,6 +31,24 @@ const METRIC_COLUMN = {
 } as const;
 
 let initialized = false;
+let revision = 0;
+let revisionListeners: (() => void)[] = [];
+
+function bumpRevision() {
+  revision += 1;
+  revisionListeners.forEach((listener) => listener());
+}
+
+function subscribeRevision(listener: () => void) {
+  revisionListeners = [...revisionListeners, listener];
+  return () => {
+    revisionListeners = revisionListeners.filter((l) => l !== listener);
+  };
+}
+
+function getRevisionSnapshot() {
+  return revision;
+}
 
 export function initializeWellnessData() {
   if (initialized) return;
@@ -85,6 +103,8 @@ export function updateMetric(dateStr: string, metric: MetricKey, value: number) 
     )
     .where(eq(dailyEntries.date, parsed.date))
     .run();
+
+  bumpRevision();
 }
 
 function getMetricValue(dateStr: string, metric: MetricKey): number {
@@ -124,6 +144,8 @@ export function updateGoal(metric: MetricKey, value: number) {
       },
     })
     .run();
+
+  bumpRevision();
 }
 
 export function resetDay(dateStr: string) {
@@ -147,13 +169,15 @@ export function resetDay(dateStr: string) {
       },
     })
     .run();
+
+  bumpRevision();
 }
 
 export function clearAllData() {
-  db.delete(dailyEntries).run();
-  db.delete(goalsTable).run();
+  sqlite.execSync("DELETE FROM daily_entries; DELETE FROM goals;");
   initialized = false;
   initializeWellnessData();
+  bumpRevision();
 }
 
 export function getEntry(
@@ -243,8 +267,13 @@ export function getCompletionRate(
 }
 
 export function useWellnessStore() {
-  const entriesQuery = useLiveQuery(db.select().from(dailyEntries));
-  const goalsQuery = useLiveQuery(db.select().from(goalsTable));
+  const currentRevision = useSyncExternalStore(
+    subscribeRevision,
+    getRevisionSnapshot
+  );
+
+  const entriesQuery = useLiveQuery(db.select().from(dailyEntries), [currentRevision]);
+  const goalsQuery = useLiveQuery(db.select().from(goalsTable), [currentRevision]);
 
   const entries = useMemo(() => {
     const rows = entriesQuery.data ?? [];
