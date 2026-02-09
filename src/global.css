@@ -1,0 +1,190 @@
+@import "tailwindcss" source(none);
+@source "./";
+
+/* ── Apple System Colors ─────────────────────────────────────── */
+
+/* Light mode defaults */
+:root {
+  /* Text */
+  --sf-text: #000;
+  --sf-text-2: rgba(60, 60, 67, 0.6);
+  --sf-text-3: rgba(60, 60, 67, 0.3);
+
+  /* Backgrounds */
+  --sf-bg: #fff;
+  --sf-bg-2: #f2f2f7;
+  --sf-bg-3: #fff;
+  --sf-bg-grouped: #f2f2f7;
+  --sf-bg-card: #fff;
+
+  /* Fills */
+  --sf-fill: rgba(120, 120, 128, 0.2);
+  --sf-fill-2: rgba(120, 120, 128, 0.16);
+  --sf-separator: rgba(60, 60, 67, 0.29);
+
+  /* Accent colors */
+  --sf-blue: #007aff;
+  --sf-green: #34c759;
+  --sf-red: #ff3b30;
+  --sf-orange: #ff9500;
+  --sf-pink: #ff2d55;
+  --sf-purple: #af52de;
+  --sf-teal: #5ac8fa;
+
+  /* Metric colors (same in light/dark) */
+  --sf-water: #38bdf8;
+  --sf-mood: #f472b6;
+  --sf-sleep: #a78bfa;
+  --sf-exercise: #34d399;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sf-text: #fff;
+    --sf-text-2: rgba(235, 235, 245, 0.6);
+    --sf-text-3: rgba(235, 235, 245, 0.3);
+    --sf-bg: #000;
+    --sf-bg-2: #1c1c1e;
+    --sf-bg-3: #2c2c2e;
+    --sf-bg-grouped: #000;
+    --sf-bg-card: #1c1c1e;
+    --sf-fill: rgba(120, 120, 128, 0.36);
+    --sf-fill-2: rgba(120, 120, 128, 0.32);
+    --sf-separator: rgba(84, 84, 88, 0.6);
+    --sf-blue: #0a84ff;
+    --sf-green: #30d159;
+    --sf-red: #ff453a;
+    --sf-orange: #ff9f0a;
+    --sf-pink: #ff375f;
+    --sf-purple: #bf5af2;
+    --sf-teal: #64d2ff;
+  }
+}
+
+/* iOS: override with native dynamic colors (auto light/dark) */
+@media ios {
+  :root {
+    --sf-text: platformColor(label);
+    --sf-text-2: platformColor(secondaryLabel);
+    --sf-text-3: platformColor(tertiaryLabel);
+    --sf-bg: platformColor(systemBackground);
+    --sf-bg-2: platformColor(secondarySystemBackground);
+    --sf-bg-3: platformColor(tertiarySystemBackground);
+    --sf-bg-grouped: platformColor(systemGroupedBackground);
+    --sf-bg-card: platformColor(secondarySystemGroupedBackground);
+    --sf-fill: platformColor(systemFill);
+    --sf-fill-2: platformColor(secondarySystemFill);
+    --sf-separator: platformColor(separator);
+    --sf-blue: platformColor(systemBlue);
+    --sf-green: platformColor(systemGreen);
+    --sf-red: platformColor(systemRed);
+    --sf-orange: platformColor(systemOrange);
+    --sf-pink: platformColor(systemPink);
+    --sf-purple: platformColor(systemPurple);
+    --sf-teal: platformColor(systemTeal);
+  }
+}
+
+/* ── Platform Fonts ──────────────────────────────────────────── */
+
+@media ios {
+  :root {
+    --font-sans: system-ui;
+    --font-mono: ui-monospace;
+    --font-rounded: ui-rounded;
+  }
+}
+
+@media android {
+  :root {
+    --font-sans: normal;
+    --font-mono: monospace;
+  }
+}
+
+/* ── Utility Classes (use var() directly — no @theme chain) ── */
+
+/* Text colors */
+@utility text-sf-text {
+  color: var(--sf-text);
+}
+@utility text-sf-text-2 {
+  color: var(--sf-text-2);
+}
+@utility text-sf-text-3 {
+  color: var(--sf-text-3);
+}
+@utility text-sf-blue {
+  color: var(--sf-blue);
+}
+@utility text-sf-green {
+  color: var(--sf-green);
+}
+@utility text-sf-red {
+  color: var(--sf-red);
+}
+@utility text-sf-orange {
+  color: var(--sf-orange);
+}
+@utility text-sf-pink {
+  color: var(--sf-pink);
+}
+@utility text-sf-purple {
+  color: var(--sf-purple);
+}
+@utility text-sf-teal {
+  color: var(--sf-teal);
+}
+
+/* Background colors */
+@utility bg-sf-bg {
+  background-color: var(--sf-bg);
+}
+@utility bg-sf-bg-2 {
+  background-color: var(--sf-bg-2);
+}
+@utility bg-sf-bg-3 {
+  background-color: var(--sf-bg-3);
+}
+@utility bg-sf-bg-grouped {
+  background-color: var(--sf-bg-grouped);
+}
+@utility bg-sf-card {
+  background-color: var(--sf-bg-card);
+}
+@utility bg-sf-fill {
+  background-color: var(--sf-fill);
+}
+@utility bg-sf-fill-2 {
+  background-color: var(--sf-fill-2);
+}
+@utility bg-sf-separator {
+  background-color: var(--sf-separator);
+}
+
+/* Metric colors */
+@utility text-water {
+  color: var(--sf-water);
+}
+@utility text-mood {
+  color: var(--sf-mood);
+}
+@utility text-sleep {
+  color: var(--sf-sleep);
+}
+@utility text-exercise {
+  color: var(--sf-exercise);
+}
+@utility bg-water {
+  background-color: var(--sf-water);
+}
+@utility bg-mood {
+  background-color: var(--sf-mood);
+}
+@utility bg-sleep {
+  background-color: var(--sf-sleep);
+}
+@utility bg-exercise {
+  background-color: var(--sf-exercise);
+}
