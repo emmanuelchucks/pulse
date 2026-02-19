@@ -1,0 +1,8 @@
+appId: com.pulse.app
+---
+- launchApp
+- tapOn: "Today"
+- assertVisible: "Today's Metrics"
+- tapOn: "Quick add Water"
+- tapOn: "Quick add Water"
+- assertVisible: "Water"

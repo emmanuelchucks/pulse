@@ -1,13 +1,11 @@
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { SymbolView } from "expo-symbols";
-import { ScrollView, View, Text, Pressable, Alert } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
-import type { MetricColorKey } from "@/lib/styles";
 
+import { AppIcon } from "@/components/ui/app-icon";
 import {
   METRIC_KEYS,
   METRIC_CONFIG,
@@ -36,10 +34,6 @@ import {
   resetDay,
 } from "@/store/wellness-store";
 
-function haptic(style = Haptics.ImpactFeedbackStyle.Medium) {
-  if (process.env.EXPO_OS === "ios") Haptics.impactAsync(style);
-}
-
 export default function TrackScreen() {
   const { entries, goals } = useWellnessStore();
   const todayStr = formatDate(new Date());
@@ -51,8 +45,9 @@ export default function TrackScreen() {
         text: "Reset",
         style: "destructive",
         onPress: () => {
-          if (process.env.EXPO_OS === "ios")
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          if (Platform.OS === "ios") {
+            void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          }
           resetDay(todayStr);
         },
       },
@@ -75,18 +70,18 @@ export default function TrackScreen() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName={scrollContent()}
       >
-        <Animated.View entering={FadeInDown.duration(400)}>
+        <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Text className={caption()}>Log your daily wellness</Text>
-        </Animated.View>
+        </View>
 
-        {METRIC_KEYS.map((key, i) => (
-          <Animated.View key={key} entering={FadeInDown.duration(400).delay(50 + i * 50)}>
+        {METRIC_KEYS.map((key) => (
+          <View key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             {key === "mood" ? (
               <MoodCard value={getEntry(entries, todayStr).mood} todayStr={todayStr} />
             ) : (
               <NumericCard metric={key} todayStr={todayStr} entries={entries} goals={goals} />
             )}
-          </Animated.View>
+          </View>
         ))}
       </ScrollView>
     </>
@@ -109,18 +104,13 @@ function NumericCard({
   const value = entry[metric];
   const goal = goals[metric];
   const pct = Math.round(Math.min(goal > 0 ? value / goal : 0, 1) * 100);
-  const mc = METRIC_CLASSES[metric as MetricColorKey];
+  const mc = METRIC_CLASSES[metric];
 
   return (
     <View className={card({ size: "md" })}>
-      {/* Header */}
       <View className={row({ gap: "md" })}>
         <View className={iconBadge({ size: "sm", className: mc.bg10 })}>
-          <SymbolView
-            name={config.icon}
-            tintColor={config.color}
-            style={{ width: 18, height: 18 }}
-          />
+          <AppIcon name={config.icon} color={config.color} size={18} />
         </View>
         <View className="flex-1">
           <Text className={heading({ className: "text-[15px]" })}>{config.label}</Text>
@@ -135,19 +125,13 @@ function NumericCard({
         </Text>
       </View>
 
-      {/* Progress bar */}
       <View className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg10}`}>
-        <View
-          className={`h-[5px] rounded-[3px] ${mc.bg}`}
-          style={{ width: `${pct}%` as unknown as number }}
-        />
+        <View className={`h-[5px] rounded-[3px] ${mc.bg}`} style={{ width: `${pct}%` }} />
       </View>
 
-      {/* Controls */}
       <View className={row({ justify: "center", className: "gap-6 mt-[18px]" })}>
         <Pressable
           onPress={() => {
-            haptic(Haptics.ImpactFeedbackStyle.Light);
             decrementMetric(todayStr, metric);
           }}
           disabled={value <= config.min}
@@ -170,7 +154,6 @@ function NumericCard({
 
         <Pressable
           onPress={() => {
-            haptic();
             incrementMetric(todayStr, metric);
           }}
           disabled={value >= config.max}
@@ -196,11 +179,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
     <View className={card({ size: "md" })}>
       <View className={row({ gap: "md" })}>
         <View className={iconBadge({ size: "sm", className: mc.bg10 })}>
-          <SymbolView
-            name={config.icon}
-            tintColor={config.color}
-            style={{ width: 18, height: 18 }}
-          />
+          <AppIcon name={config.icon} color={config.color} size={18} />
         </View>
         <View>
           <Text className={heading({ className: "text-[15px]" })}>How are you feeling?</Text>
@@ -215,7 +194,6 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
           <Pressable
             key={mood}
             onPress={() => {
-              haptic();
               updateMetric(todayStr, "mood", mood);
             }}
             accessibilityRole="button"

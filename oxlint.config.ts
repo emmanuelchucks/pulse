@@ -1,1 +1,7 @@
-export { react as default } from "@kasoa/oxlint-config/react";
+import { react } from "@kasoa/oxlint-config/react";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  ...react,
+  ignorePatterns: ["drizzle/**"],
+});

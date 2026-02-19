@@ -14,29 +14,28 @@ export function getEntry(entries: Record<string, DailyEntry>, dateStr: string): 
 export function getProgress(
   entries: Record<string, DailyEntry>,
   goals: Goals,
-  dateStr: string,
-  metric: MetricKey,
+  params: { dateStr: string; metric: MetricKey },
 ): number {
-  const entry = getEntry(entries, dateStr);
-  const goal = goals[metric];
+  const entry = getEntry(entries, params.dateStr);
+  const goal = goals[params.metric];
   if (goal === 0) return 0;
-  return Math.min(entry[metric] / goal, 1);
+  return Math.min(entry[params.metric] / goal, 1);
 }
 
 export function getStreak(
   entries: Record<string, DailyEntry>,
   goals: Goals,
-  metric: MetricKey,
-  today: Date = new Date(),
+  params: { metric: MetricKey; today?: Date },
 ): number {
   let streak = 0;
+  const today = params.today ?? new Date();
   const cursor = new Date(today);
 
   while (true) {
     const dateStr = formatDate(cursor);
     const entry = entries[dateStr];
-    if (!entry || entry[metric] === 0) break;
-    if (entry[metric] / goals[metric] < 1) break;
+    if (!entry || entry[params.metric] === 0) break;
+    if (entry[params.metric] / goals[params.metric] < 1) break;
     streak++;
     cursor.setDate(cursor.getDate() - 1);
   }
@@ -69,9 +68,11 @@ export function getWeeklyAverage(
 export function getCompletionRate(
   entries: Record<string, DailyEntry>,
   goals: Goals,
-  days = 7,
-  today: Date = new Date(),
+  params?: { days?: number; today?: Date },
 ): number {
+  const days = params?.days ?? 7;
+  const today = params?.today ?? new Date();
+
   let completedMetrics = 0;
   const totalMetrics = days * METRIC_KEYS.length;
 

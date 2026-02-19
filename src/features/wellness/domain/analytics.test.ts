@@ -45,7 +45,7 @@ describe("wellness analytics", () => {
       },
     };
 
-    expect(getProgress(entries, goals, date, "water")).toBe(1);
+    expect(getProgress(entries, goals, { dateStr: date, metric: "water" })).toBe(1);
   });
 
   it("calculates streak only for consecutive completed days", () => {
@@ -59,7 +59,7 @@ describe("wellness analytics", () => {
       [formatDate(twoDaysAgo)]: withEntry(twoDaysAgo, { water: 3 }),
     };
 
-    expect(getStreak(entries, goals, "water", today)).toBe(2);
+    expect(getStreak(entries, goals, { metric: "water", today })).toBe(2);
   });
 
   it("computes weekly average from non-zero values only", () => {
@@ -95,6 +95,6 @@ describe("wellness analytics", () => {
     };
 
     // 6 completed metrics out of 8 total metrics across 2 days.
-    expect(getCompletionRate(entries, goals, 2, today)).toBeCloseTo(0.75, 5);
+    expect(getCompletionRate(entries, goals, { days: 2, today })).toBeCloseTo(0.75, 5);
   });
 });

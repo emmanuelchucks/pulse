@@ -1,15 +1,28 @@
-const { getDefaultConfig } = require("expo/metro-config");
-const { withNativewind } = require("nativewind/metro");
+import { getDefaultConfig } from "expo/metro-config";
+import { withNativewind } from "nativewind/metro";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('expo/metro-config').MetroConfig} */
-let config = getDefaultConfig(__dirname);
+let config = getDefaultConfig(rootDir);
 
 config = withNativewind(config, {
   inlineVariables: false,
 });
 
-if (!config.resolver.sourceExts.includes("sql")) {
-  config.resolver.sourceExts.push("sql");
+const sourceExts = [.../** @type {string[]} */ (config.resolver.sourceExts)];
+if (!sourceExts.includes("sql")) {
+  sourceExts.push("sql");
 }
 
-module.exports = config;
+config = {
+  ...config,
+  resolver: {
+    ...config.resolver,
+    sourceExts,
+  },
+};
+
+export default config;

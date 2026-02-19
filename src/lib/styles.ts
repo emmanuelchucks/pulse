@@ -1,5 +1,7 @@
 import { tv } from "tailwind-variants";
 
+import type { MetricKey } from "@/constants/metrics";
+
 // ── Card ────────────────────────────────────────────────────
 export const card = tv({
   base: "bg-sf-card rounded-[20px] overflow-hidden corner-squircle",
@@ -124,9 +126,19 @@ export const stepperButton = tv({
   },
 });
 
+type MetricColorClasses = {
+  text: string;
+  bg: string;
+  border: string;
+  bg10: string;
+  bg15: string;
+  bg25: string;
+  bg40: string;
+};
+
 // ── Metric color map (className tokens keyed by metric) ─────
 // Maps metric keys to their Tailwind @theme color classes
-export const METRIC_CLASSES = {
+export const METRIC_CLASSES: Record<MetricKey, MetricColorClasses> = {
   water: {
     text: "text-water",
     bg: "bg-water",
@@ -163,6 +175,4 @@ export const METRIC_CLASSES = {
     bg25: "bg-exercise/25",
     bg40: "bg-exercise/40",
   },
-} as const;
-
-export type MetricColorKey = keyof typeof METRIC_CLASSES;
+};

@@ -1,8 +1,6 @@
-import * as Haptics from "expo-haptics";
-import { SymbolView } from "expo-symbols";
-import { ScrollView, View, Text, Pressable } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { ScrollView, Text, Pressable, View } from "react-native";
 
+import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_KEYS, METRIC_CONFIG, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
 import {
   getEntry,
@@ -25,7 +23,6 @@ import {
   iconBadge,
   row,
   METRIC_CLASSES,
-  type MetricColorKey,
 } from "@/lib/styles";
 import { useWellnessStore, incrementMetric } from "@/store/wellness-store";
 
@@ -40,11 +37,13 @@ export default function DashboardScreen() {
     day: "numeric",
   });
 
-  const progresses = METRIC_KEYS.map((k) => getProgress(entries, goals, todayStr, k));
+  const progresses = METRIC_KEYS.map((k) =>
+    getProgress(entries, goals, { dateStr: todayStr, metric: k }),
+  );
   const overall = Math.round((progresses.reduce((a, b) => a + b, 0) / progresses.length) * 100);
   const completed = progresses.filter((p) => p >= 1).length;
-  const weeklyRate = Math.round(getCompletionRate(entries, goals, 7) * 100);
-  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, k)));
+  const weeklyRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
+  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
   const greeting = getGreeting();
 
   return (
@@ -53,13 +52,11 @@ export default function DashboardScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName={scrollContent()}
     >
-      {/* Date */}
-      <Animated.View entering={FadeInDown.duration(400)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <Text className={caption({ className: "mt-1" })}>{dateLabel}</Text>
-      </Animated.View>
+      </View>
 
-      {/* Summary Card */}
-      <Animated.View entering={FadeInDown.duration(400).delay(50)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <View className={card({ size: "md" })}>
           <View className={row({ gap: "lg" })}>
             <View
@@ -91,22 +88,17 @@ export default function DashboardScreen() {
             </View>
           </View>
         </View>
-      </Animated.View>
+      </View>
 
-      {/* Streak Row */}
-      <Animated.View entering={FadeInDown.duration(400).delay(100)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <View className={card({ size: "sm" })}>
           <View className={row({ justify: "around", className: "py-3.5" })}>
             {METRIC_KEYS.map((key) => {
               const config = METRIC_CONFIG[key];
-              const streak = getStreak(entries, goals, key);
+              const streak = getStreak(entries, goals, { metric: key });
               return (
                 <View key={key} className="items-center gap-1 py-0.5">
-                  <SymbolView
-                    name={config.icon}
-                    tintColor={config.color}
-                    style={{ width: 16, height: 16 }}
-                  />
+                  <AppIcon name={config.icon} color={config.color} size={16} />
                   <Text
                     className={numericDisplay({ size: "xs", className: "font-bold" })}
                     selectable
@@ -119,18 +111,16 @@ export default function DashboardScreen() {
             })}
           </View>
         </View>
-      </Animated.View>
+      </View>
 
-      {/* Section Header */}
       <View className={sectionHeader()}>
         <Text className={sectionTitle()}>Today&apos;s Metrics</Text>
         <Text className={sectionSubtitle()}>Tap + to quick-add</Text>
       </View>
 
-      {/* Metric Cards */}
-      {METRIC_KEYS.map((key, i) => {
+      {METRIC_KEYS.map((key) => {
         const config = METRIC_CONFIG[key];
-        const mc = METRIC_CLASSES[key as MetricColorKey];
+        const mc = METRIC_CLASSES[key];
         const entry = getEntry(entries, todayStr);
         const value = entry[key];
         const goal = goals[key];
@@ -139,22 +129,18 @@ export default function DashboardScreen() {
         const unit = key === "mood" ? "" : `/${goal} ${config.unit}`;
 
         return (
-          <Animated.View key={key} entering={FadeInDown.duration(400).delay(150 + i * 50)}>
+          <View key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <View className={card({ size: "md", className: "p-4" })}>
               <View className={row({ gap: "lg", className: "gap-3.5" })}>
                 <View className="items-center">
                   <View className={iconBadge({ size: "md", className: mc.bg10 })}>
-                    <SymbolView
-                      name={config.icon}
-                      tintColor={config.color}
-                      style={{ width: 22, height: 22 }}
-                    />
+                    <AppIcon name={config.icon} color={config.color} size={22} />
                   </View>
                   <View className={`w-10 h-1 rounded-full mt-1.5 ${mc.bg15}`}>
                     <View
                       className={`h-1 rounded-full ${mc.bg}`}
                       style={{
-                        width: `${Math.round(pct * 100)}%` as unknown as number,
+                        width: `${Math.round(pct * 100)}%`,
                       }}
                     />
                   </View>
@@ -170,9 +156,6 @@ export default function DashboardScreen() {
                 </View>
                 <Pressable
                   onPress={() => {
-                    if (process.env.EXPO_OS === "ios") {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }
                     incrementMetric(todayStr, key);
                   }}
                   accessibilityRole="button"
@@ -183,7 +166,7 @@ export default function DashboardScreen() {
                 </Pressable>
               </View>
             </View>
-          </Animated.View>
+          </View>
         );
       })}
     </ScrollView>

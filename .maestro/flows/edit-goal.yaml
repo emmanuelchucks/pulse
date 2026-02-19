@@ -1,0 +1,8 @@
+appId: com.pulse.app
+---
+- launchApp
+- tapOn: "Settings"
+- assertVisible: "Daily Goals"
+- tapOn: "Increase Water goal"
+- tapOn: "Decrease Water goal"
+- assertVisible: "Water"

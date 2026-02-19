@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "66ec551d-21f2-42aa-8349-6292f19d648f",
+  "id": "54b01afd-9640-4d07-9973-7a7556acc682",
   "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
@@ -15,6 +15,16 @@
     {
       "type": "text",
       "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "text",
+      "notNull": true,
       "autoincrement": false,
       "default": null,
       "generated": null,
@@ -68,6 +78,16 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "daily_entries"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "updated_at",
       "entityType": "columns",
       "table": "daily_entries"
@@ -75,6 +95,16 @@
     {
       "type": "text",
       "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "goals"
+    },
+    {
+      "type": "text",
+      "notNull": true,
       "autoincrement": false,
       "default": null,
       "generated": null,
@@ -98,23 +128,61 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "goals"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "updated_at",
       "entityType": "columns",
       "table": "goals"
     },
     {
-      "columns": ["date"],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "daily_entries_pk",
       "table": "daily_entries",
       "entityType": "pks"
     },
     {
-      "columns": ["metric"],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "goals_pk",
       "table": "goals",
       "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "date",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "daily_entries_date_unique",
+      "entityType": "indexes",
+      "table": "daily_entries"
+    },
+    {
+      "columns": [
+        {
+          "value": "metric",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "goals_metric_unique",
+      "entityType": "indexes",
+      "table": "goals"
     }
   ],
   "renames": []

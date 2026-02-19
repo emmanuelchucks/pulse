@@ -4,48 +4,64 @@ import type { WellnessRepository } from "@/features/wellness/infra/wellness-repo
 
 import { createWellnessService } from "@/features/wellness/application/wellness-service";
 
-function createRepositoryMock(): WellnessRepository {
+function createRepositoryMock() {
   const values = new Map<string, number>();
 
+  const seedGoals = vi.fn();
+  const upsertMetric = vi.fn((date: string, metric: string, value: number) => {
+    values.set(`${date}:${metric}`, value);
+  });
+  const getMetricValue = vi.fn(
+    (date: string, metric: string) => values.get(`${date}:${metric}`) ?? 0,
+  );
+  const upsertGoal = vi.fn();
+  const resetDay = vi.fn();
+  const clearAllData = vi.fn();
+
+  const repository: WellnessRepository = {
+    seedGoals,
+    upsertMetric,
+    getMetricValue,
+    upsertGoal,
+    resetDay,
+    clearAllData,
+  };
+
   return {
-    seedGoals: vi.fn(),
-    upsertMetric: vi.fn((date, metric, value) => {
-      values.set(`${date}:${metric}`, value);
-    }),
-    getMetricValue: vi.fn((date, metric) => values.get(`${date}:${metric}`) ?? 0),
-    upsertGoal: vi.fn(),
-    resetDay: vi.fn(),
-    clearAllData: vi.fn(),
+    repository,
+    seedGoals,
+    upsertMetric,
+    upsertGoal,
   };
 }
 
 describe("wellness service", () => {
   it("seeds goals only once during initialization", () => {
-    const repository = createRepositoryMock();
+    const { repository, seedGoals } = createRepositoryMock();
     const service = createWellnessService(repository);
 
     service.initializeWellnessData();
     service.initializeWellnessData();
 
-    expect(repository.seedGoals).toHaveBeenCalledTimes(1);
+    expect(seedGoals).toHaveBeenCalledTimes(1);
   });
 
   it("increments and decrements using metric step values", () => {
-    const repository = createRepositoryMock();
+    const { repository, upsertMetric } = createRepositoryMock();
     const service = createWellnessService(repository);
 
     service.incrementMetric("2026-02-11", "water");
     service.incrementMetric("2026-02-11", "water");
     service.decrementMetric("2026-02-11", "water");
 
-    expect(repository.upsertMetric).toHaveBeenLastCalledWith("2026-02-11", "water", 1);
+    expect(upsertMetric).toHaveBeenLastCalledWith("2026-02-11", "water", 1);
   });
 
   it("rejects invalid goal updates through metric validation", () => {
-    const repository = createRepositoryMock();
+    const { repository, upsertGoal } = createRepositoryMock();
     const service = createWellnessService(repository);
 
     expect(() => service.updateGoal("mood", 10)).toThrow();
-    expect(repository.upsertGoal).not.toHaveBeenCalled();
+    expect(upsertGoal).not.toHaveBeenCalled();
   });
 });

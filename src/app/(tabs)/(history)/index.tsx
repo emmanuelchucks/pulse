@@ -1,12 +1,10 @@
-import { SymbolView } from "expo-symbols";
 import { useReducer } from "react";
-import { ScrollView, View, Text, Pressable } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
-import type { MetricColorKey } from "@/lib/styles";
 
+import { AppIcon } from "@/components/ui/app-icon";
 import {
   METRIC_KEYS,
   METRIC_CONFIG,
@@ -48,10 +46,12 @@ export default function HistoryScreen() {
   const { entries, goals } = useWellnessStore();
   const [referenceDate, dispatch] = useReducer(weekReducer, new Date());
 
-  const completionRate = Math.round(getCompletionRate(entries, goals, 7) * 100);
-  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, k)));
+  const completionRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
+  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
   const weekDates = getWeekDates(referenceDate);
-  const canGoNext = weekDates[6] < new Date();
+  const weekStart = weekDates[0] ?? referenceDate;
+  const weekEnd = weekDates[6] ?? referenceDate;
+  const canGoNext = weekEnd < new Date();
   const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   return (
@@ -60,19 +60,22 @@ export default function HistoryScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName={scrollContent()}
     >
-      <Animated.View entering={FadeInDown.duration(400)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <Text className={caption()}>Track your progress over time</Text>
-      </Animated.View>
+      </View>
 
-      {/* Stats row */}
-      <Animated.View entering={FadeInDown.duration(400).delay(50)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <View className="flex-row gap-3">
           <View className={card({ size: "sm", className: "flex-1 p-3" })}>
             <View className={row({ gap: "sm" })}>
-              <SymbolView
-                name="checkmark.circle.fill"
-                tintColor="#0a84ff"
-                style={{ width: 16, height: 16 }}
+              <AppIcon
+                name={{
+                  ios: "checkmark.circle.fill",
+                  android: "check_circle",
+                  web: "check_circle",
+                }}
+                color="#0a84ff"
+                size={16}
               />
               <View>
                 <Text className={statLabel()}>Completion</Text>
@@ -82,7 +85,15 @@ export default function HistoryScreen() {
           </View>
           <View className={card({ size: "sm", className: "flex-1 p-3" })}>
             <View className={row({ gap: "sm" })}>
-              <SymbolView name="flame.fill" tintColor="#ff9f0a" style={{ width: 16, height: 16 }} />
+              <AppIcon
+                name={{
+                  ios: "flame.fill",
+                  android: "local_fire_department",
+                  web: "local_fire_department",
+                }}
+                color="#ff9f0a"
+                size={16}
+              />
               <View>
                 <Text className={statLabel()}>Best Streak</Text>
                 <Text className={numericDisplay({ size: "sm" })}>
@@ -92,20 +103,23 @@ export default function HistoryScreen() {
             </View>
           </View>
         </View>
-      </Animated.View>
+      </View>
 
-      {/* Week nav */}
-      <Animated.View entering={FadeInDown.duration(400).delay(100)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <View className={row({ justify: "between", className: "px-1" })}>
           <Pressable
             onPress={() => dispatch({ type: "prev" })}
             accessibilityLabel="Previous week"
             className="w-9 h-9 rounded-[10px] items-center justify-center corner-squircle"
           >
-            <SymbolView name="chevron.left" tintColor="#8e8e93" style={{ width: 14, height: 14 }} />
+            <AppIcon
+              name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }}
+              color="#8e8e93"
+              size={14}
+            />
           </Pressable>
           <Text className={caption({ className: "font-medium" })}>
-            {fmt(weekDates[0])} – {fmt(weekDates[6])}
+            {fmt(weekStart)} – {fmt(weekEnd)}
           </Text>
           <Pressable
             onPress={() => dispatch({ type: "next" })}
@@ -113,43 +127,36 @@ export default function HistoryScreen() {
             accessibilityLabel="Next week"
             className={`w-9 h-9 rounded-[10px] items-center justify-center corner-squircle ${canGoNext ? "opacity-100" : "opacity-30"}`}
           >
-            <SymbolView
-              name="chevron.right"
-              tintColor="#8e8e93"
-              style={{ width: 14, height: 14 }}
+            <AppIcon
+              name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
+              color="#8e8e93"
+              size={14}
             />
           </Pressable>
         </View>
-      </Animated.View>
+      </View>
 
-      {/* Charts */}
-      {METRIC_KEYS.map((key, i) => (
-        <Animated.View key={key} entering={FadeInDown.duration(400).delay(150 + i * 50)}>
+      {METRIC_KEYS.map((key) => (
+        <View key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           <WeekChart metric={key} weekDates={weekDates} entries={entries} goals={goals} />
-        </Animated.View>
+        </View>
       ))}
 
-      {/* Averages */}
       <View className={sectionHeader()}>
         <Text className={sectionTitle()}>Weekly Averages</Text>
       </View>
       <View className="flex-row flex-wrap gap-3">
-        {METRIC_KEYS.map((key, i) => {
+        {METRIC_KEYS.map((key) => {
           const config = METRIC_CONFIG[key];
           const avg = getWeeklyAverage(entries, key, referenceDate);
           return (
-            <Animated.View
+            <View
               key={key}
-              entering={FadeInDown.duration(400).delay(350 + i * 50)}
-              className="w-[47%]"
+              className="w-[47%] animate-in fade-in slide-in-from-bottom-2 duration-300"
             >
               <View className={card({ size: "sm", className: "p-3" })}>
                 <View className={row({ gap: "sm" })}>
-                  <SymbolView
-                    name={config.icon}
-                    tintColor={config.color}
-                    style={{ width: 14, height: 14 }}
-                  />
+                  <AppIcon name={config.icon} color={config.color} size={14} />
                   <View>
                     <Text className={statLabel()}>{config.label}</Text>
                     <Text className={numericDisplay({ size: "xs" })}>
@@ -158,7 +165,7 @@ export default function HistoryScreen() {
                   </View>
                 </View>
               </View>
-            </Animated.View>
+            </View>
           );
         })}
       </View>
@@ -181,20 +188,18 @@ function WeekChart({
   const goal = goals[metric];
   const values = weekDates.map((d) => getEntry(entries, formatDate(d))[metric]);
   const maxVal = Math.max(...values, goal);
-  const colors = METRIC_CLASSES[metric as MetricColorKey];
+  const colors = METRIC_CLASSES[metric];
 
   return (
     <View className={card({ padded: true })}>
-      {/* Title */}
       <View className={row({ gap: "sm" })}>
-        <SymbolView name={config.icon} tintColor={config.color} style={{ width: 15, height: 15 }} />
+        <AppIcon name={config.icon} color={config.color} size={15} />
         <Text className={statValue()}>{config.label}</Text>
       </View>
 
-      {/* Bars */}
       <View className={row({ justify: "around", className: "items-end mt-3 h-[90px]" })}>
         {weekDates.map((date, idx) => {
-          const val = values[idx];
+          const val = values[idx] ?? 0;
           const h = maxVal > 0 ? (val / maxVal) * 70 : 0;
           const current = isToday(date);
           const met = val >= goal;
@@ -218,7 +223,6 @@ function WeekChart({
         })}
       </View>
 
-      {/* Footer */}
       <View className={row({ justify: "between", className: "mt-2.5" })}>
         <Text className={statLabel({ className: "text-[10px]" })}>
           Goal: {goal} {config.unit}

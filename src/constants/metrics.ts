@@ -1,11 +1,37 @@
+import type { AndroidSymbol, SFSymbol } from "expo-symbols";
+
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 
-export const METRIC_CONFIG = {
+export type MetricKey = "water" | "mood" | "sleep" | "exercise";
+
+type MetricConfig = {
+  key: MetricKey;
+  label: string;
+  unit: string;
+  icon: {
+    ios: SFSymbol;
+    android: AndroidSymbol;
+    web: AndroidSymbol;
+  };
+  color: string;
+  defaultGoal: number;
+  step: number;
+  min: number;
+  max: number;
+};
+
+export const METRIC_KEYS: MetricKey[] = ["water", "mood", "sleep", "exercise"];
+
+export const METRIC_CONFIG: Record<MetricKey, MetricConfig> = {
   water: {
-    key: "water" as const,
+    key: "water",
     label: "Water",
     unit: "glasses",
-    icon: "drop.fill" as const,
+    icon: {
+      ios: "drop.fill",
+      android: "water_drop",
+      web: "water_drop",
+    },
     color: "#38bdf8",
     defaultGoal: 8,
     step: 1,
@@ -13,10 +39,14 @@ export const METRIC_CONFIG = {
     max: 20,
   },
   mood: {
-    key: "mood" as const,
+    key: "mood",
     label: "Mood",
     unit: "",
-    icon: "face.smiling.fill" as const,
+    icon: {
+      ios: "face.smiling.fill",
+      android: "mood",
+      web: "mood",
+    },
     color: "#f472b6",
     defaultGoal: 5,
     step: 1,
@@ -24,10 +54,14 @@ export const METRIC_CONFIG = {
     max: 5,
   },
   sleep: {
-    key: "sleep" as const,
+    key: "sleep",
     label: "Sleep",
     unit: "hours",
-    icon: "moon.fill" as const,
+    icon: {
+      ios: "moon.fill",
+      android: "dark_mode",
+      web: "dark_mode",
+    },
     color: "#a78bfa",
     defaultGoal: 8,
     step: 0.5,
@@ -35,23 +69,24 @@ export const METRIC_CONFIG = {
     max: 14,
   },
   exercise: {
-    key: "exercise" as const,
+    key: "exercise",
     label: "Exercise",
     unit: "min",
-    icon: "flame.fill" as const,
+    icon: {
+      ios: "flame.fill",
+      android: "local_fire_department",
+      web: "local_fire_department",
+    },
     color: "#34d399",
     defaultGoal: 30,
     step: 5,
     min: 0,
     max: 180,
   },
-} as const;
+};
 
-export type MetricKey = keyof typeof METRIC_CONFIG;
-export const METRIC_KEYS = Object.keys(METRIC_CONFIG) as MetricKey[];
-
-export const MOOD_LABELS = ["", "Awful", "Bad", "Okay", "Good", "Great"] as const;
-export const MOOD_EMOJIS = ["", "😞", "😔", "😐", "😊", "😄"] as const;
+export const MOOD_LABELS = ["", "Awful", "Bad", "Okay", "Good", "Great"];
+export const MOOD_EMOJIS = ["", "😞", "😔", "😐", "😊", "😄"];
 
 export function formatDate(date: Date): string {
   return format(date, "yyyy-MM-dd");

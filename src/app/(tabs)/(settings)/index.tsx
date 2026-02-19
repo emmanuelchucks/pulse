@@ -1,12 +1,10 @@
 import * as Haptics from "expo-haptics";
-import { SymbolView } from "expo-symbols";
-import { ScrollView, View, Text, Pressable, Alert } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
 import type { MetricKey } from "@/constants/metrics";
 import type { Goals } from "@/db/types";
-import type { MetricColorKey } from "@/lib/styles";
 
+import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_KEYS, METRIC_CONFIG } from "@/constants/metrics";
 import {
   card,
@@ -25,10 +23,6 @@ import {
 } from "@/lib/styles";
 import { useWellnessStore, updateGoal, clearAllData } from "@/store/wellness-store";
 
-function haptic(style = Haptics.ImpactFeedbackStyle.Light) {
-  if (process.env.EXPO_OS === "ios") Haptics.impactAsync(style);
-}
-
 export default function SettingsScreen() {
   const { entries, goals } = useWellnessStore();
 
@@ -43,8 +37,10 @@ export default function SettingsScreen() {
           style: "destructive",
           onPress: () => {
             clearAllData();
-            if (process.env.EXPO_OS === "ios") {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+            if (Platform.OS === "ios") {
+              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(
+                () => {},
+              );
             }
           },
         },
@@ -60,28 +56,26 @@ export default function SettingsScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName={scrollContent()}
     >
-      <Animated.View entering={FadeInDown.duration(400)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <Text className={caption()}>Customize your goals</Text>
-      </Animated.View>
+      </View>
 
-      {/* Daily Goals Header */}
       <View className={sectionHeader()}>
         <Text className={sectionTitle()}>Daily Goals</Text>
         <Text className={sectionSubtitle()}>Adjust targets for each metric</Text>
       </View>
 
-      {METRIC_KEYS.map((key, i) => (
-        <Animated.View key={key} entering={FadeInDown.duration(400).delay(50 + i * 50)}>
+      {METRIC_KEYS.map((key) => (
+        <View key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           <GoalCard metric={key} goals={goals} />
-        </Animated.View>
+        </View>
       ))}
 
-      {/* Data Header */}
       <View className={sectionHeader({ className: "mt-2" })}>
         <Text className={sectionTitle()}>Data</Text>
       </View>
 
-      <Animated.View entering={FadeInDown.duration(400).delay(250)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <View className={card({ padded: true, className: "gap-3.5" })}>
           <View className={row({ justify: "between" })}>
             <Text className={caption()}>Days tracked</Text>
@@ -98,14 +92,13 @@ export default function SettingsScreen() {
             <Text className="text-[13px] font-semibold text-sf-red">Clear All Data</Text>
           </Pressable>
         </View>
-      </Animated.View>
+      </View>
 
-      {/* About Header */}
       <View className={sectionHeader({ className: "mt-2" })}>
         <Text className={sectionTitle()}>About</Text>
       </View>
 
-      <Animated.View entering={FadeInDown.duration(400).delay(300)}>
+      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
         <View className={card({ padded: true, className: "gap-1.5" })}>
           <Text className={heading({ className: "text-[15px]" })}>Pulse</Text>
           <Text className={caption({ className: "leading-5" })}>
@@ -114,7 +107,7 @@ export default function SettingsScreen() {
           </Text>
           <Text className={statLabel({ className: "mt-1.5" })}>Version 1.0.0</Text>
         </View>
-      </Animated.View>
+      </View>
     </ScrollView>
   );
 }
@@ -122,17 +115,13 @@ export default function SettingsScreen() {
 function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const config = METRIC_CONFIG[metric];
   const current = goals[metric];
-  const colors = METRIC_CLASSES[metric as MetricColorKey];
+  const colors = METRIC_CLASSES[metric];
 
   return (
     <View className={card({ padded: true })}>
       <View className={row({ gap: "md" })}>
         <View className={iconBadge({ size: "sm", className: colors.bg10 })}>
-          <SymbolView
-            name={config.icon}
-            tintColor={config.color}
-            style={{ width: 18, height: 18 }}
-          />
+          <AppIcon name={config.icon} color={config.color} size={18} />
         </View>
 
         <View className="flex-1">
@@ -143,7 +132,6 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
         <View className={row({ className: "gap-2.5" })}>
           <Pressable
             onPress={() => {
-              haptic();
               updateGoal(metric, Math.max(config.step, current - config.step));
             }}
             disabled={current <= config.step}
@@ -164,7 +152,6 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
 
           <Pressable
             onPress={() => {
-              haptic();
               updateGoal(metric, current + config.step);
             }}
             accessibilityRole="button"

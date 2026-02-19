@@ -1,20 +1,46 @@
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, uniqueIndex } from "drizzle-orm/sqlite-core";
 
-export const dailyEntries = sqliteTable("daily_entries", {
-  date: text("date").primaryKey(),
-  water: real("water").notNull().default(0),
-  mood: integer("mood").notNull().default(0),
-  sleep: real("sleep").notNull().default(0),
-  exercise: real("exercise").notNull().default(0),
-  updatedAt: integer("updated_at")
-    .notNull()
-    .$defaultFn(() => Date.now()),
-});
+export const dailyEntries = sqliteTable(
+  "daily_entries",
+  (t) => ({
+    id: t
+      .text("id")
+      .primaryKey()
+      .$defaultFn(() => globalThis.crypto.randomUUID()),
+    date: t.text("date").notNull(),
+    water: t.real("water").notNull().default(0),
+    mood: t.integer("mood").notNull().default(0),
+    sleep: t.real("sleep").notNull().default(0),
+    exercise: t.real("exercise").notNull().default(0),
+    createdAt: t
+      .integer("created_at")
+      .notNull()
+      .$defaultFn(() => Date.now()),
+    updatedAt: t
+      .integer("updated_at")
+      .notNull()
+      .$defaultFn(() => Date.now()),
+  }),
+  (t) => [uniqueIndex("daily_entries_date_unique").on(t.date)],
+);
 
-export const goals = sqliteTable("goals", {
-  metric: text("metric").primaryKey(),
-  value: real("value").notNull(),
-  updatedAt: integer("updated_at")
-    .notNull()
-    .$defaultFn(() => Date.now()),
-});
+export const goals = sqliteTable(
+  "goals",
+  (t) => ({
+    id: t
+      .text("id")
+      .primaryKey()
+      .$defaultFn(() => globalThis.crypto.randomUUID()),
+    metric: t.text("metric").notNull(),
+    value: t.real("value").notNull(),
+    createdAt: t
+      .integer("created_at")
+      .notNull()
+      .$defaultFn(() => Date.now()),
+    updatedAt: t
+      .integer("updated_at")
+      .notNull()
+      .$defaultFn(() => Date.now()),
+  }),
+  (t) => [uniqueIndex("goals_metric_unique").on(t.metric)],
+);

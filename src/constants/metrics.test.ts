@@ -13,9 +13,17 @@ describe("metrics date utilities", () => {
     const week = getWeekDates(reference);
 
     expect(week).toHaveLength(7);
-    expect(week[0].getDay()).toBe(1);
-    expect(formatDate(week[0])).toBe("2026-02-09");
-    expect(formatDate(week[6])).toBe("2026-02-15");
+
+    const monday = week[0];
+    const sunday = week[6];
+
+    if (!monday || !sunday) {
+      throw new Error("week boundaries missing");
+    }
+
+    expect(monday.getDay()).toBe(1);
+    expect(formatDate(monday)).toBe("2026-02-09");
+    expect(formatDate(sunday)).toBe("2026-02-15");
   });
 
   it("detects today by local calendar day", () => {

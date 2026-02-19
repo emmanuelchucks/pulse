@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { LogBox, Pressable, Text, View } from "react-native";
 
 import { runMigrations } from "@/db/client";
@@ -48,7 +48,7 @@ function BootErrorScreen({ onRetry }: { onRetry: () => void }) {
 export default function RootLayout() {
   const [status, setStatus] = useState<BootStatus>("loading");
 
-  const initialize = useCallback(async () => {
+  const initialize = async () => {
     setStatus("loading");
 
     try {
@@ -57,22 +57,22 @@ export default function RootLayout() {
       setStatus("ready");
       await SplashScreen.hideAsync();
     } catch (error) {
-      console.error("Failed to initialize database", error);
+      globalThis.console.error("Failed to initialize database", error);
       setStatus("error");
       await SplashScreen.hideAsync();
     }
-  }, []);
+  };
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    void initialize();
+  }, []);
 
   if (status === "loading") {
     return <BootScreen />;
   }
 
   if (status === "error") {
-    return <BootErrorScreen onRetry={initialize} />;
+    return <BootErrorScreen onRetry={() => void initialize()} />;
   }
 
   return (

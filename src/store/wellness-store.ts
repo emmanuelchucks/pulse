@@ -1,5 +1,4 @@
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useMemo } from "react";
 
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
@@ -13,6 +12,10 @@ import { drizzleWellnessRepository } from "@/features/wellness/infra/wellness-re
 
 const wellnessService = createWellnessService(drizzleWellnessRepository);
 const DEFAULT_GOALS = createDefaultGoals();
+
+function isMetricKey(value: string): value is MetricKey {
+  return METRIC_KEYS.some((metric) => metric === value);
+}
 
 export function initializeWellnessData() {
   wellnessService.initializeWellnessData();
@@ -46,32 +49,25 @@ export function useWellnessStore() {
   const entriesQuery = useLiveQuery(db.select().from(dailyEntries));
   const goalsQuery = useLiveQuery(db.select().from(goalsTable));
 
-  const entries = useMemo(() => {
-    const rows = entriesQuery.data ?? [];
-    return rows.reduce<Record<string, DailyEntry>>((accumulator, row) => {
-      accumulator[row.date] = {
-        date: row.date,
-        water: row.water,
-        mood: row.mood,
-        sleep: row.sleep,
-        exercise: row.exercise,
-      };
-      return accumulator;
-    }, {});
-  }, [entriesQuery.data]);
+  const rows = entriesQuery.data ?? [];
+  const entries = rows.reduce<Record<string, DailyEntry>>((accumulator, row) => {
+    accumulator[row.date] = {
+      date: row.date,
+      water: row.water,
+      mood: row.mood,
+      sleep: row.sleep,
+      exercise: row.exercise,
+    };
+    return accumulator;
+  }, {});
 
-  const goals = useMemo(() => {
-    const base: Goals = { ...DEFAULT_GOALS };
-    const rows = goalsQuery.data ?? [];
+  const base: Goals = { ...DEFAULT_GOALS };
+  const goalRows = goalsQuery.data ?? [];
 
-    for (const row of rows) {
-      const metric = row.metric as MetricKey;
-      if (!METRIC_KEYS.includes(metric)) continue;
-      base[metric] = row.value;
-    }
+  for (const row of goalRows) {
+    if (!isMetricKey(row.metric)) continue;
+    base[row.metric] = row.value;
+  }
 
-    return base;
-  }, [goalsQuery.data]);
-
-  return { entries, goals };
+  return { entries, goals: base };
 }

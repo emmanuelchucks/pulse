@@ -1,0 +1,9 @@
+appId: com.pulse.app
+---
+- launchApp
+- tapOn: "Track"
+- assertVisible: "Log your daily wellness"
+- tapOn: "Increase Water"
+- tapOn: "Reset Day"
+- tapOn: "Reset"
+- assertVisible: "Water"

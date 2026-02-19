@@ -1,0 +1,8 @@
+appId: com.pulse.app
+---
+- launchApp
+- tapOn: "History"
+- assertVisible: "Track your progress over time"
+- tapOn: "Previous week"
+- tapOn: "Next week"
+- assertVisible: "Weekly Averages"

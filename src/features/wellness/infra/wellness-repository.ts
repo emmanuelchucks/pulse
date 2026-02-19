@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import type { MetricKey } from "@/constants/metrics";
 import type { Goals } from "@/db/types";
 
+import { METRIC_KEYS } from "@/constants/metrics";
 import { db } from "@/db/client";
 import { dailyEntries, goals } from "@/db/schema";
 
@@ -11,7 +12,7 @@ const METRIC_COLUMN = {
   mood: dailyEntries.mood,
   sleep: dailyEntries.sleep,
   exercise: dailyEntries.exercise,
-} as const;
+} satisfies Record<MetricKey, (typeof dailyEntries)[MetricKey]>;
 
 function metricUpdateSet(metric: MetricKey, value: number, updatedAt: number) {
   if (metric === "water") return { water: value, updatedAt };
@@ -32,11 +33,11 @@ export interface WellnessRepository {
 export const drizzleWellnessRepository: WellnessRepository = {
   seedGoals(defaultGoals) {
     db.transaction((tx) => {
-      for (const [metric, value] of Object.entries(defaultGoals) as [MetricKey, number][]) {
+      for (const metric of METRIC_KEYS) {
         tx.insert(goals)
           .values({
             metric,
-            value,
+            value: defaultGoals[metric],
             updatedAt: Date.now(),
           })
           .onConflictDoNothing({ target: goals.metric })
@@ -125,11 +126,11 @@ export const drizzleWellnessRepository: WellnessRepository = {
       tx.delete(dailyEntries).run();
       tx.delete(goals).run();
 
-      for (const [metric, value] of Object.entries(defaultGoals) as [MetricKey, number][]) {
+      for (const metric of METRIC_KEYS) {
         tx.insert(goals)
           .values({
             metric,
-            value,
+            value: defaultGoals[metric],
             updatedAt: Date.now(),
           })
           .run();

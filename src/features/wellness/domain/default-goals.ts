@@ -1,13 +1,12 @@
 import type { Goals } from "@/db/types";
 
-import { METRIC_CONFIG, METRIC_KEYS } from "@/constants/metrics";
+import { METRIC_CONFIG } from "@/constants/metrics";
 
 export function createDefaultGoals(): Goals {
-  const defaults = {} as Goals;
-
-  for (const metric of METRIC_KEYS) {
-    defaults[metric] = METRIC_CONFIG[metric].defaultGoal;
-  }
-
-  return defaults;
+  return {
+    water: METRIC_CONFIG.water.defaultGoal,
+    mood: METRIC_CONFIG.mood.defaultGoal,
+    sleep: METRIC_CONFIG.sleep.defaultGoal,
+    exercise: METRIC_CONFIG.exercise.defaultGoal,
+  };
 }
