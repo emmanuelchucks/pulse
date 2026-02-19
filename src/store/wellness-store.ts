@@ -8,9 +8,9 @@ import { db } from "@/db/client";
 import { dailyEntries, goals as goalsTable } from "@/db/schema";
 import { createWellnessService } from "@/features/wellness/application/wellness-service";
 import { createDefaultGoals } from "@/features/wellness/domain/default-goals";
-import { drizzleWellnessRepository } from "@/features/wellness/infra/wellness-repository";
+import { createDrizzleWellnessRepository } from "@/features/wellness/infra/wellness-repository";
 
-const wellnessService = createWellnessService(drizzleWellnessRepository);
+const wellnessService = createWellnessService(createDrizzleWellnessRepository(db));
 const DEFAULT_GOALS = createDefaultGoals();
 
 function isMetricKey(value: string): value is MetricKey {

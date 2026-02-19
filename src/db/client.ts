@@ -38,3 +38,5 @@ export function runMigrations() {
 export function onDbChange(listener: () => void) {
   return addDatabaseChangeListener(() => listener());
 }
+
+export type AppDatabase = typeof db;
