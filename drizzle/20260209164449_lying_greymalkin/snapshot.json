@@ -2,9 +2,7 @@
   "version": "7",
   "dialect": "sqlite",
   "id": "66ec551d-21f2-42aa-8349-6292f19d648f",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "name": "daily_entries",
@@ -105,18 +103,14 @@
       "table": "goals"
     },
     {
-      "columns": [
-        "date"
-      ],
+      "columns": ["date"],
       "nameExplicit": false,
       "name": "daily_entries_pk",
       "table": "daily_entries",
       "entityType": "pks"
     },
     {
-      "columns": [
-        "metric"
-      ],
+      "columns": ["metric"],
       "nameExplicit": false,
       "name": "goals_pk",
       "table": "goals",

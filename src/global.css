@@ -1,9 +1,29 @@
 @import "tailwindcss" source(none);
 @source "./";
 
-/* ── Apple System Colors ─────────────────────────────────────── */
+/* ── Metric colors + elevations in @theme ────────────────── */
+/* Usage: bg-water, bg-water/10, text-mood/50, elevation-md   */
+@theme {
+  --elevation-xs: 1;
+  --elevation-sm: 3;
+  --elevation-md: 6;
+  --elevation-lg: 8;
+  --elevation-xl: 13;
+  --elevation-2xl: 24;
+  --elevation-none: 0;
 
-/* Light mode defaults */
+  --color-water: #38bdf8;
+  --color-mood: #f472b6;
+  --color-sleep: #a78bfa;
+  --color-exercise: #34d399;
+}
+
+/* ── Apple System Colors (platformColor on iOS) ──────────── */
+/* These are CSS custom properties, NOT in @theme, because     */
+/* platformColor() is an opaque native reference that can't    */
+/* participate in color-mix / opacity modifiers.               */
+
+/* Light mode defaults (web + Android fallback) */
 :root {
   /* Text */
   --sf-text: #000;
@@ -31,11 +51,8 @@
   --sf-purple: #af52de;
   --sf-teal: #5ac8fa;
 
-  /* Metric colors (same in light/dark) */
-  --sf-water: #38bdf8;
-  --sf-mood: #f472b6;
-  --sf-sleep: #a78bfa;
-  --sf-exercise: #34d399;
+  /* iOS tertiary gray (non-platform fallback) */
+  --sf-gray: #8e8e93;
 }
 
 /* Dark mode overrides */
@@ -59,10 +76,11 @@
     --sf-pink: #ff375f;
     --sf-purple: #bf5af2;
     --sf-teal: #64d2ff;
+    --sf-gray: #8e8e93;
   }
 }
 
-/* iOS: override with native dynamic colors (auto light/dark) */
+/* iOS: native dynamic colors (auto light/dark) */
 @media ios {
   :root {
     --sf-text: platformColor(label);
@@ -83,29 +101,12 @@
     --sf-pink: platformColor(systemPink);
     --sf-purple: platformColor(systemPurple);
     --sf-teal: platformColor(systemTeal);
+    --sf-gray: platformColor(systemGray);
   }
 }
 
-/* ── Platform Fonts ──────────────────────────────────────────── */
-
-@media ios {
-  :root {
-    --font-sans: system-ui;
-    --font-mono: ui-monospace;
-    --font-rounded: ui-rounded;
-  }
-}
-
-@media android {
-  :root {
-    --font-sans: normal;
-    --font-mono: monospace;
-  }
-}
-
-/* ── Utility Classes (use var() directly — no @theme chain) ── */
-
-/* Text colors */
+/* ── System color utilities (platformColor-safe, no opacity) ─ */
+/* Text */
 @utility text-sf-text {
   color: var(--sf-text);
 }
@@ -136,8 +137,11 @@
 @utility text-sf-teal {
   color: var(--sf-teal);
 }
+@utility text-sf-gray {
+  color: var(--sf-gray);
+}
 
-/* Background colors */
+/* Backgrounds */
 @utility bg-sf-bg {
   background-color: var(--sf-bg);
 }
@@ -163,28 +167,7 @@
   background-color: var(--sf-separator);
 }
 
-/* Metric colors */
-@utility text-water {
-  color: var(--sf-water);
-}
-@utility text-mood {
-  color: var(--sf-mood);
-}
-@utility text-sleep {
-  color: var(--sf-sleep);
-}
-@utility text-exercise {
-  color: var(--sf-exercise);
-}
-@utility bg-water {
-  background-color: var(--sf-water);
-}
-@utility bg-mood {
-  background-color: var(--sf-mood);
-}
-@utility bg-sleep {
-  background-color: var(--sf-sleep);
-}
-@utility bg-exercise {
-  background-color: var(--sf-exercise);
-}
+/* ── Metric background opacity (static hex, color-mix safe) ─ */
+/* These use the @theme --color-* values via Tailwind's native */
+/* opacity modifier syntax: bg-water/10, bg-mood/15, etc.      */
+/* No manual @utility needed — handled by @theme + Tailwind.   */

@@ -1,6 +1,7 @@
-import { addDatabaseChangeListener, openDatabaseSync } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
+import { addDatabaseChangeListener, openDatabaseSync } from "expo-sqlite";
+
 import migrations from "@/db/migrations";
 import * as schema from "@/db/schema";
 
@@ -21,7 +22,12 @@ let migrationPromise: Promise<void> | null = null;
 
 export function runMigrations() {
   if (!migrationPromise) {
-    migrationPromise = Promise.resolve(migrate(db, migrations as any)).then(() => undefined);
+    migrationPromise = Promise.resolve(migrate(db, migrations))
+      .then(() => undefined)
+      .catch((error) => {
+        migrationPromise = null;
+        throw error;
+      });
   }
 
   return migrationPromise;

@@ -1,22 +1,15 @@
-import { ScrollView, View, Text, Pressable } from "react-native";
-import { SymbolView } from "expo-symbols";
 import * as Haptics from "expo-haptics";
+import { SymbolView } from "expo-symbols";
+import { ScrollView, View, Text, Pressable } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+
+import { METRIC_KEYS, METRIC_CONFIG, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
 import {
-  METRIC_KEYS,
-  METRIC_CONFIG,
-  MOOD_EMOJIS,
-  formatDate,
-} from "@/constants/metrics";
-import { BG, TEXT } from "@/constants/colors";
-import {
-  useWellnessStore,
   getEntry,
   getProgress,
   getStreak,
   getCompletionRate,
-  incrementMetric,
-} from "@/store/wellness-store";
+} from "@/features/wellness/domain/analytics";
 import {
   card,
   caption,
@@ -24,14 +17,17 @@ import {
   label,
   statLabel,
   statValue,
+  numericDisplay,
   sectionHeader,
   sectionTitle,
   sectionSubtitle,
   scrollContent,
   iconBadge,
   row,
-  BORDER_CURVE,
+  METRIC_CLASSES,
+  type MetricColorKey,
 } from "@/lib/styles";
+import { useWellnessStore, incrementMetric } from "@/store/wellness-store";
 
 export default function DashboardScreen() {
   const { entries, goals } = useWellnessStore();
@@ -44,22 +40,16 @@ export default function DashboardScreen() {
     day: "numeric",
   });
 
-  const progresses = METRIC_KEYS.map((k) =>
-    getProgress(entries, goals, todayStr, k)
-  );
-  const overall = Math.round(
-    (progresses.reduce((a, b) => a + b, 0) / progresses.length) * 100
-  );
+  const progresses = METRIC_KEYS.map((k) => getProgress(entries, goals, todayStr, k));
+  const overall = Math.round((progresses.reduce((a, b) => a + b, 0) / progresses.length) * 100);
   const completed = progresses.filter((p) => p >= 1).length;
   const weeklyRate = Math.round(getCompletionRate(entries, goals, 7) * 100);
-  const bestStreak = Math.max(
-    ...METRIC_KEYS.map((k) => getStreak(entries, goals, k))
-  );
+  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, k)));
   const greeting = getGreeting();
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: BG }}
+      className="flex-1 bg-sf-bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName={scrollContent()}
     >
@@ -70,29 +60,14 @@ export default function DashboardScreen() {
 
       {/* Summary Card */}
       <Animated.View entering={FadeInDown.duration(400).delay(50)}>
-        <View className={card({ size: "md" })} style={BORDER_CURVE}>
+        <View className={card({ size: "md" })}>
           <View className={row({ gap: "lg" })}>
             <View
-              style={{
-                width: 76,
-                height: 76,
-                borderRadius: 38,
-                borderWidth: 5,
-                borderColor: overall >= 100 ? "#34d399" : "#0a84ff",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              className={`size-[76px] rounded-full border-[5px] items-center justify-center ${
+                overall >= 100 ? "border-emerald-400" : "border-[#0a84ff]"
+              }`}
             >
-              <Text
-                style={{
-                  fontSize: 17,
-                  fontWeight: "800",
-                  fontVariant: ["tabular-nums"],
-                  color: TEXT,
-                }}
-              >
-                {overall}%
-              </Text>
+              <Text className={numericDisplay({ size: "md" })}>{overall}%</Text>
             </View>
             <View className="flex-1 gap-0.5">
               <Text className={heading()}>{greeting}</Text>
@@ -102,14 +77,7 @@ export default function DashboardScreen() {
               <View className={row({ gap: "lg", className: "mt-2" })}>
                 <View>
                   <Text className={statLabel()}>Weekly</Text>
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      fontWeight: "600",
-                      fontVariant: ["tabular-nums"],
-                      color: TEXT,
-                    }}
-                  >
+                  <Text className={numericDisplay({ size: "xs", className: "font-semibold" })}>
                     {weeklyRate}%
                   </Text>
                 </View>
@@ -127,7 +95,7 @@ export default function DashboardScreen() {
 
       {/* Streak Row */}
       <Animated.View entering={FadeInDown.duration(400).delay(100)}>
-        <View className={card({ size: "sm" })} style={BORDER_CURVE}>
+        <View className={card({ size: "sm" })}>
           <View className={row({ justify: "around", className: "py-3.5" })}>
             {METRIC_KEYS.map((key) => {
               const config = METRIC_CONFIG[key];
@@ -140,19 +108,12 @@ export default function DashboardScreen() {
                     style={{ width: 16, height: 16 }}
                   />
                   <Text
-                    style={{
-                      fontSize: 13,
-                      fontWeight: "700",
-                      fontVariant: ["tabular-nums"],
-                      color: TEXT,
-                    }}
+                    className={numericDisplay({ size: "xs", className: "font-bold" })}
                     selectable
                   >
                     {streak}
                   </Text>
-                  <Text className={statLabel({ className: "text-[10px]" })}>
-                    streak
-                  </Text>
+                  <Text className={statLabel({ className: "text-[10px]" })}>streak</Text>
                 </View>
               );
             })}
@@ -169,50 +130,31 @@ export default function DashboardScreen() {
       {/* Metric Cards */}
       {METRIC_KEYS.map((key, i) => {
         const config = METRIC_CONFIG[key];
+        const mc = METRIC_CLASSES[key as MetricColorKey];
         const entry = getEntry(entries, todayStr);
         const value = entry[key];
         const goal = goals[key];
         const pct = Math.min(goal > 0 ? value / goal : 0, 1);
-        const display =
-          key === "mood" && value > 0 ? MOOD_EMOJIS[value] : `${value}`;
+        const display = key === "mood" && value > 0 ? MOOD_EMOJIS[value] : `${value}`;
         const unit = key === "mood" ? "" : `/${goal} ${config.unit}`;
 
         return (
-          <Animated.View
-            key={key}
-            entering={FadeInDown.duration(400).delay(150 + i * 50)}
-          >
-            <View className={card({ size: "md", className: "p-4" })} style={BORDER_CURVE}>
+          <Animated.View key={key} entering={FadeInDown.duration(400).delay(150 + i * 50)}>
+            <View className={card({ size: "md", className: "p-4" })}>
               <View className={row({ gap: "lg", className: "gap-3.5" })}>
                 <View className="items-center">
-                  <View
-                    className={iconBadge({ size: "md" })}
-                    style={{
-                      ...BORDER_CURVE,
-                      backgroundColor: config.color + "18",
-                    }}
-                  >
+                  <View className={iconBadge({ size: "md", className: mc.bg10 })}>
                     <SymbolView
                       name={config.icon}
                       tintColor={config.color}
                       style={{ width: 22, height: 22 }}
                     />
                   </View>
-                  <View
-                    style={{
-                      width: 40,
-                      height: 4,
-                      borderRadius: 2,
-                      backgroundColor: config.color + "25",
-                      marginTop: 6,
-                    }}
-                  >
+                  <View className={`w-10 h-1 rounded-full mt-1.5 ${mc.bg15}`}>
                     <View
+                      className={`h-1 rounded-full ${mc.bg}`}
                       style={{
                         width: `${Math.round(pct * 100)}%` as unknown as number,
-                        height: 4,
-                        borderRadius: 2,
-                        backgroundColor: config.color,
                       }}
                     />
                   </View>
@@ -220,15 +162,7 @@ export default function DashboardScreen() {
                 <View className="flex-1">
                   <Text className={label()}>{config.label}</Text>
                   <View className={row({ gap: "sm", className: "items-baseline" })}>
-                    <Text
-                      style={{
-                        fontSize: 21,
-                        fontWeight: "800",
-                        fontVariant: ["tabular-nums"],
-                        color: TEXT,
-                      }}
-                      selectable
-                    >
+                    <Text className={numericDisplay({ size: "lg" })} selectable>
                       {display}
                     </Text>
                     <Text className={statLabel()}>{unit}</Text>
@@ -243,21 +177,9 @@ export default function DashboardScreen() {
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={`Quick add ${config.label}`}
-                  className="w-10 h-10 rounded-xl items-center justify-center"
-                  style={{
-                    ...BORDER_CURVE,
-                    backgroundColor: config.color + "18",
-                  }}
+                  className={`w-10 h-10 rounded-xl items-center justify-center corner-squircle ${mc.bg10}`}
                 >
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      fontWeight: "700",
-                      color: config.color,
-                    }}
-                  >
-                    +
-                  </Text>
+                  <Text className={`text-[20px] font-bold ${mc.text}`}>+</Text>
                 </Pressable>
               </View>
             </View>

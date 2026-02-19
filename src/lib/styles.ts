@@ -2,7 +2,7 @@ import { tv } from "tailwind-variants";
 
 // ── Card ────────────────────────────────────────────────────
 export const card = tv({
-  base: "bg-sf-card rounded-[20px] overflow-hidden",
+  base: "bg-sf-card rounded-[20px] overflow-hidden corner-squircle",
   variants: {
     size: {
       md: "rounded-[20px] p-5",
@@ -56,13 +56,29 @@ export const statLabel = tv({
 });
 
 export const statValue = tv({
-  base: "text-[13px] font-semibold text-sf-text",
+  base: "text-[13px] font-semibold text-sf-text tabular-nums",
+});
+
+// ── Numeric display (large counters, percentages) ───────────
+export const numericDisplay = tv({
+  base: "font-extrabold text-sf-text tabular-nums",
+  variants: {
+    size: {
+      xl: "text-[31.5px]",
+      lg: "text-[21px]",
+      md: "text-[17px]",
+      sm: "text-[15px]",
+      xs: "text-[13px]",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
 });
 
 // ── Icon badge ──────────────────────────────────────────────
-// Dynamic color background requires inline style
 export const iconBadge = tv({
-  base: "items-center justify-center",
+  base: "items-center justify-center corner-squircle",
   variants: {
     size: {
       md: "w-12 h-12 rounded-[14px]",
@@ -96,7 +112,7 @@ export const row = tv({
 
 // ── Stepper button ──────────────────────────────────────────
 export const stepperButton = tv({
-  base: "items-center justify-center",
+  base: "items-center justify-center corner-squircle",
   variants: {
     size: {
       md: "w-12 h-12 rounded-[14px]",
@@ -108,5 +124,45 @@ export const stepperButton = tv({
   },
 });
 
-// ── Native style constants (borderCurve not in TW) ─────────
-export const BORDER_CURVE = { borderCurve: "continuous" as const };
+// ── Metric color map (className tokens keyed by metric) ─────
+// Maps metric keys to their Tailwind @theme color classes
+export const METRIC_CLASSES = {
+  water: {
+    text: "text-water",
+    bg: "bg-water",
+    border: "border-water",
+    bg10: "bg-water/10",
+    bg15: "bg-water/15",
+    bg25: "bg-water/25",
+    bg40: "bg-water/40",
+  },
+  mood: {
+    text: "text-mood",
+    bg: "bg-mood",
+    border: "border-mood",
+    bg10: "bg-mood/10",
+    bg15: "bg-mood/15",
+    bg25: "bg-mood/25",
+    bg40: "bg-mood/40",
+  },
+  sleep: {
+    text: "text-sleep",
+    bg: "bg-sleep",
+    border: "border-sleep",
+    bg10: "bg-sleep/10",
+    bg15: "bg-sleep/15",
+    bg25: "bg-sleep/25",
+    bg40: "bg-sleep/40",
+  },
+  exercise: {
+    text: "text-exercise",
+    bg: "bg-exercise",
+    border: "border-exercise",
+    bg10: "bg-exercise/10",
+    bg15: "bg-exercise/15",
+    bg25: "bg-exercise/25",
+    bg40: "bg-exercise/40",
+  },
+} as const;
+
+export type MetricColorKey = keyof typeof METRIC_CLASSES;

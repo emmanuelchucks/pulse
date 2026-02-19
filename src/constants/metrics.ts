@@ -1,3 +1,5 @@
+import { addDays, format, isSameDay, startOfWeek } from "date-fns";
+
 export const METRIC_CONFIG = {
   water: {
     key: "water" as const,
@@ -52,28 +54,18 @@ export const MOOD_LABELS = ["", "Awful", "Bad", "Okay", "Good", "Great"] as cons
 export const MOOD_EMOJIS = ["", "😞", "😔", "😐", "😊", "😄"] as const;
 
 export function formatDate(date: Date): string {
-  return date.toISOString().split("T")[0];
+  return format(date, "yyyy-MM-dd");
 }
 
 export function getWeekDates(referenceDate: Date): Date[] {
-  const dates: Date[] = [];
-  const day = referenceDate.getDay();
-  const monday = new Date(referenceDate);
-  monday.setDate(referenceDate.getDate() - ((day + 6) % 7));
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    dates.push(d);
-  }
-  return dates;
+  const monday = startOfWeek(referenceDate, { weekStartsOn: 1 });
+  return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
 }
 
 export function getDayLabel(date: Date): string {
-  return date.toLocaleDateString("en-US", { weekday: "short" });
+  return format(date, "EEE");
 }
 
 export function isToday(date: Date): boolean {
-  const today = new Date();
-  return formatDate(date) === formatDate(today);
+  return isSameDay(date, new Date());
 }

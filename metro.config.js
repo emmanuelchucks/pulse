@@ -2,9 +2,14 @@ const { getDefaultConfig } = require("expo/metro-config");
 const { withNativewind } = require("nativewind/metro");
 
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname);
+let config = getDefaultConfig(__dirname);
 
-module.exports = withNativewind(config, {
-  // inline variables break PlatformColor in CSS variables
+config = withNativewind(config, {
   inlineVariables: false,
 });
+
+if (!config.resolver.sourceExts.includes("sql")) {
+  config.resolver.sourceExts.push("sql");
+}
+
+module.exports = config;

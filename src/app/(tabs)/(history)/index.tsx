@@ -1,9 +1,13 @@
-import { ScrollView, View, Text, Pressable } from "react-native";
 import { SymbolView } from "expo-symbols";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { useReducer } from "react";
+import { ScrollView, View, Text, Pressable } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+
+import type { MetricKey } from "@/constants/metrics";
+import type { DailyEntry, Goals } from "@/db/types";
+import type { MetricColorKey } from "@/lib/styles";
+
 import {
-  MetricKey,
   METRIC_KEYS,
   METRIC_CONFIG,
   getWeekDates,
@@ -12,14 +16,11 @@ import {
   isToday,
 } from "@/constants/metrics";
 import {
-  useWellnessStore,
-  DailyEntry,
-  Goals,
   getEntry,
   getWeeklyAverage,
   getCompletionRate,
   getStreak,
-} from "@/store/wellness-store";
+} from "@/features/wellness/domain/analytics";
 import {
   card,
   caption,
@@ -31,8 +32,8 @@ import {
   scrollContent,
   row,
   METRIC_CLASSES,
-  MetricColorKey,
 } from "@/lib/styles";
+import { useWellnessStore } from "@/store/wellness-store";
 
 type WeekAction = { type: "prev" } | { type: "next" };
 
@@ -47,16 +48,11 @@ export default function HistoryScreen() {
   const { entries, goals } = useWellnessStore();
   const [referenceDate, dispatch] = useReducer(weekReducer, new Date());
 
-  const completionRate = Math.round(
-    getCompletionRate(entries, goals, 7) * 100
-  );
-  const bestStreak = Math.max(
-    ...METRIC_KEYS.map((k) => getStreak(entries, goals, k))
-  );
+  const completionRate = Math.round(getCompletionRate(entries, goals, 7) * 100);
+  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, k)));
   const weekDates = getWeekDates(referenceDate);
   const canGoNext = weekDates[6] < new Date();
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   return (
     <ScrollView
@@ -69,37 +65,30 @@ export default function HistoryScreen() {
       </Animated.View>
 
       {/* Stats row */}
-      <Animated.View
-        entering={FadeInDown.duration(400).delay(50)}
-        className="flex-row gap-3"
-      >
-        <View className={card({ size: "sm", className: "flex-1 p-3" })}>
-          <View className={row({ gap: "sm" })}>
-            <SymbolView
-              name="checkmark.circle.fill"
-              tintColor="#0a84ff"
-              style={{ width: 16, height: 16 }}
-            />
-            <View>
-              <Text className={statLabel()}>Completion</Text>
-              <Text className={numericDisplay({ size: "sm" })}>
-                {completionRate}%
-              </Text>
+      <Animated.View entering={FadeInDown.duration(400).delay(50)}>
+        <View className="flex-row gap-3">
+          <View className={card({ size: "sm", className: "flex-1 p-3" })}>
+            <View className={row({ gap: "sm" })}>
+              <SymbolView
+                name="checkmark.circle.fill"
+                tintColor="#0a84ff"
+                style={{ width: 16, height: 16 }}
+              />
+              <View>
+                <Text className={statLabel()}>Completion</Text>
+                <Text className={numericDisplay({ size: "sm" })}>{completionRate}%</Text>
+              </View>
             </View>
           </View>
-        </View>
-        <View className={card({ size: "sm", className: "flex-1 p-3" })}>
-          <View className={row({ gap: "sm" })}>
-            <SymbolView
-              name="flame.fill"
-              tintColor="#ff9f0a"
-              style={{ width: 16, height: 16 }}
-            />
-            <View>
-              <Text className={statLabel()}>Best Streak</Text>
-              <Text className={numericDisplay({ size: "sm" })}>
-                {bestStreak} {bestStreak === 1 ? "day" : "days"}
-              </Text>
+          <View className={card({ size: "sm", className: "flex-1 p-3" })}>
+            <View className={row({ gap: "sm" })}>
+              <SymbolView name="flame.fill" tintColor="#ff9f0a" style={{ width: 16, height: 16 }} />
+              <View>
+                <Text className={statLabel()}>Best Streak</Text>
+                <Text className={numericDisplay({ size: "sm" })}>
+                  {bestStreak} {bestStreak === 1 ? "day" : "days"}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -113,11 +102,7 @@ export default function HistoryScreen() {
             accessibilityLabel="Previous week"
             className="w-9 h-9 rounded-[10px] items-center justify-center corner-squircle"
           >
-            <SymbolView
-              name="chevron.left"
-              tintColor="#8e8e93"
-              style={{ width: 14, height: 14 }}
-            />
+            <SymbolView name="chevron.left" tintColor="#8e8e93" style={{ width: 14, height: 14 }} />
           </Pressable>
           <Text className={caption({ className: "font-medium" })}>
             {fmt(weekDates[0])} – {fmt(weekDates[6])}
@@ -139,16 +124,8 @@ export default function HistoryScreen() {
 
       {/* Charts */}
       {METRIC_KEYS.map((key, i) => (
-        <Animated.View
-          key={key}
-          entering={FadeInDown.duration(400).delay(150 + i * 50)}
-        >
-          <WeekChart
-            metric={key}
-            weekDates={weekDates}
-            entries={entries}
-            goals={goals}
-          />
+        <Animated.View key={key} entering={FadeInDown.duration(400).delay(150 + i * 50)}>
+          <WeekChart metric={key} weekDates={weekDates} entries={entries} goals={goals} />
         </Animated.View>
       ))}
 
@@ -164,7 +141,7 @@ export default function HistoryScreen() {
             <Animated.View
               key={key}
               entering={FadeInDown.duration(400).delay(350 + i * 50)}
-              style={{ width: "47%" } as any}
+              className="w-[47%]"
             >
               <View className={card({ size: "sm", className: "p-3" })}>
                 <View className={row({ gap: "sm" })}>
@@ -210,19 +187,12 @@ function WeekChart({
     <View className={card({ padded: true })}>
       {/* Title */}
       <View className={row({ gap: "sm" })}>
-        <SymbolView
-          name={config.icon}
-          tintColor={config.color}
-          style={{ width: 15, height: 15 }}
-        />
+        <SymbolView name={config.icon} tintColor={config.color} style={{ width: 15, height: 15 }} />
         <Text className={statValue()}>{config.label}</Text>
       </View>
 
       {/* Bars */}
-      <View
-        className={row({ justify: "around", className: "items-end mt-3" })}
-        style={{ height: 90 }}
-      >
+      <View className={row({ justify: "around", className: "items-end mt-3 h-[90px]" })}>
         {weekDates.map((date, idx) => {
           const val = values[idx];
           const h = maxVal > 0 ? (val / maxVal) * 70 : 0;
@@ -232,18 +202,11 @@ function WeekChart({
           return (
             <View key={idx} className="items-center gap-1 flex-1">
               <Text className="text-[8px] tabular-nums text-sf-text-3">
-                {val > 0
-                  ? metric === "sleep"
-                    ? val.toFixed(1)
-                    : String(val)
-                  : ""}
+                {val > 0 ? (metric === "sleep" ? val.toFixed(1) : String(val)) : ""}
               </Text>
               <View
-                className={`rounded-md corner-squircle ${met ? colors.bg : colors.bg40}`}
-                style={{
-                  width: 22,
-                  height: Math.max(h, 3),
-                }}
+                className={`w-[22px] rounded-md corner-squircle ${met ? colors.bg : colors.bg40}`}
+                style={{ height: Math.max(h, 3) }}
               />
               <Text
                 className={`text-[10px] ${current ? `font-bold ${colors.text}` : "font-normal text-sf-gray"}`}
@@ -263,10 +226,7 @@ function WeekChart({
         <Text className="text-[10px] tabular-nums text-sf-text-3">
           Avg:{" "}
           {values.filter((v) => v > 0).length > 0
-            ? (
-                values.reduce((a, b) => a + b, 0) /
-                values.filter((v) => v > 0).length
-              ).toFixed(1)
+            ? (values.reduce((a, b) => a + b, 0) / values.filter((v) => v > 0).length).toFixed(1)
             : "–"}{" "}
           {config.unit}
         </Text>

@@ -1,301 +1,75 @@
-import { useMemo, useSyncExternalStore } from "react";
-import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { METRIC_CONFIG, METRIC_KEYS, MetricKey, formatDate } from "@/constants/metrics";
-import { db, sqlite } from "@/db/client";
+import { useMemo } from "react";
+
+import type { MetricKey } from "@/constants/metrics";
+import type { DailyEntry, Goals } from "@/db/types";
+
+import { METRIC_KEYS } from "@/constants/metrics";
+import { db } from "@/db/client";
 import { dailyEntries, goals as goalsTable } from "@/db/schema";
-import { parseMetricValue, parseMetricWrite } from "@/db/validation";
+import { createWellnessService } from "@/features/wellness/application/wellness-service";
+import { createDefaultGoals } from "@/features/wellness/domain/default-goals";
+import { drizzleWellnessRepository } from "@/features/wellness/infra/wellness-repository";
 
-export type DailyEntry = {
-  date: string;
-  water: number;
-  mood: number;
-  sleep: number;
-  exercise: number;
-};
-
-export type Goals = Record<MetricKey, number>;
-
-const DEFAULT_GOALS: Goals = {
-  water: 8,
-  mood: 5,
-  sleep: 8,
-  exercise: 30,
-};
-
-const METRIC_COLUMN = {
-  water: dailyEntries.water,
-  mood: dailyEntries.mood,
-  sleep: dailyEntries.sleep,
-  exercise: dailyEntries.exercise,
-} as const;
-
-let initialized = false;
-let revision = 0;
-let revisionListeners: (() => void)[] = [];
-
-function bumpRevision() {
-  revision += 1;
-  revisionListeners.forEach((listener) => listener());
-}
-
-function subscribeRevision(listener: () => void) {
-  revisionListeners = [...revisionListeners, listener];
-  return () => {
-    revisionListeners = revisionListeners.filter((l) => l !== listener);
-  };
-}
-
-function getRevisionSnapshot() {
-  return revision;
-}
+const wellnessService = createWellnessService(drizzleWellnessRepository);
+const DEFAULT_GOALS = createDefaultGoals();
 
 export function initializeWellnessData() {
-  if (initialized) return;
-
-  for (const metric of METRIC_KEYS) {
-    db.insert(goalsTable)
-      .values({
-        metric,
-        value: DEFAULT_GOALS[metric],
-        updatedAt: Date.now(),
-      })
-      .onConflictDoNothing({ target: goalsTable.metric })
-      .run();
-  }
-
-  initialized = true;
+  wellnessService.initializeWellnessData();
 }
 
-function createEmptyEntry(dateStr: string): DailyEntry {
-  return { date: dateStr, water: 0, mood: 0, sleep: 0, exercise: 0 };
+export function updateMetric(date: string, metric: MetricKey, value: number) {
+  wellnessService.updateMetric(date, metric, value);
 }
 
-function ensureEntry(dateStr: string) {
-  db.insert(dailyEntries)
-    .values({
-      date: dateStr,
-      water: 0,
-      mood: 0,
-      sleep: 0,
-      exercise: 0,
-      updatedAt: Date.now(),
-    })
-    .onConflictDoNothing({ target: dailyEntries.date })
-    .run();
+export function incrementMetric(date: string, metric: MetricKey) {
+  wellnessService.incrementMetric(date, metric);
 }
 
-export function updateMetric(dateStr: string, metric: MetricKey, value: number) {
-  const parsed = parseMetricWrite(dateStr, metric, value);
-  const updatedAt = Date.now();
-
-  ensureEntry(parsed.date);
-
-  db.update(dailyEntries)
-    .set(
-      metric === "water"
-        ? { water: parsed.value, updatedAt }
-        : metric === "mood"
-          ? { mood: parsed.value, updatedAt }
-          : metric === "sleep"
-            ? { sleep: parsed.value, updatedAt }
-            : { exercise: parsed.value, updatedAt }
-    )
-    .where(eq(dailyEntries.date, parsed.date))
-    .run();
-
-  bumpRevision();
-}
-
-function getMetricValue(dateStr: string, metric: MetricKey): number {
-  const row = db
-    .select({ value: METRIC_COLUMN[metric] })
-    .from(dailyEntries)
-    .where(eq(dailyEntries.date, dateStr))
-    .get();
-
-  return row?.value ?? 0;
-}
-
-export function incrementMetric(dateStr: string, metric: MetricKey) {
-  const current = getMetricValue(dateStr, metric);
-  const nextValue = parseMetricValue(metric, current + METRIC_CONFIG[metric].step);
-  updateMetric(dateStr, metric, nextValue);
-}
-
-export function decrementMetric(dateStr: string, metric: MetricKey) {
-  const current = getMetricValue(dateStr, metric);
-  const nextValue = parseMetricValue(metric, current - METRIC_CONFIG[metric].step);
-  updateMetric(dateStr, metric, nextValue);
+export function decrementMetric(date: string, metric: MetricKey) {
+  wellnessService.decrementMetric(date, metric);
 }
 
 export function updateGoal(metric: MetricKey, value: number) {
-  db.insert(goalsTable)
-    .values({
-      metric,
-      value: parseMetricValue(metric, value),
-      updatedAt: Date.now(),
-    })
-    .onConflictDoUpdate({
-      target: goalsTable.metric,
-      set: {
-        value: parseMetricValue(metric, value),
-        updatedAt: Date.now(),
-      },
-    })
-    .run();
-
-  bumpRevision();
+  wellnessService.updateGoal(metric, value);
 }
 
-export function resetDay(dateStr: string) {
-  db.insert(dailyEntries)
-    .values({
-      date: dateStr,
-      water: 0,
-      mood: 0,
-      sleep: 0,
-      exercise: 0,
-      updatedAt: Date.now(),
-    })
-    .onConflictDoUpdate({
-      target: dailyEntries.date,
-      set: {
-        water: 0,
-        mood: 0,
-        sleep: 0,
-        exercise: 0,
-        updatedAt: Date.now(),
-      },
-    })
-    .run();
-
-  bumpRevision();
+export function resetDay(date: string) {
+  wellnessService.resetDay(date);
 }
 
 export function clearAllData() {
-  sqlite.execSync("DELETE FROM daily_entries; DELETE FROM goals;");
-  initialized = false;
-  initializeWellnessData();
-  bumpRevision();
-}
-
-export function getEntry(
-  entries: Record<string, DailyEntry>,
-  dateStr: string
-): DailyEntry {
-  return entries[dateStr] ?? createEmptyEntry(dateStr);
-}
-
-export function getProgress(
-  entries: Record<string, DailyEntry>,
-  goals: Goals,
-  dateStr: string,
-  metric: MetricKey
-): number {
-  const entry = getEntry(entries, dateStr);
-  const goal = goals[metric];
-  if (goal === 0) return 0;
-  return Math.min(entry[metric] / goal, 1);
-}
-
-export function getStreak(
-  entries: Record<string, DailyEntry>,
-  goals: Goals,
-  metric: MetricKey
-): number {
-  const today = new Date();
-  let streak = 0;
-  const d = new Date(today);
-
-  while (true) {
-    const dateStr = formatDate(d);
-    const entry = entries[dateStr];
-    if (!entry || entry[metric] === 0) break;
-    if (entry[metric] / goals[metric] < 1) break;
-    streak++;
-    d.setDate(d.getDate() - 1);
-  }
-
-  return streak;
-}
-
-export function getWeeklyAverage(
-  entries: Record<string, DailyEntry>,
-  metric: MetricKey,
-  referenceDate: Date
-): number {
-  let total = 0;
-  let count = 0;
-  const d = new Date(referenceDate);
-  for (let i = 0; i < 7; i++) {
-    const dateStr = formatDate(d);
-    const entry = entries[dateStr];
-    if (entry && entry[metric] > 0) {
-      total += entry[metric];
-      count++;
-    }
-    d.setDate(d.getDate() - 1);
-  }
-  return count > 0 ? total / count : 0;
-}
-
-export function getCompletionRate(
-  entries: Record<string, DailyEntry>,
-  goals: Goals,
-  days: number = 7
-): number {
-  const today = new Date();
-  let completedMetrics = 0;
-  const totalMetrics = days * METRIC_KEYS.length;
-
-  for (let i = 0; i < days; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const dateStr = formatDate(d);
-    const entry = entries[dateStr];
-    if (entry) {
-      for (const key of METRIC_KEYS) {
-        if (entry[key] > 0 && entry[key] >= goals[key]) {
-          completedMetrics++;
-        }
-      }
-    }
-  }
-
-  return totalMetrics > 0 ? completedMetrics / totalMetrics : 0;
+  wellnessService.clearAllData();
 }
 
 export function useWellnessStore() {
-  const currentRevision = useSyncExternalStore(
-    subscribeRevision,
-    getRevisionSnapshot
-  );
-
-  const entriesQuery = useLiveQuery(db.select().from(dailyEntries), [currentRevision]);
-  const goalsQuery = useLiveQuery(db.select().from(goalsTable), [currentRevision]);
+  const entriesQuery = useLiveQuery(db.select().from(dailyEntries));
+  const goalsQuery = useLiveQuery(db.select().from(goalsTable));
 
   const entries = useMemo(() => {
     const rows = entriesQuery.data ?? [];
-    return rows.reduce<Record<string, DailyEntry>>((acc, row) => {
-      acc[row.date] = {
+    return rows.reduce<Record<string, DailyEntry>>((accumulator, row) => {
+      accumulator[row.date] = {
         date: row.date,
         water: row.water,
         mood: row.mood,
         sleep: row.sleep,
         exercise: row.exercise,
       };
-      return acc;
+      return accumulator;
     }, {});
   }, [entriesQuery.data]);
 
   const goals = useMemo(() => {
     const base: Goals = { ...DEFAULT_GOALS };
     const rows = goalsQuery.data ?? [];
+
     for (const row of rows) {
       const metric = row.metric as MetricKey;
-      if (metric in base) base[metric] = row.value;
+      if (!METRIC_KEYS.includes(metric)) continue;
+      base[metric] = row.value;
     }
+
     return base;
   }, [goalsQuery.data]);
 

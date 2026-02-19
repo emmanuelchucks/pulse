@@ -1,26 +1,21 @@
-import { ScrollView, View, Text, Pressable, Alert } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import * as Haptics from "expo-haptics";
+import { ScrollView, View, Text, Pressable, Alert } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+
+import type { MetricKey } from "@/constants/metrics";
+import type { DailyEntry, Goals } from "@/db/types";
+import type { MetricColorKey } from "@/lib/styles";
+
 import {
-  MetricKey,
   METRIC_KEYS,
   METRIC_CONFIG,
   MOOD_EMOJIS,
   MOOD_LABELS,
   formatDate,
 } from "@/constants/metrics";
-import {
-  useWellnessStore,
-  DailyEntry,
-  Goals,
-  getEntry,
-  incrementMetric,
-  decrementMetric,
-  updateMetric,
-  resetDay,
-} from "@/store/wellness-store";
+import { getEntry } from "@/features/wellness/domain/analytics";
 import {
   card,
   caption,
@@ -32,8 +27,14 @@ import {
   scrollContent,
   numericDisplay,
   METRIC_CLASSES,
-  MetricColorKey,
 } from "@/lib/styles";
+import {
+  useWellnessStore,
+  incrementMetric,
+  decrementMetric,
+  updateMetric,
+  resetDay,
+} from "@/store/wellness-store";
 
 function haptic(style = Haptics.ImpactFeedbackStyle.Medium) {
   if (process.env.EXPO_OS === "ios") Haptics.impactAsync(style);
@@ -64,9 +65,7 @@ export default function TrackScreen() {
         options={{
           headerRight: () => (
             <Pressable onPress={handleReset} accessibilityLabel="Reset Day">
-              <Text className="text-[13px] font-semibold text-sf-red">
-                Reset
-              </Text>
+              <Text className="text-[13px] font-semibold text-sf-red">Reset</Text>
             </Pressable>
           ),
         }}
@@ -81,22 +80,11 @@ export default function TrackScreen() {
         </Animated.View>
 
         {METRIC_KEYS.map((key, i) => (
-          <Animated.View
-            key={key}
-            entering={FadeInDown.duration(400).delay(50 + i * 50)}
-          >
+          <Animated.View key={key} entering={FadeInDown.duration(400).delay(50 + i * 50)}>
             {key === "mood" ? (
-              <MoodCard
-                value={getEntry(entries, todayStr).mood}
-                todayStr={todayStr}
-              />
+              <MoodCard value={getEntry(entries, todayStr).mood} todayStr={todayStr} />
             ) : (
-              <NumericCard
-                metric={key}
-                todayStr={todayStr}
-                entries={entries}
-                goals={goals}
-              />
+              <NumericCard metric={key} todayStr={todayStr} entries={entries} goals={goals} />
             )}
           </Animated.View>
         ))}
@@ -127,9 +115,7 @@ function NumericCard({
     <View className={card({ size: "md" })}>
       {/* Header */}
       <View className={row({ gap: "md" })}>
-        <View
-          className={iconBadge({ size: "sm", className: mc.bg10 })}
-        >
+        <View className={iconBadge({ size: "sm", className: mc.bg10 })}>
           <SymbolView
             name={config.icon}
             tintColor={config.color}
@@ -137,9 +123,7 @@ function NumericCard({
           />
         </View>
         <View className="flex-1">
-          <Text className={heading({ className: "text-[15px]" })}>
-            {config.label}
-          </Text>
+          <Text className={heading({ className: "text-[15px]" })}>{config.label}</Text>
           <Text className={statLabel()}>
             Goal: {goal} {config.unit}
           </Text>
@@ -152,9 +136,7 @@ function NumericCard({
       </View>
 
       {/* Progress bar */}
-      <View
-        className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg10}`}
-      >
+      <View className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg10}`}>
         <View
           className={`h-[5px] rounded-[3px] ${mc.bg}`}
           style={{ width: `${pct}%` as unknown as number }}
@@ -171,19 +153,16 @@ function NumericCard({
           disabled={value <= config.min}
           accessibilityRole="button"
           accessibilityLabel={`Decrease ${config.label}`}
-          className={stepperButton({ size: "md", className: mc.bg10 })}
-          style={{ opacity: value <= config.min ? 0.3 : 1 }}
+          className={stepperButton({
+            size: "md",
+            className: `${mc.bg10} ${value <= config.min ? "opacity-30" : "opacity-100"}`,
+          })}
         >
-          <Text className={`text-[22px] font-bold ${mc.text}`}>
-            −
-          </Text>
+          <Text className={`text-[22px] font-bold ${mc.text}`}>−</Text>
         </Pressable>
 
         <View className="items-center min-w-[72px]">
-          <Text
-            className={numericDisplay({ size: "xl" })}
-            selectable
-          >
+          <Text className={numericDisplay({ size: "xl" })} selectable>
             {value}
           </Text>
           <Text className="text-[13px] text-sf-text-3">{config.unit}</Text>
@@ -197,12 +176,12 @@ function NumericCard({
           disabled={value >= config.max}
           accessibilityRole="button"
           accessibilityLabel={`Increase ${config.label}`}
-          className={stepperButton({ size: "md", className: mc.bg })}
-          style={{ opacity: value >= config.max ? 0.3 : 1 }}
+          className={stepperButton({
+            size: "md",
+            className: `${mc.bg} ${value >= config.max ? "opacity-30" : "opacity-100"}`,
+          })}
         >
-          <Text className="text-[22px] font-bold text-white">
-            +
-          </Text>
+          <Text className="text-[22px] font-bold text-white">+</Text>
         </Pressable>
       </View>
     </View>
@@ -216,9 +195,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
   return (
     <View className={card({ size: "md" })}>
       <View className={row({ gap: "md" })}>
-        <View
-          className={iconBadge({ size: "sm", className: mc.bg10 })}
-        >
+        <View className={iconBadge({ size: "sm", className: mc.bg10 })}>
           <SymbolView
             name={config.icon}
             tintColor={config.color}
@@ -226,13 +203,9 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
           />
         </View>
         <View>
-          <Text className={heading({ className: "text-[15px]" })}>
-            How are you feeling?
-          </Text>
+          <Text className={heading({ className: "text-[15px]" })}>How are you feeling?</Text>
           <Text className={statLabel()}>
-            {value > 0
-              ? `${MOOD_LABELS[value]} ${MOOD_EMOJIS[value]}`
-              : "Tap to log your mood"}
+            {value > 0 ? `${MOOD_LABELS[value]} ${MOOD_EMOJIS[value]}` : "Tap to log your mood"}
           </Text>
         </View>
       </View>
@@ -251,19 +224,12 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
           >
             <View
               className={`w-[52px] h-[52px] rounded-2xl items-center justify-center ${
-                value === mood ? mc.bg10 : ""
+                value === mood ? `${mc.bg10} border-2 ${mc.border}` : ""
               }`}
-              style={
-                value === mood
-                  ? { borderWidth: 2, borderColor: config.color }
-                  : undefined
-              }
             >
               <Text className="text-[26px]">{MOOD_EMOJIS[mood]}</Text>
             </View>
-            <Text className={statLabel({ className: "text-[10px]" })}>
-              {MOOD_LABELS[mood]}
-            </Text>
+            <Text className={statLabel({ className: "text-[10px]" })}>{MOOD_LABELS[mood]}</Text>
           </Pressable>
         ))}
       </View>
