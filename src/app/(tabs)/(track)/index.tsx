@@ -111,7 +111,7 @@ function NumericCard({
       <Card.Body>
         <View className="flex-row items-center gap-3">
           <View
-            className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg}/10`}
+            className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg10}`}
             style={{ borderCurve: "continuous" }}
           >
             <AppIcon name={config.icon} color={config.color} size={18} />
@@ -130,7 +130,7 @@ function NumericCard({
         </View>
 
         {/* Progress bar */}
-        <View className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg}/10`}>
+        <View className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg10}`}>
           <View className={`h-[5px] rounded-[3px] ${mc.bg}`} style={{ width: `${pct}%` }} />
         </View>
 
@@ -145,7 +145,7 @@ function NumericCard({
             }}
             isDisabled={value <= config.min}
             accessibilityLabel={`Decrease ${config.label}`}
-            className={`w-12 h-12 rounded-[14px] ${mc.bg}/10`}
+            className={`w-12 h-12 rounded-[14px] ${mc.bg10}`}
           >
             <Button.Label className={`text-[22px] font-bold ${mc.text}`}>−</Button.Label>
           </Button>
@@ -185,7 +185,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
       <Card.Body>
         <View className="flex-row items-center gap-3">
           <View
-            className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg}/10`}
+            className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg10}`}
             style={{ borderCurve: "continuous" }}
           >
             <AppIcon name={config.icon} color={config.color} size={18} />
@@ -209,7 +209,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
               }}
               accessibilityLabel={`Mood ${MOOD_LABELS[mood]}`}
               className={`items-center w-[52px] h-[52px] rounded-2xl ${
-                value === mood ? `${mc.bg}/10 border-2 border-mood` : ""
+                value === mood ? `${mc.bg10} border-2 ${mc.border}` : ""
               }`}
             >
               <Text className="text-[26px]">{MOOD_EMOJIS[mood]}</Text>

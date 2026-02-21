@@ -202,7 +202,7 @@ function WeekChart({
                   {val > 0 ? (metric === "sleep" ? val.toFixed(1) : String(val)) : ""}
                 </Text>
                 <View
-                  className={`w-[22px] rounded-md ${met ? mc.bg : `${mc.bg}/40`}`}
+                  className={`w-[22px] rounded-md ${met ? mc.bg : `${mc.bg40}`}`}
                   style={{ height: Math.max(h, 3), borderCurve: "continuous" }}
                 />
                 <Text

@@ -115,12 +115,12 @@ export default function DashboardScreen() {
             <Card.Body className="flex-row items-center gap-3.5">
               <View className="items-center">
                 <View
-                  className={`w-12 h-12 rounded-[14px] items-center justify-center ${mc.bg}/10`}
+                  className={`w-12 h-12 rounded-[14px] items-center justify-center ${mc.bg10}`}
                   style={{ borderCurve: "continuous" }}
                 >
                   <AppIcon name={config.icon} color={config.color} size={22} />
                 </View>
-                <View className={`w-10 h-1 rounded-full mt-1.5 ${mc.bg}/15`}>
+                <View className={`w-10 h-1 rounded-full mt-1.5 ${mc.bg15}`}>
                   <View
                     className={`h-1 rounded-full ${mc.bg}`}
                     style={{ width: `${Math.round(pct * 100)}%` }}
@@ -144,7 +144,7 @@ export default function DashboardScreen() {
                   incrementMetric(todayStr, key);
                 }}
                 accessibilityLabel={`Quick add ${config.label}`}
-                className={`w-10 h-10 rounded-xl ${mc.bg}/10`}
+                className={`w-10 h-10 rounded-xl ${mc.bg10}`}
               >
                 <Button.Label className={`text-[20px] font-bold ${mc.text}`}>+</Button.Label>
               </Button>

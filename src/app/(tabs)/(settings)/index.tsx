@@ -110,7 +110,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
     <Card>
       <Card.Body className="flex-row items-center gap-3">
         <View
-          className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg}/10`}
+          className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg10}`}
           style={{ borderCurve: "continuous" }}
         >
           <AppIcon name={config.icon} color={config.color} size={18} />
@@ -131,7 +131,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             }}
             isDisabled={current <= config.step}
             accessibilityLabel={`Decrease ${config.label} goal`}
-            className={`w-[34px] h-[34px] rounded-[10px] ${mc.bg}/10`}
+            className={`w-[34px] h-[34px] rounded-[10px] ${mc.bg10}`}
           >
             <Button.Label className={`text-[18px] font-bold ${mc.text}`}>−</Button.Label>
           </Button>
