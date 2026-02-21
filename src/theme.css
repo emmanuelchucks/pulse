@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@import "uniwind";
+@import "heroui-native/styles";
+
+@source "./";
+@source "./node_modules/heroui-native/lib";
+
+/* ── Custom semantic colors for metrics ──────────────── */
+@layer theme {
+  @variant light {
+    --color-water: oklch(0.72 0.15 220);
+    --color-mood: oklch(0.72 0.18 340);
+    --color-sleep: oklch(0.68 0.16 280);
+    --color-exercise: oklch(0.72 0.16 160);
+  }
+
+  @variant dark {
+    --color-water: oklch(0.78 0.13 220);
+    --color-mood: oklch(0.78 0.16 340);
+    --color-sleep: oklch(0.74 0.14 280);
+    --color-exercise: oklch(0.78 0.14 160);
+  }
+}
+
+@theme inline {
+  --color-water: var(--color-water);
+  --color-mood: var(--color-mood);
+  --color-sleep: var(--color-sleep);
+  --color-exercise: var(--color-exercise);
+}

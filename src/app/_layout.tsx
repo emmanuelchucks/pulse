@@ -1,18 +1,28 @@
+import type { HeroUINativeConfig } from "heroui-native";
+
+import { HeroUINativeProvider } from "heroui-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { LogBox, Pressable, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { runMigrations } from "@/db/client";
 import { initializeWellnessData } from "@/store/wellness-store";
-import "@/global.css";
+import "@/theme.css";
 
 LogBox.ignoreLogs(["ReactNativeCss:", "RNScreens", "RCTEventEmitter.receiveEvent"]);
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore if already hidden.
 });
+
+const config: HeroUINativeConfig = {
+  textProps: { maxFontSizeMultiplier: 1.5 },
+  devInfo: { stylingPrinciples: false },
+  toast: false,
+};
 
 type BootStatus = "loading" | "ready" | "error";
 
@@ -21,8 +31,8 @@ function BootScreen({ onRetry }: { onRetry?: () => void }) {
     <View className="flex-1 items-center justify-center bg-background px-6">
       <Text className="text-foreground text-lg font-semibold">Preparing Pulse…</Text>
       {onRetry ? (
-        <Pressable className="mt-5 rounded-xl bg-primary px-4 py-2" onPress={onRetry}>
-          <Text className="text-primary-foreground font-medium">Retry initialization</Text>
+        <Pressable className="mt-5 rounded-xl bg-accent px-4 py-2" onPress={onRetry}>
+          <Text className="text-accent-foreground font-medium">Retry initialization</Text>
         </Pressable>
       ) : null}
     </View>
@@ -38,8 +48,8 @@ function BootErrorScreen({ onRetry }: { onRetry: () => void }) {
       <Text className="text-muted-foreground mt-2 text-center">
         Please retry. Your existing local data was not modified.
       </Text>
-      <Pressable className="mt-5 rounded-xl bg-primary px-4 py-2" onPress={onRetry}>
-        <Text className="text-primary-foreground font-medium">Retry</Text>
+      <Pressable className="mt-5 rounded-xl bg-danger px-4 py-2" onPress={onRetry}>
+        <Text className="text-danger-foreground font-medium">Retry</Text>
       </Pressable>
     </View>
   );
@@ -76,11 +86,13 @@ export default function RootLayout() {
   }
 
   return (
-    <>
-      <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-    </>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <HeroUINativeProvider config={config}>
+        <StatusBar style="auto" />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </HeroUINativeProvider>
+    </GestureHandlerRootView>
   );
 }
