@@ -1,26 +1,14 @@
 import * as Haptics from "expo-haptics";
-import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Platform, ScrollView, Text, View } from "react-native";
+
+import { Button, Card, Description, Label } from "heroui-native";
 
 import type { MetricKey } from "@/constants/metrics";
 import type { Goals } from "@/db/types";
 
 import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_KEYS, METRIC_CONFIG } from "@/constants/metrics";
-import {
-  card,
-  caption,
-  heading,
-  statLabel,
-  numericDisplay,
-  sectionHeader,
-  sectionTitle,
-  sectionSubtitle,
-  scrollContent,
-  row,
-  iconBadge,
-  stepperButton,
-  METRIC_CLASSES,
-} from "@/lib/styles";
+import { numericText, METRIC_TW } from "@/lib/metric-theme";
 import { useWellnessStore, updateGoal, clearAllData } from "@/store/wellness-store";
 
 export default function SettingsScreen() {
@@ -52,63 +40,63 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-sf-bg-grouped"
+      className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName={scrollContent()}
+      contentContainerClassName="px-5 pb-10 gap-3"
     >
-      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <Text className={caption()}>Customize your goals</Text>
+      <Description>Customize your goals</Description>
+
+      {/* Section header */}
+      <View className="px-1 mt-1">
+        <Label className="text-xl font-bold">Daily Goals</Label>
+        <Description className="mt-0.5">Adjust targets for each metric</Description>
       </View>
 
-      <View className={sectionHeader()}>
-        <Text className={sectionTitle()}>Daily Goals</Text>
-        <Text className={sectionSubtitle()}>Adjust targets for each metric</Text>
-      </View>
-
+      {/* Goal cards */}
       {METRIC_KEYS.map((key) => (
-        <View key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <GoalCard metric={key} goals={goals} />
-        </View>
+        <GoalCard key={key} metric={key} goals={goals} />
       ))}
 
-      <View className={sectionHeader({ className: "mt-2" })}>
-        <Text className={sectionTitle()}>Data</Text>
+      {/* Data section */}
+      <View className="px-1 mt-3">
+        <Label className="text-xl font-bold">Data</Label>
       </View>
 
-      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <View className={card({ padded: true, className: "gap-3.5" })}>
-          <View className={row({ justify: "between" })}>
-            <Text className={caption()}>Days tracked</Text>
-            <Text className={numericDisplay({ size: "xs", className: "font-semibold" })} selectable>
+      <Card>
+        <Card.Body className="gap-3.5">
+          <View className="flex-row items-center justify-between">
+            <Description>Days tracked</Description>
+            <Text className={numericText({ size: "xs", className: "font-semibold" })} selectable>
               {totalEntries}
             </Text>
           </View>
-          <Pressable
+          <Button
+            variant="danger"
             onPress={handleClearData}
-            accessibilityRole="button"
             accessibilityLabel="Clear All Data"
-            className="items-center py-3 rounded-[14px] corner-squircle bg-red-500/12"
+            className="w-full"
           >
-            <Text className="text-[13px] font-semibold text-sf-red">Clear All Data</Text>
-          </Pressable>
-        </View>
+            <Button.Label>Clear All Data</Button.Label>
+          </Button>
+        </Card.Body>
+      </Card>
+
+      {/* About section */}
+      <View className="px-1 mt-3">
+        <Label className="text-xl font-bold">About</Label>
       </View>
 
-      <View className={sectionHeader({ className: "mt-2" })}>
-        <Text className={sectionTitle()}>About</Text>
-      </View>
-
-      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <View className={card({ padded: true, className: "gap-1.5" })}>
-          <Text className={heading({ className: "text-[15px]" })}>Pulse</Text>
-          <Text className={caption({ className: "leading-5" })}>
+      <Card>
+        <Card.Body className="gap-1.5">
+          <Card.Title className="text-[15px]">Pulse</Card.Title>
+          <Card.Description className="leading-5">
             Your daily wellness companion. Track water intake, mood, sleep, and exercise to build
             healthier habits.
-          </Text>
-          <Text className={statLabel({ className: "mt-1.5" })}>Version 1.0.0</Text>
-        </View>
-      </View>
+          </Card.Description>
+          <Description className="mt-1.5 text-[11px]">Version 1.0.0</Description>
+        </Card.Body>
+      </Card>
     </ScrollView>
   );
 }
@@ -116,53 +104,57 @@ export default function SettingsScreen() {
 function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const config = METRIC_CONFIG[metric];
   const current = goals[metric];
-  const colors = METRIC_CLASSES[metric];
+  const mc = METRIC_TW[metric];
 
   return (
-    <View className={card({ padded: true })}>
-      <View className={row({ gap: "md" })}>
-        <View className={iconBadge({ size: "sm", className: colors.bg10 })}>
+    <Card>
+      <Card.Body className="flex-row items-center gap-3">
+        <View
+          className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg}/10`}
+          style={{ borderCurve: "continuous" }}
+        >
           <AppIcon name={config.icon} color={config.color} size={18} />
         </View>
 
         <View className="flex-1">
-          <Text className={caption({ className: "font-medium text-sf-text" })}>{config.label}</Text>
-          <Text className={statLabel()}>Daily goal</Text>
+          <Card.Title className="text-[15px]">{config.label}</Card.Title>
+          <Description className="text-[11px]">Daily goal</Description>
         </View>
 
-        <View className={row({ className: "gap-2.5" })}>
-          <Pressable
+        <View className="flex-row items-center gap-2.5">
+          <Button
+            size="sm"
+            variant="ghost"
+            isIconOnly
             onPress={() => {
               updateGoal(metric, Math.max(config.step, current - config.step));
             }}
-            disabled={current <= config.step}
-            accessibilityRole="button"
+            isDisabled={current <= config.step}
             accessibilityLabel={`Decrease ${config.label} goal`}
-            className={stepperButton({
-              size: "sm",
-              className: `${colors.bg10} ${current <= config.step ? "opacity-30" : "opacity-100"}`,
-            })}
+            className={`w-[34px] h-[34px] rounded-[10px] ${mc.bg}/10`}
           >
-            <Text className={`text-[18px] font-bold ${colors.text}`}>−</Text>
-          </Pressable>
+            <Button.Label className={`text-[18px] font-bold ${mc.text}`}>−</Button.Label>
+          </Button>
 
           <View className="items-center min-w-[44px]">
-            <Text className={numericDisplay({ size: "md" })}>{current}</Text>
-            <Text className={statLabel({ className: "text-[10px]" })}>{config.unit}</Text>
+            <Text className={numericText({ size: "md" })}>{current}</Text>
+            <Description className="text-[10px]">{config.unit}</Description>
           </View>
 
-          <Pressable
+          <Button
+            size="sm"
+            variant="primary"
+            isIconOnly
             onPress={() => {
               updateGoal(metric, current + config.step);
             }}
-            accessibilityRole="button"
             accessibilityLabel={`Increase ${config.label} goal`}
-            className={stepperButton({ size: "sm", className: colors.bg })}
+            className={`w-[34px] h-[34px] rounded-[10px] ${mc.bg}`}
           >
-            <Text className="text-[16px] font-bold text-white">+</Text>
-          </Pressable>
+            <Button.Label className="text-[16px] font-bold text-white">+</Button.Label>
+          </Button>
         </View>
-      </View>
-    </View>
+      </Card.Body>
+    </Card>
   );
 }

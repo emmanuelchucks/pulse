@@ -1,6 +1,8 @@
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Platform, ScrollView, Text, View } from "react-native";
+
+import { Button, Card, Description } from "heroui-native";
 
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
@@ -14,18 +16,7 @@ import {
   formatDate,
 } from "@/constants/metrics";
 import { getEntry } from "@/features/wellness/domain/analytics";
-import {
-  card,
-  caption,
-  heading,
-  statLabel,
-  row,
-  iconBadge,
-  stepperButton,
-  scrollContent,
-  numericDisplay,
-  METRIC_CLASSES,
-} from "@/lib/styles";
+import { numericText, METRIC_TW } from "@/lib/metric-theme";
 import {
   useWellnessStore,
   incrementMetric,
@@ -59,36 +50,32 @@ export default function TrackScreen() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <Pressable
+            <Button
+              size="sm"
+              variant="danger-soft"
               onPress={handleReset}
-              accessibilityRole="button"
               accessibilityLabel="Reset Day"
-              className="h-8 px-3 rounded-xl items-center justify-center bg-red-500/12"
             >
-              <View className="flex-row items-center gap-1.5">
-                <AppIcon
-                  name={{ ios: "arrow.counterclockwise", android: "restart_alt", web: "restart_alt" }}
-                  color="#ff3b30"
-                  size={13}
-                />
-                <Text className="text-[12px] font-semibold text-sf-red">Reset</Text>
-              </View>
-            </Pressable>
+              <AppIcon
+                name={{ ios: "arrow.counterclockwise", android: "restart_alt", web: "restart_alt" }}
+                color="#ff3b30"
+                size={13}
+              />
+              <Button.Label>Reset</Button.Label>
+            </Button>
           ),
         }}
       />
       <ScrollView
-        className="flex-1 bg-sf-bg-grouped"
+        className="flex-1 bg-background"
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName={scrollContent()}
+        contentContainerClassName="px-5 pb-10 gap-3"
       >
-        <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <Text className={caption()}>Log your daily wellness</Text>
-        </View>
+        <Description>Log your daily wellness</Description>
 
         {METRIC_KEYS.map((key) => (
-          <View key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <View key={key}>
             {key === "mood" ? (
               <MoodCard value={getEntry(entries, todayStr).mood} todayStr={todayStr} />
             ) : (
@@ -117,113 +104,127 @@ function NumericCard({
   const value = entry[metric];
   const goal = goals[metric];
   const pct = Math.round(Math.min(goal > 0 ? value / goal : 0, 1) * 100);
-  const mc = METRIC_CLASSES[metric];
+  const mc = METRIC_TW[metric];
 
   return (
-    <View className={card({ size: "md" })}>
-      <View className={row({ gap: "md" })}>
-        <View className={iconBadge({ size: "sm", className: mc.bg10 })}>
-          <AppIcon name={config.icon} color={config.color} size={18} />
-        </View>
-        <View className="flex-1">
-          <Text className={heading({ className: "text-[15px]" })}>{config.label}</Text>
-          <Text className={statLabel()}>
-            Goal: {goal} {config.unit}
+    <Card>
+      <Card.Body>
+        <View className="flex-row items-center gap-3">
+          <View
+            className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg}/10`}
+            style={{ borderCurve: "continuous" }}
+          >
+            <AppIcon name={config.icon} color={config.color} size={18} />
+          </View>
+          <View className="flex-1">
+            <Card.Title className="text-[15px]">{config.label}</Card.Title>
+            <Description className="text-[11px]">
+              Goal: {goal} {config.unit}
+            </Description>
+          </View>
+          <Text
+            className={`text-[13px] font-bold tabular-nums ${pct > 0 ? mc.text : "text-muted"}`}
+          >
+            {pct}%
           </Text>
         </View>
-        <Text
-          className={`text-[13px] font-bold tabular-nums ${pct > 0 ? mc.text : "text-sf-gray"}`}
-        >
-          {pct}%
-        </Text>
-      </View>
 
-      <View className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg10}`}>
-        <View className={`h-[5px] rounded-[3px] ${mc.bg}`} style={{ width: `${pct}%` }} />
-      </View>
-
-      <View className={row({ justify: "center", className: "gap-6 mt-[18px]" })}>
-        <Pressable
-          onPress={() => {
-            decrementMetric(todayStr, metric);
-          }}
-          disabled={value <= config.min}
-          accessibilityRole="button"
-          accessibilityLabel={`Decrease ${config.label}`}
-          className={stepperButton({
-            size: "md",
-            className: `${mc.bg10} ${value <= config.min ? "opacity-30" : "opacity-100"}`,
-          })}
-        >
-          <Text className={`text-[22px] font-bold ${mc.text}`}>−</Text>
-        </Pressable>
-
-        <View className="items-center min-w-[72px]">
-          <Text className={numericDisplay({ size: "xl" })} selectable>
-            {value}
-          </Text>
-          <Text className="text-[13px] text-sf-text-3">{config.unit}</Text>
+        {/* Progress bar */}
+        <View className={`h-[5px] rounded-[3px] mt-[14px] ${mc.bg}/10`}>
+          <View className={`h-[5px] rounded-[3px] ${mc.bg}`} style={{ width: `${pct}%` }} />
         </View>
 
-        <Pressable
-          onPress={() => {
-            incrementMetric(todayStr, metric);
-          }}
-          disabled={value >= config.max}
-          accessibilityRole="button"
-          accessibilityLabel={`Increase ${config.label}`}
-          className={stepperButton({
-            size: "md",
-            className: `${mc.bg} ${value >= config.max ? "opacity-30" : "opacity-100"}`,
-          })}
-        >
-          <Text className="text-[22px] font-bold text-white">+</Text>
-        </Pressable>
-      </View>
-    </View>
+        {/* Stepper */}
+        <View className="flex-row items-center justify-center gap-6 mt-[18px]">
+          <Button
+            size="md"
+            variant="ghost"
+            isIconOnly
+            onPress={() => {
+              decrementMetric(todayStr, metric);
+            }}
+            isDisabled={value <= config.min}
+            accessibilityLabel={`Decrease ${config.label}`}
+            className={`w-12 h-12 rounded-[14px] ${mc.bg}/10`}
+          >
+            <Button.Label className={`text-[22px] font-bold ${mc.text}`}>−</Button.Label>
+          </Button>
+
+          <View className="items-center min-w-[72px]">
+            <Text className={numericText({ size: "xl" })} selectable>
+              {value}
+            </Text>
+            <Description className="text-[13px]">{config.unit}</Description>
+          </View>
+
+          <Button
+            size="md"
+            variant="primary"
+            isIconOnly
+            onPress={() => {
+              incrementMetric(todayStr, metric);
+            }}
+            isDisabled={value >= config.max}
+            accessibilityLabel={`Increase ${config.label}`}
+            className={`w-12 h-12 rounded-[14px] ${mc.bg}`}
+          >
+            <Button.Label className="text-[22px] font-bold text-white">+</Button.Label>
+          </Button>
+        </View>
+      </Card.Body>
+    </Card>
   );
 }
 
 function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
   const config = METRIC_CONFIG.mood;
-  const mc = METRIC_CLASSES.mood;
+  const mc = METRIC_TW.mood;
 
   return (
-    <View className={card({ size: "md" })}>
-      <View className={row({ gap: "md" })}>
-        <View className={iconBadge({ size: "sm", className: mc.bg10 })}>
-          <AppIcon name={config.icon} color={config.color} size={18} />
-        </View>
-        <View>
-          <Text className={heading({ className: "text-[15px]" })}>How are you feeling?</Text>
-          <Text className={statLabel()}>
-            {value > 0 ? `${MOOD_LABELS[value]} ${MOOD_EMOJIS[value]}` : "Tap to log your mood"}
-          </Text>
-        </View>
-      </View>
-
-      <View className={row({ justify: "around", className: "mt-4" })}>
-        {[1, 2, 3, 4, 5].map((mood) => (
-          <Pressable
-            key={mood}
-            onPress={() => {
-              updateMetric(todayStr, "mood", mood);
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={`Mood ${MOOD_LABELS[mood]}`}
-            className="items-center gap-1"
+    <Card>
+      <Card.Body>
+        <View className="flex-row items-center gap-3">
+          <View
+            className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg}/10`}
+            style={{ borderCurve: "continuous" }}
           >
-            <View
-              className={`w-[52px] h-[52px] rounded-2xl items-center justify-center ${
-                value === mood ? `${mc.bg10} border-2 ${mc.border}` : ""
+            <AppIcon name={config.icon} color={config.color} size={18} />
+          </View>
+          <View>
+            <Card.Title className="text-[15px]">How are you feeling?</Card.Title>
+            <Description className="text-[11px]">
+              {value > 0 ? `${MOOD_LABELS[value]} ${MOOD_EMOJIS[value]}` : "Tap to log your mood"}
+            </Description>
+          </View>
+        </View>
+
+        {/* Mood selector */}
+        <View className="flex-row items-center justify-around mt-4">
+          {[1, 2, 3, 4, 5].map((mood) => (
+            <Button
+              key={mood}
+              variant={value === mood ? "secondary" : "ghost"}
+              onPress={() => {
+                updateMetric(todayStr, "mood", mood);
+              }}
+              accessibilityLabel={`Mood ${MOOD_LABELS[mood]}`}
+              className={`items-center w-[52px] h-[52px] rounded-2xl ${
+                value === mood ? `${mc.bg}/10 border-2 border-mood` : ""
               }`}
             >
               <Text className="text-[26px]">{MOOD_EMOJIS[mood]}</Text>
-            </View>
-            <Text className={statLabel({ className: "text-[10px]" })}>{MOOD_LABELS[mood]}</Text>
-          </Pressable>
-        ))}
-      </View>
-    </View>
+            </Button>
+          ))}
+        </View>
+        {/* Mood labels below buttons */}
+        <View className="flex-row items-center justify-around mt-1">
+          {[1, 2, 3, 4, 5].map((mood) => (
+            <Description key={mood} className="text-[10px] w-[52px] text-center">
+              {MOOD_LABELS[mood]}
+            </Description>
+          ))}
+        </View>
+      </Card.Body>
+    </Card>
   );
 }

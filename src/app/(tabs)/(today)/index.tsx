@@ -1,4 +1,6 @@
-import { ScrollView, Text, Pressable, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+
+import { Button, Card, Chip, Description, Label } from "heroui-native";
 
 import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_KEYS, METRIC_CONFIG, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
@@ -8,22 +10,7 @@ import {
   getStreak,
   getCompletionRate,
 } from "@/features/wellness/domain/analytics";
-import {
-  card,
-  caption,
-  heading,
-  label,
-  statLabel,
-  statValue,
-  numericDisplay,
-  sectionHeader,
-  sectionTitle,
-  sectionSubtitle,
-  scrollContent,
-  iconBadge,
-  row,
-  METRIC_CLASSES,
-} from "@/lib/styles";
+import { numericText, METRIC_TW } from "@/lib/metric-theme";
 import { useWellnessStore, incrementMetric } from "@/store/wellness-store";
 
 export default function DashboardScreen() {
@@ -48,80 +35,74 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-sf-bg-grouped"
+      className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName={scrollContent()}
+      contentContainerClassName="px-5 pb-10 gap-3"
     >
-      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <Text className={caption({ className: "mt-1" })}>{dateLabel}</Text>
-      </View>
+      <Description className="mt-1">{dateLabel}</Description>
 
-      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <View className={card({ size: "md" })}>
-          <View className={row({ gap: "lg" })}>
-            <View
-              className={`size-[76px] rounded-full border-[5px] items-center justify-center ${
-                overall >= 100 ? "border-emerald-400" : "border-[#0a84ff]"
-              }`}
-            >
-              <Text className={numericDisplay({ size: "md" })}>{overall}%</Text>
+      {/* Summary card */}
+      <Card>
+        <Card.Body className="flex-row items-center gap-4">
+          <View
+            className={`size-[76px] rounded-full border-[5px] items-center justify-center ${
+              overall >= 100 ? "border-emerald-400" : "border-[#0a84ff]"
+            }`}
+          >
+            <Text className={numericText({ size: "md" })}>{overall}%</Text>
+          </View>
+          <View className="flex-1 gap-0.5">
+            <Card.Title>{greeting}</Card.Title>
+            <Card.Description>
+              {completed}/{METRIC_KEYS.length} goals met today
+            </Card.Description>
+            <View className="flex-row items-center gap-4 mt-2">
+              <Chip variant="secondary" size="sm" color="default">
+                <Chip.Label>Weekly {weeklyRate}%</Chip.Label>
+              </Chip>
+              <Chip variant="secondary" size="sm" color="default">
+                <Chip.Label>
+                  Best {bestStreak} {bestStreak === 1 ? "day" : "days"}
+                </Chip.Label>
+              </Chip>
             </View>
-            <View className="flex-1 gap-0.5">
-              <Text className={heading()}>{greeting}</Text>
-              <Text className={caption()}>
-                {completed}/{METRIC_KEYS.length} goals met today
-              </Text>
-              <View className={row({ gap: "lg", className: "mt-2" })}>
-                <View>
-                  <Text className={statLabel()}>Weekly</Text>
-                  <Text className={numericDisplay({ size: "xs", className: "font-semibold" })}>
-                    {weeklyRate}%
-                  </Text>
-                </View>
-                <View>
-                  <Text className={statLabel()}>Best Streak</Text>
-                  <Text className={statValue()}>
-                    {bestStreak} {bestStreak === 1 ? "day" : "days"}
-                  </Text>
-                </View>
+          </View>
+        </Card.Body>
+      </Card>
+
+      {/* Streak bar */}
+      <Card>
+        <Card.Body className="flex-row items-center justify-around py-0.5">
+          {METRIC_KEYS.map((key) => {
+            const config = METRIC_CONFIG[key];
+            const streak = getStreak(entries, goals, { metric: key });
+            return (
+              <View key={key} className="items-center gap-1 py-0.5">
+                <AppIcon name={config.icon} color={config.color} size={16} />
+                <Text
+                  className={numericText({ size: "xs", className: "font-bold" })}
+                  selectable
+                >
+                  {streak}
+                </Text>
+                <Description className="text-[10px]">streak</Description>
               </View>
-            </View>
-          </View>
-        </View>
+            );
+          })}
+        </Card.Body>
+      </Card>
+
+      {/* Section header */}
+      <View className="px-1 mt-1">
+        <Label className="text-xl font-bold">Today&apos;s Metrics</Label>
+        <Description className="mt-0.5">Tap + to quick-add</Description>
       </View>
 
-      <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <View className={card({ size: "sm" })}>
-          <View className={row({ justify: "around", className: "py-3.5" })}>
-            {METRIC_KEYS.map((key) => {
-              const config = METRIC_CONFIG[key];
-              const streak = getStreak(entries, goals, { metric: key });
-              return (
-                <View key={key} className="items-center gap-1 py-0.5">
-                  <AppIcon name={config.icon} color={config.color} size={16} />
-                  <Text
-                    className={numericDisplay({ size: "xs", className: "font-bold" })}
-                    selectable
-                  >
-                    {streak}
-                  </Text>
-                  <Text className={statLabel({ className: "text-[10px]" })}>streak</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-      </View>
-
-      <View className={sectionHeader()}>
-        <Text className={sectionTitle()}>Today&apos;s Metrics</Text>
-        <Text className={sectionSubtitle()}>Tap + to quick-add</Text>
-      </View>
-
+      {/* Metric cards */}
       {METRIC_KEYS.map((key) => {
         const config = METRIC_CONFIG[key];
-        const mc = METRIC_CLASSES[key];
+        const mc = METRIC_TW[key];
         const entry = getEntry(entries, todayStr);
         const value = entry[key];
         const goal = goals[key];
@@ -130,44 +111,45 @@ export default function DashboardScreen() {
         const unit = key === "mood" ? "" : `/${goal} ${config.unit}`;
 
         return (
-          <View key={key} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <View className={card({ size: "md", className: "p-4" })}>
-              <View className={row({ gap: "lg", className: "gap-3.5" })}>
-                <View className="items-center">
-                  <View className={iconBadge({ size: "md", className: mc.bg10 })}>
-                    <AppIcon name={config.icon} color={config.color} size={22} />
-                  </View>
-                  <View className={`w-10 h-1 rounded-full mt-1.5 ${mc.bg15}`}>
-                    <View
-                      className={`h-1 rounded-full ${mc.bg}`}
-                      style={{
-                        width: `${Math.round(pct * 100)}%`,
-                      }}
-                    />
-                  </View>
-                </View>
-                <View className="flex-1">
-                  <Text className={label()}>{config.label}</Text>
-                  <View className={row({ gap: "sm", className: "items-baseline" })}>
-                    <Text className={numericDisplay({ size: "lg" })} selectable>
-                      {display}
-                    </Text>
-                    <Text className={statLabel()}>{unit}</Text>
-                  </View>
-                </View>
-                <Pressable
-                  onPress={() => {
-                    incrementMetric(todayStr, key);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Quick add ${config.label}`}
-                  className={`w-10 h-10 rounded-xl items-center justify-center corner-squircle ${mc.bg10}`}
+          <Card key={key}>
+            <Card.Body className="flex-row items-center gap-3.5">
+              <View className="items-center">
+                <View
+                  className={`w-12 h-12 rounded-[14px] items-center justify-center ${mc.bg}/10`}
+                  style={{ borderCurve: "continuous" }}
                 >
-                  <Text className={`text-[20px] font-bold ${mc.text}`}>+</Text>
-                </Pressable>
+                  <AppIcon name={config.icon} color={config.color} size={22} />
+                </View>
+                <View className={`w-10 h-1 rounded-full mt-1.5 ${mc.bg}/15`}>
+                  <View
+                    className={`h-1 rounded-full ${mc.bg}`}
+                    style={{ width: `${Math.round(pct * 100)}%` }}
+                  />
+                </View>
               </View>
-            </View>
-          </View>
+              <View className="flex-1">
+                <Description className="font-medium">{config.label}</Description>
+                <View className="flex-row items-baseline gap-2">
+                  <Text className={numericText({ size: "lg" })} selectable>
+                    {display}
+                  </Text>
+                  <Description className="text-[11px]">{unit}</Description>
+                </View>
+              </View>
+              <Button
+                size="sm"
+                variant="ghost"
+                isIconOnly
+                onPress={() => {
+                  incrementMetric(todayStr, key);
+                }}
+                accessibilityLabel={`Quick add ${config.label}`}
+                className={`w-10 h-10 rounded-xl ${mc.bg}/10`}
+              >
+                <Button.Label className={`text-[20px] font-bold ${mc.text}`}>+</Button.Label>
+              </Button>
+            </Card.Body>
+          </Card>
         );
       })}
     </ScrollView>
