@@ -3,5 +3,5 @@ import { defineConfig } from "oxlint";
 
 export default defineConfig({
   ...react,
-  ignorePatterns: ["drizzle/**"],
+  ignorePatterns: ["drizzle/**", "metro.config.cjs"],
 });

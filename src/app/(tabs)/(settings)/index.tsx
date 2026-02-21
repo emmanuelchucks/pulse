@@ -54,6 +54,7 @@ export default function SettingsScreen() {
     <ScrollView
       className="flex-1 bg-sf-bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
+      showsVerticalScrollIndicator={false}
       contentContainerClassName={scrollContent()}
     >
       <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">

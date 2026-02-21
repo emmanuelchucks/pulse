@@ -59,8 +59,20 @@ export default function TrackScreen() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <Pressable onPress={handleReset} accessibilityLabel="Reset Day">
-              <Text className="text-[13px] font-semibold text-sf-red">Reset</Text>
+            <Pressable
+              onPress={handleReset}
+              accessibilityRole="button"
+              accessibilityLabel="Reset Day"
+              className="h-8 px-3 rounded-xl items-center justify-center bg-red-500/12"
+            >
+              <View className="flex-row items-center gap-1.5">
+                <AppIcon
+                  name={{ ios: "arrow.counterclockwise", android: "restart_alt", web: "restart_alt" }}
+                  color="#ff3b30"
+                  size={13}
+                />
+                <Text className="text-[12px] font-semibold text-sf-red">Reset</Text>
+              </View>
             </Pressable>
           ),
         }}
@@ -68,6 +80,7 @@ export default function TrackScreen() {
       <ScrollView
         className="flex-1 bg-sf-bg-grouped"
         contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
         contentContainerClassName={scrollContent()}
       >
         <View className="animate-in fade-in slide-in-from-bottom-2 duration-300">
