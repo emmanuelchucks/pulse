@@ -74,7 +74,10 @@ module.exports = withUniwindConfig(config, {
 });
 ```
 
-### 1.3 Rewrite `src/global.css`
+### 1.3 Rewrite CSS entry file as `src/theme.css`
+
+Rename `src/global.css` → `src/theme.css`. Update the import in `src/app/_layout.tsx`
+and the `cssEntryFile` in `metro.config.cjs` accordingly.
 
 ```css
 @import "tailwindcss";
@@ -514,26 +517,16 @@ pnpm typecheck              # tsgo clean
 pnpm test                   # vitest passes
 ```
 
-### 8.2 Build for physical iPhone
+### 8.2 Build for physical iPhone (local only)
 
 ```bash
-# Development build for testing on device
-eas build --profile development --platform ios
-
-# Or local build (faster iteration)
+# Local release build — no EAS, no cloud
 npx expo run:ios --device --configuration Release
 ```
 
-### 8.3 Install on device
+Xcode auto-installs to the connected physical device.
 
-```bash
-# If using EAS
-eas build:run --platform ios
-
-# If local build, Xcode auto-installs to connected device
-```
-
-### 8.4 Final on-device verification
+### 8.3 Final on-device verification
 
 Run through all 15 checkpoints on the physical iPhone. Pay special attention to:
 - Haptic feedback on reset/clear (must fire on real hardware)
