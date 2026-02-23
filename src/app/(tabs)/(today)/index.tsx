@@ -1,6 +1,6 @@
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
-import { Button, Card, Description, Label } from "heroui-native";
+import { Card, Description, Label } from "heroui-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { AppIcon } from "@/components/ui/app-icon";
@@ -47,7 +47,7 @@ export default function DashboardScreen() {
       <Description>{dateLabel}</Description>
 
       <Card className={cardStyles.base()}>
-        <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-4" })}>
+        <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-4 px-5 py-4" })}>
           <View className={`size-20 rounded-full border-4 items-center justify-center ${summaryBorder}`}>
             <Text className={numericText({ size: "md" })}>{overall}%</Text>
           </View>
@@ -70,7 +70,7 @@ export default function DashboardScreen() {
       </Card>
 
       <Card className={cardStyles.base()}>
-        <Card.Body className={cardStyles.body({ className: "flex-row items-center justify-between" })}>
+        <Card.Body className={cardStyles.body({ className: "flex-row items-center justify-between px-4 py-3" })}>
           {METRIC_KEYS.map((key) => {
             const config = METRIC_CONFIG[key];
             const streak = getStreak(entries, goals, { metric: key });
@@ -103,7 +103,7 @@ export default function DashboardScreen() {
 
         return (
           <Card key={key} className={cardStyles.base()}>
-            <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-3" })}>
+            <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-3 px-4 py-3.5" })}>
               <View className="items-center gap-1.5">
                 <View className={`${iconBadge({ size: "lg" })} ${mc.bg10}`}>
                   <AppIcon name={config.icon} color={config.color} size={22} />
@@ -125,20 +125,16 @@ export default function DashboardScreen() {
                 </View>
               </View>
 
-              <Button
-                size="sm"
-                variant="ghost"
-                isIconOnly
+              <Pressable
                 onPress={() => {
                   incrementMetric(todayStr, key);
                 }}
+                accessibilityRole="button"
                 accessibilityLabel={`Quick add ${config.label}`}
-                className={`size-11 rounded-2xl ${mc.bg10}`}
+                className={`size-11 rounded-2xl ${mc.bg10} items-center justify-center`}
               >
-                <View className="size-full items-center justify-center">
-                  <MaterialIcons name="add" color={config.color} size={22} />
-                </View>
-              </Button>
+                <MaterialIcons name="add" color={config.color} size={22} />
+              </Pressable>
             </Card.Body>
           </Card>
         );

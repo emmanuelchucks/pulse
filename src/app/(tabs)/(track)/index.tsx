@@ -2,7 +2,7 @@ import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
 import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
-import { Button, Card, Description } from "heroui-native";
+import { Card, Description } from "heroui-native";
 
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
@@ -56,16 +56,17 @@ export default function TrackScreen() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <Button
-              size="sm"
-              variant="danger-soft"
+            <Pressable
               onPress={handleReset}
+              accessibilityRole="button"
               accessibilityLabel="Reset Day"
-              className="h-9 rounded-full px-4 justify-center"
+              className="h-9 px-4 rounded-full border border-red-500/30 bg-red-500/10 items-center justify-center"
             >
-              <AppIcon name={RESET_ICON} color="#f87171" size={14} />
-              <Button.Label className="text-red-300">Reset</Button.Label>
-            </Button>
+              <View className="flex-row items-center justify-center gap-1.5">
+                <AppIcon name={RESET_ICON} color="#f87171" size={14} />
+                <Text className="text-red-300 text-[17px] font-semibold">Reset</Text>
+              </View>
+            </Pressable>
           ),
         }}
       />
@@ -113,7 +114,7 @@ function NumericCard({
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "gap-3" })}>
+      <Card.Body className={cardStyles.body({ className: "gap-3 px-4 py-4" })}>
         <View className="flex-row items-start gap-3">
           <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
@@ -136,42 +137,34 @@ function NumericCard({
         </View>
 
         <View className="flex-row items-center justify-between">
-          <Button
-            size="md"
-            variant="ghost"
-            isIconOnly
+          <Pressable
             onPress={() => {
               decrementMetric(todayStr, metric);
             }}
-            isDisabled={value <= config.min}
+            disabled={value <= config.min}
+            accessibilityRole="button"
             accessibilityLabel={`Decrease ${config.label}`}
             className={`${stepperButton({ disabled: value <= config.min })} ${mc.bg10}`}
           >
-            <View className="size-full items-center justify-center">
-              <StepperGlyph kind="minus" color={config.color} />
-            </View>
-          </Button>
+            <StepperGlyph kind="minus" color={config.color} />
+          </Pressable>
 
           <View className="items-center min-w-20">
             <Text className={numericText({ size: "md" })}>{value}</Text>
             <Description>{config.unit}</Description>
           </View>
 
-          <Button
-            size="md"
-            variant="ghost"
-            isIconOnly
+          <Pressable
             onPress={() => {
               incrementMetric(todayStr, metric);
             }}
-            isDisabled={value >= config.max}
+            disabled={value >= config.max}
+            accessibilityRole="button"
             accessibilityLabel={`Increase ${config.label}`}
             className={`${stepperButton({ disabled: value >= config.max })} ${mc.bg}`}
           >
-            <View className="size-full items-center justify-center">
-              <StepperGlyph kind="plus" color="#ffffff" />
-            </View>
-          </Button>
+            <StepperGlyph kind="plus" color="#ffffff" />
+          </Pressable>
         </View>
       </Card.Body>
     </Card>
@@ -180,10 +173,16 @@ function NumericCard({
 
 function StepperGlyph({ kind, color }: { kind: "plus" | "minus"; color: string }) {
   return (
-    <View className="size-5 items-center justify-center">
-      <View className="absolute w-3.5 h-0.5 rounded-full" style={{ backgroundColor: color }} />
+    <View className="size-5 relative">
+      <View
+        className="absolute rounded-full"
+        style={{ backgroundColor: color, width: 14, height: 2, left: 3, top: 9 }}
+      />
       {kind === "plus" ? (
-        <View className="absolute h-3.5 w-0.5 rounded-full" style={{ backgroundColor: color }} />
+        <View
+          className="absolute rounded-full"
+          style={{ backgroundColor: color, width: 2, height: 14, left: 9, top: 3 }}
+        />
       ) : null}
     </View>
   );
@@ -196,7 +195,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "gap-3" })}>
+      <Card.Body className={cardStyles.body({ className: "gap-3 px-4 py-4" })}>
         <View className="flex-row items-start gap-3">
           <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
             <AppIcon name={config.icon} color={config.color} size={18} />

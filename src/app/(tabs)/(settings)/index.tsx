@@ -1,5 +1,5 @@
 import * as Haptics from "expo-haptics";
-import { Alert, Platform, Text, View, ScrollView } from "react-native";
+import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
 import { Button, Card, Description, Label } from "heroui-native";
 
@@ -102,10 +102,16 @@ export default function SettingsScreen() {
 
 function StepperGlyph({ kind, color }: { kind: "plus" | "minus"; color: string }) {
   return (
-    <View className="size-5 items-center justify-center">
-      <View className="absolute w-3.5 h-0.5 rounded-full" style={{ backgroundColor: color }} />
+    <View className="size-5 relative">
+      <View
+        className="absolute rounded-full"
+        style={{ backgroundColor: color, width: 14, height: 2, left: 3, top: 9 }}
+      />
       {kind === "plus" ? (
-        <View className="absolute h-3.5 w-0.5 rounded-full" style={{ backgroundColor: color }} />
+        <View
+          className="absolute rounded-full"
+          style={{ backgroundColor: color, width: 2, height: 14, left: 9, top: 3 }}
+        />
       ) : null}
     </View>
   );
@@ -131,41 +137,33 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
         </View>
 
         <View className="flex-row items-center gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            isIconOnly
+          <Pressable
             onPress={() => {
               updateGoal(metric, Math.max(config.step, current - config.step));
             }}
-            isDisabled={current <= config.step}
+            disabled={current <= config.step}
+            accessibilityRole="button"
             accessibilityLabel={`Decrease ${config.label} goal`}
             className={`${stepperButton({ disabled: current <= config.step })} size-10 ${mc.bg10}`}
           >
-            <View className="size-full items-center justify-center">
-              <StepperGlyph kind="minus" color={config.color} />
-            </View>
-          </Button>
+            <StepperGlyph kind="minus" color={config.color} />
+          </Pressable>
 
           <View className="items-center min-w-12">
             <Text className={numericText({ size: "md" })}>{current}</Text>
             <Description className="text-sm">{unitLabel}</Description>
           </View>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            isIconOnly
+          <Pressable
             onPress={() => {
               updateGoal(metric, current + config.step);
             }}
+            accessibilityRole="button"
             accessibilityLabel={`Increase ${config.label} goal`}
             className={`${stepperButton()} size-10 ${mc.bg}`}
           >
-            <View className="size-full items-center justify-center">
-              <StepperGlyph kind="plus" color="#ffffff" />
-            </View>
-          </Button>
+            <StepperGlyph kind="plus" color="#ffffff" />
+          </Pressable>
         </View>
       </Card.Body>
     </Card>
