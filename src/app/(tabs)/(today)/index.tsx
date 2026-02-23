@@ -1,6 +1,7 @@
 import { ScrollView, Text, View } from "react-native";
 
 import { Button, Card, Description, Label } from "heroui-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_CONFIG, METRIC_KEYS, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
@@ -13,7 +14,6 @@ import {
 import { iconBadge, METRIC_TW, numericText, panel } from "@/lib/metric-theme";
 import { incrementMetric, useWellnessStore } from "@/store/wellness-store";
 
-const PLUS_ICON = { ios: "plus", android: "add", web: "add" } as const;
 
 export default function DashboardScreen() {
   const { entries, goals } = useWellnessStore();
@@ -42,7 +42,7 @@ export default function DashboardScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-4 pt-1 pb-20 gap-3"
+      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
     >
       <Description>{dateLabel}</Description>
 
@@ -135,8 +135,8 @@ export default function DashboardScreen() {
                 accessibilityLabel={`Quick add ${config.label}`}
                 className={`size-11 rounded-2xl ${mc.bg10}`}
               >
-                <View className="size-full items-center justify-center pt-0.5">
-                  <AppIcon name={PLUS_ICON} color={config.color} size={20} />
+                <View className="size-full items-center justify-center">
+                  <MaterialIcons name="add" color={config.color} size={22} />
                 </View>
               </Button>
             </Card.Body>

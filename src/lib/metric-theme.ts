@@ -19,12 +19,12 @@ export const numericText = tv({
 export const panel = tv({
   slots: {
     base: "rounded-3xl border border-foreground/10 bg-foreground/5",
-    body: "p-3"
+    body: "p-4",
   },
   variants: {
     density: {
-      sm: { body: "p-2" },
-      md: { body: "p-3" },
+      sm: { body: "p-3" },
+      md: { body: "p-4" },
     },
   },
   defaultVariants: {

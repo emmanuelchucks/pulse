@@ -52,7 +52,7 @@ export default function HistoryScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-4 pt-1 pb-20 gap-3"
+      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
     >
       <Description>Track your progress over time</Description>
 

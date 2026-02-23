@@ -11,8 +11,6 @@ import { METRIC_CONFIG, METRIC_KEYS } from "@/constants/metrics";
 import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
 import { clearAllData, updateGoal, useWellnessStore } from "@/store/wellness-store";
 
-const PLUS_ICON = { ios: "plus", android: "add", web: "add" } as const;
-const MINUS_ICON = { ios: "minus", android: "remove", web: "remove" } as const;
 
 export default function SettingsScreen() {
   const { entries, goals } = useWellnessStore();
@@ -47,7 +45,7 @@ export default function SettingsScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-4 pt-1 pb-20 gap-3"
+      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
     >
       <Description>Customize your goals</Description>
 
@@ -102,6 +100,17 @@ export default function SettingsScreen() {
   );
 }
 
+function StepperGlyph({ kind, color }: { kind: "plus" | "minus"; color: string }) {
+  return (
+    <View className="size-5 items-center justify-center">
+      <View className="absolute w-3.5 h-0.5 rounded-full" style={{ backgroundColor: color }} />
+      {kind === "plus" ? (
+        <View className="absolute h-3.5 w-0.5 rounded-full" style={{ backgroundColor: color }} />
+      ) : null}
+    </View>
+  );
+}
+
 function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const config = METRIC_CONFIG[metric];
   const current = goals[metric];
@@ -133,8 +142,8 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             accessibilityLabel={`Decrease ${config.label} goal`}
             className={`${stepperButton({ disabled: current <= config.step })} size-10 ${mc.bg10}`}
           >
-            <View className="size-full items-center justify-center pt-0.5">
-              <AppIcon name={MINUS_ICON} color={config.color} size={18} />
+            <View className="size-full items-center justify-center">
+              <StepperGlyph kind="minus" color={config.color} />
             </View>
           </Button>
 
@@ -153,8 +162,8 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             accessibilityLabel={`Increase ${config.label} goal`}
             className={`${stepperButton()} size-10 ${mc.bg}`}
           >
-            <View className="size-full items-center justify-center pt-0.5">
-              <AppIcon name={PLUS_ICON} color="#ffffff" size={18} />
+            <View className="size-full items-center justify-center">
+              <StepperGlyph kind="plus" color="#ffffff" />
             </View>
           </Button>
         </View>
