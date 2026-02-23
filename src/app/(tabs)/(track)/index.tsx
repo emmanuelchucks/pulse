@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { Alert, Platform, ScrollView, Text, View } from "react-native";
+import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
 import { Button, Card, Description } from "heroui-native";
 
@@ -201,27 +201,24 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
         {/* Mood selector */}
         <View className="flex-row items-center justify-around mt-4">
           {[1, 2, 3, 4, 5].map((mood) => (
-            <Button
+            <Pressable
               key={mood}
-              variant={value === mood ? "secondary" : "ghost"}
               onPress={() => {
                 updateMetric(todayStr, "mood", mood);
               }}
+              accessibilityRole="button"
               accessibilityLabel={`Mood ${MOOD_LABELS[mood]}`}
-              className={`items-center w-[52px] h-[52px] rounded-2xl ${
-                value === mood ? `${mc.bg10} border-2 ${mc.border}` : ""
-              }`}
+              className="items-center gap-1"
             >
-              <Text className="text-[26px]">{MOOD_EMOJIS[mood]}</Text>
-            </Button>
-          ))}
-        </View>
-        {/* Mood labels below buttons */}
-        <View className="flex-row items-center justify-around mt-1">
-          {[1, 2, 3, 4, 5].map((mood) => (
-            <Description key={mood} className="text-[10px] w-[52px] text-center">
-              {MOOD_LABELS[mood]}
-            </Description>
+              <View
+                className={`w-[52px] h-[52px] rounded-2xl items-center justify-center ${
+                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : ""
+                }`}
+              >
+                <Text className="text-[26px]">{MOOD_EMOJIS[mood]}</Text>
+              </View>
+              <Description className="text-[10px]">{MOOD_LABELS[mood]}</Description>
+            </Pressable>
           ))}
         </View>
       </Card.Body>
