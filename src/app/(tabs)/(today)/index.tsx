@@ -32,37 +32,39 @@ export default function DashboardScreen() {
   const weeklyRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
   const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
   const greeting = getGreeting();
+  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
 
   return (
     <ScrollView
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pb-10 gap-3"
+      contentContainerClassName="px-5 pt-1 pb-28 gap-4"
     >
-      <Description className="mt-1">{dateLabel}</Description>
+      <Description>{dateLabel}</Description>
 
-      {/* Summary card */}
-      <Card>
-        <Card.Body className="flex-row items-center gap-4">
+      <Card className={surface}>
+        <Card.Body className="p-4 flex-row items-center gap-4">
           <View
-            className={`size-[76px] rounded-full border-[5px] items-center justify-center ${
+            className={`size-20 rounded-full border-[5px] items-center justify-center ${
               overall >= 100 ? "border-emerald-400" : "border-[#0a84ff]"
             }`}
           >
             <Text className={numericText({ size: "md" })}>{overall}%</Text>
           </View>
-          <View className="flex-1 gap-0.5">
+
+          <View className="flex-1 gap-1">
             <Card.Title>{greeting}</Card.Title>
             <Card.Description>
               {completed}/{METRIC_KEYS.length} goals met today
             </Card.Description>
-            <View className="flex-row items-center gap-4 mt-2">
-              <Chip variant="secondary" size="sm" color="default">
-                <Chip.Label>Weekly {weeklyRate}%</Chip.Label>
+
+            <View className="flex-row items-center gap-2 mt-2 flex-wrap">
+              <Chip size="sm" variant="secondary" className="rounded-full">
+                <Chip.Label className="text-foreground">Weekly {weeklyRate}%</Chip.Label>
               </Chip>
-              <Chip variant="secondary" size="sm" color="default">
-                <Chip.Label>
+              <Chip size="sm" variant="secondary" className="rounded-full">
+                <Chip.Label className="text-foreground">
                   Best {bestStreak} {bestStreak === 1 ? "day" : "days"}
                 </Chip.Label>
               </Chip>
@@ -71,21 +73,16 @@ export default function DashboardScreen() {
         </Card.Body>
       </Card>
 
-      {/* Streak bar */}
-      <Card>
-        <Card.Body className="flex-row items-center justify-around py-0.5">
+      <Card className={surface}>
+        <Card.Body className="p-4 flex-row items-center justify-between">
           {METRIC_KEYS.map((key) => {
             const config = METRIC_CONFIG[key];
             const streak = getStreak(entries, goals, { metric: key });
+
             return (
-              <View key={key} className="items-center gap-1 py-0.5">
+              <View key={key} className="items-center gap-1">
                 <AppIcon name={config.icon} color={config.color} size={16} />
-                <Text
-                  className={numericText({ size: "xs", className: "font-bold" })}
-                  selectable
-                >
-                  {streak}
-                </Text>
+                <Text className={numericText({ size: "xs", className: "font-bold" })}>{streak}</Text>
                 <Description className="text-[10px]">streak</Description>
               </View>
             );
@@ -93,13 +90,11 @@ export default function DashboardScreen() {
         </Card.Body>
       </Card>
 
-      {/* Section header */}
-      <View className="px-1 mt-1">
+      <View className="px-1 gap-0.5">
         <Label className="text-xl font-bold">Today&apos;s Metrics</Label>
-        <Description className="mt-0.5">Tap + to quick-add</Description>
+        <Description>Tap + to quick-add</Description>
       </View>
 
-      {/* Metric cards */}
       {METRIC_KEYS.map((key) => {
         const config = METRIC_CONFIG[key];
         const mc = METRIC_TW[key];
@@ -111,31 +106,32 @@ export default function DashboardScreen() {
         const unit = key === "mood" ? "" : `/${goal} ${config.unit}`;
 
         return (
-          <Card key={key}>
-            <Card.Body className="flex-row items-center gap-3.5">
-              <View className="items-center">
+          <Card key={key} className={surface}>
+            <Card.Body className="p-4 flex-row items-center gap-3">
+              <View className="items-center gap-1.5">
                 <View
                   className={`w-12 h-12 rounded-[14px] items-center justify-center ${mc.bg10}`}
                   style={{ borderCurve: "continuous" }}
                 >
                   <AppIcon name={config.icon} color={config.color} size={22} />
                 </View>
-                <View className={`w-10 h-1 rounded-full mt-1.5 ${mc.bg15}`}>
+
+                <View className={`w-10 h-1 rounded-full ${mc.bg15}`}>
                   <View
                     className={`h-1 rounded-full ${mc.bg}`}
                     style={{ width: `${Math.round(pct * 100)}%` }}
                   />
                 </View>
               </View>
-              <View className="flex-1">
+
+              <View className="flex-1 gap-0.5">
                 <Description className="font-medium">{config.label}</Description>
                 <View className="flex-row items-baseline gap-2">
-                  <Text className={numericText({ size: "lg" })} selectable>
-                    {display}
-                  </Text>
+                  <Text className={numericText({ size: "lg" })}>{display}</Text>
                   <Description className="text-[11px]">{unit}</Description>
                 </View>
               </View>
+
               <Button
                 size="sm"
                 variant="ghost"
@@ -144,9 +140,9 @@ export default function DashboardScreen() {
                   incrementMetric(todayStr, key);
                 }}
                 accessibilityLabel={`Quick add ${config.label}`}
-                className={`w-10 h-10 rounded-xl ${mc.bg10}`}
+                className={`w-11 h-11 rounded-[14px] ${mc.bg10}`}
               >
-                <Button.Label className={`text-[20px] font-bold ${mc.text}`}>+</Button.Label>
+                <Button.Label className={`text-[22px] font-bold ${mc.text}`}>+</Button.Label>
               </Button>
             </Card.Body>
           </Card>

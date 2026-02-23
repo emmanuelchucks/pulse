@@ -37,58 +37,56 @@ export default function SettingsScreen() {
   };
 
   const totalEntries = Object.keys(entries).length;
+  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
 
   return (
     <ScrollView
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pb-10 gap-3"
+      contentContainerClassName="px-5 pt-1 pb-28 gap-4"
     >
       <Description>Customize your goals</Description>
 
-      {/* Section header */}
-      <View className="px-1 mt-1">
+      <View className="px-1 gap-0.5">
         <Label className="text-xl font-bold">Daily Goals</Label>
-        <Description className="mt-0.5">Adjust targets for each metric</Description>
+        <Description>Adjust targets for each metric</Description>
       </View>
 
-      {/* Goal cards */}
       {METRIC_KEYS.map((key) => (
         <GoalCard key={key} metric={key} goals={goals} />
       ))}
 
-      {/* Data section */}
-      <View className="px-1 mt-3">
+      <View className="px-1 mt-1">
         <Label className="text-xl font-bold">Data</Label>
       </View>
 
-      <Card>
-        <Card.Body className="gap-3.5">
+      <Card className={surface}>
+        <Card.Body className="p-4 gap-3.5">
           <View className="flex-row items-center justify-between">
             <Description>Days tracked</Description>
-            <Text className={numericText({ size: "xs", className: "font-semibold" })} selectable>
+            <Text className={numericText({ size: "xs", className: "font-semibold" })}>
               {totalEntries}
             </Text>
           </View>
+
           <Button
-            variant="danger"
+            variant="danger-soft"
             onPress={handleClearData}
             accessibilityLabel="Clear All Data"
-            className="w-full"
+            className="w-full rounded-xl"
           >
             <Button.Label>Clear All Data</Button.Label>
           </Button>
         </Card.Body>
       </Card>
 
-      {/* About section */}
-      <View className="px-1 mt-3">
+      <View className="px-1 mt-1">
         <Label className="text-xl font-bold">About</Label>
       </View>
 
-      <Card>
-        <Card.Body className="gap-1.5">
+      <Card className={surface}>
+        <Card.Body className="p-4 gap-1.5">
           <Card.Title className="text-[15px]">Pulse</Card.Title>
           <Card.Description className="leading-5">
             Your daily wellness companion. Track water intake, mood, sleep, and exercise to build
@@ -105,23 +103,24 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const config = METRIC_CONFIG[metric];
   const current = goals[metric];
   const mc = METRIC_TW[metric];
+  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
 
   return (
-    <Card>
-      <Card.Body className="flex-row items-center gap-3">
+    <Card className={surface}>
+      <Card.Body className="p-4 flex-row items-center gap-3">
         <View
-          className={`w-[38px] h-[38px] rounded-[11px] items-center justify-center ${mc.bg10}`}
+          className={`w-[40px] h-[40px] rounded-[12px] items-center justify-center ${mc.bg10}`}
           style={{ borderCurve: "continuous" }}
         >
           <AppIcon name={config.icon} color={config.color} size={18} />
         </View>
 
-        <View className="flex-1">
+        <View className="flex-1 gap-0.5">
           <Card.Title className="text-[15px]">{config.label}</Card.Title>
           <Description className="text-[11px]">Daily goal</Description>
         </View>
 
-        <View className="flex-row items-center gap-2.5">
+        <View className="flex-row items-center gap-2">
           <Button
             size="sm"
             variant="ghost"
@@ -131,27 +130,27 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             }}
             isDisabled={current <= config.step}
             accessibilityLabel={`Decrease ${config.label} goal`}
-            className={`w-[34px] h-[34px] rounded-[10px] ${mc.bg10}`}
+            className={`w-9 h-9 rounded-[11px] ${mc.bg10}`}
           >
             <Button.Label className={`text-[18px] font-bold ${mc.text}`}>−</Button.Label>
           </Button>
 
-          <View className="items-center min-w-[44px]">
+          <View className="items-center min-w-[48px]">
             <Text className={numericText({ size: "md" })}>{current}</Text>
             <Description className="text-[10px]">{config.unit}</Description>
           </View>
 
           <Button
             size="sm"
-            variant="primary"
+            variant="ghost"
             isIconOnly
             onPress={() => {
               updateGoal(metric, current + config.step);
             }}
             accessibilityLabel={`Increase ${config.label} goal`}
-            className={`w-[34px] h-[34px] rounded-[10px] ${mc.bg}`}
+            className={`w-9 h-9 rounded-[11px] ${mc.bg}`}
           >
-            <Button.Label className="text-[16px] font-bold text-white">+</Button.Label>
+            <Button.Label className="text-[17px] font-bold text-white">+</Button.Label>
           </Button>
         </View>
       </Card.Body>
