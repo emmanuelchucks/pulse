@@ -1,5 +1,5 @@
 import * as Haptics from "expo-haptics";
-import { Alert, Platform, ScrollView, Text, View } from "react-native";
+import { Alert, Platform, Text, View, ScrollView } from "react-native";
 
 import { Button, Card, Description, Label } from "heroui-native";
 
@@ -7,12 +7,16 @@ import type { MetricKey } from "@/constants/metrics";
 import type { Goals } from "@/db/types";
 
 import { AppIcon } from "@/components/ui/app-icon";
-import { METRIC_KEYS, METRIC_CONFIG } from "@/constants/metrics";
-import { numericText, METRIC_TW } from "@/lib/metric-theme";
-import { useWellnessStore, updateGoal, clearAllData } from "@/store/wellness-store";
+import { METRIC_CONFIG, METRIC_KEYS } from "@/constants/metrics";
+import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
+import { clearAllData, updateGoal, useWellnessStore } from "@/store/wellness-store";
+
+const PLUS_ICON = { ios: "plus", android: "add", web: "add" } as const;
+const MINUS_ICON = { ios: "minus", android: "remove", web: "remove" } as const;
 
 export default function SettingsScreen() {
   const { entries, goals } = useWellnessStore();
+  const cardStyles = panel();
 
   const handleClearData = () => {
     Alert.alert(
@@ -37,14 +41,13 @@ export default function SettingsScreen() {
   };
 
   const totalEntries = Object.keys(entries).length;
-  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
 
   return (
     <ScrollView
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pt-1 pb-28 gap-4"
+      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
     >
       <Description>Customize your goals</Description>
 
@@ -61,8 +64,8 @@ export default function SettingsScreen() {
         <Label className="text-xl font-bold">Data</Label>
       </View>
 
-      <Card className={surface}>
-        <Card.Body className="p-4 gap-3.5">
+      <Card className={cardStyles.base()}>
+        <Card.Body className={cardStyles.body({ className: "gap-3.5" })}>
           <View className="flex-row items-center justify-between">
             <Description>Days tracked</Description>
             <Text className={numericText({ size: "xs", className: "font-semibold" })}>
@@ -71,12 +74,12 @@ export default function SettingsScreen() {
           </View>
 
           <Button
-            variant="danger-soft"
+            variant="ghost"
             onPress={handleClearData}
             accessibilityLabel="Clear All Data"
-            className="w-full rounded-xl"
+            className="h-11 rounded-xl border border-red-500/60 bg-red-500/20"
           >
-            <Button.Label>Clear All Data</Button.Label>
+            <Button.Label className="text-red-200 font-semibold">Clear All Data</Button.Label>
           </Button>
         </Card.Body>
       </Card>
@@ -85,14 +88,14 @@ export default function SettingsScreen() {
         <Label className="text-xl font-bold">About</Label>
       </View>
 
-      <Card className={surface}>
-        <Card.Body className="p-4 gap-1.5">
-          <Card.Title className="text-[15px]">Pulse</Card.Title>
-          <Card.Description className="leading-5">
+      <Card className={cardStyles.base()}>
+        <Card.Body className={cardStyles.body({ className: "gap-1.5" })}>
+          <Card.Title className="text-lg">Pulse</Card.Title>
+          <Card.Description className="leading-6">
             Your daily wellness companion. Track water intake, mood, sleep, and exercise to build
             healthier habits.
           </Card.Description>
-          <Description className="mt-1.5 text-[11px]">Version 1.0.0</Description>
+          <Description className="pt-1 text-sm">Version 1.0.0</Description>
         </Card.Body>
       </Card>
     </ScrollView>
@@ -103,21 +106,18 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const config = METRIC_CONFIG[metric];
   const current = goals[metric];
   const mc = METRIC_TW[metric];
-  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
+  const cardStyles = panel();
 
   return (
-    <Card className={surface}>
-      <Card.Body className="p-4 flex-row items-center gap-3">
-        <View
-          className={`w-[40px] h-[40px] rounded-[12px] items-center justify-center ${mc.bg10}`}
-          style={{ borderCurve: "continuous" }}
-        >
+    <Card className={cardStyles.base()}>
+      <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-3" })}>
+        <View className={`${iconBadge()} ${mc.bg10}`}>
           <AppIcon name={config.icon} color={config.color} size={18} />
         </View>
 
         <View className="flex-1 gap-0.5">
-          <Card.Title className="text-[15px]">{config.label}</Card.Title>
-          <Description className="text-[11px]">Daily goal</Description>
+          <Card.Title className="text-lg">{config.label}</Card.Title>
+          <Description className="text-sm">Daily goal</Description>
         </View>
 
         <View className="flex-row items-center gap-2">
@@ -130,14 +130,14 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             }}
             isDisabled={current <= config.step}
             accessibilityLabel={`Decrease ${config.label} goal`}
-            className={`w-9 h-9 rounded-[11px] ${mc.bg10}`}
+            className={`${stepperButton({ disabled: current <= config.step })} size-10 ${mc.bg10}`}
           >
-            <Button.Label className={`text-[18px] font-bold ${mc.text}`}>−</Button.Label>
+            <AppIcon name={MINUS_ICON} color={config.color} size={18} />
           </Button>
 
-          <View className="items-center min-w-[48px]">
+          <View className="items-center min-w-12">
             <Text className={numericText({ size: "md" })}>{current}</Text>
-            <Description className="text-[10px]">{config.unit}</Description>
+            <Description className="text-sm">{config.unit}</Description>
           </View>
 
           <Button
@@ -148,9 +148,9 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
               updateGoal(metric, current + config.step);
             }}
             accessibilityLabel={`Increase ${config.label} goal`}
-            className={`w-9 h-9 rounded-[11px] ${mc.bg}`}
+            className={`${stepperButton()} size-10 ${mc.bg}`}
           >
-            <Button.Label className="text-[17px] font-bold text-white">+</Button.Label>
+            <AppIcon name={PLUS_ICON} color="#ffffff" size={18} />
           </Button>
         </View>
       </Card.Body>

@@ -3,17 +3,60 @@ import { tv } from "tailwind-variants";
 import type { MetricKey } from "@/constants/metrics";
 
 export const numericText = tv({
-  base: "font-extrabold text-foreground tabular-nums",
+  base: "font-extrabold tabular-nums text-foreground",
   variants: {
     size: {
-      xl: "text-[32px]",
-      lg: "text-[21px]",
-      md: "text-[17px]",
-      sm: "text-[15px]",
-      xs: "text-[13px]",
+      xl: "text-5xl",
+      lg: "text-3xl",
+      md: "text-2xl",
+      sm: "text-xl",
+      xs: "text-base",
     },
   },
   defaultVariants: { size: "md" },
+});
+
+export const panel = tv({
+  slots: {
+    base: "rounded-3xl border border-foreground/10 bg-foreground/5",
+    body: "p-4",
+  },
+  variants: {
+    density: {
+      sm: { body: "p-3" },
+      md: { body: "p-4" },
+    },
+  },
+  defaultVariants: {
+    density: "md",
+  },
+});
+
+export const iconBadge = tv({
+  base: "rounded-2xl items-center justify-center",
+  variants: {
+    size: {
+      sm: "size-10",
+      md: "size-11",
+      lg: "size-12",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+
+export const stepperButton = tv({
+  base: "size-12 rounded-2xl items-center justify-center",
+  variants: {
+    disabled: {
+      true: "opacity-35",
+      false: "opacity-100",
+    },
+  },
+  defaultVariants: {
+    disabled: false,
+  },
 });
 
 type MetricColors = {

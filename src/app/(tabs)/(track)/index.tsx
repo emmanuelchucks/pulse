@@ -9,21 +9,29 @@ import type { DailyEntry, Goals } from "@/db/types";
 
 import { AppIcon } from "@/components/ui/app-icon";
 import {
-  METRIC_KEYS,
   METRIC_CONFIG,
+  METRIC_KEYS,
   MOOD_EMOJIS,
   MOOD_LABELS,
   formatDate,
 } from "@/constants/metrics";
 import { getEntry } from "@/features/wellness/domain/analytics";
-import { numericText, METRIC_TW } from "@/lib/metric-theme";
+import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
 import {
-  useWellnessStore,
-  incrementMetric,
   decrementMetric,
-  updateMetric,
+  incrementMetric,
   resetDay,
+  updateMetric,
+  useWellnessStore,
 } from "@/store/wellness-store";
+
+const RESET_ICON = {
+  ios: "arrow.counterclockwise",
+  android: "restart_alt",
+  web: "restart_alt",
+} as const;
+const PLUS_ICON = { ios: "plus", android: "add", web: "add" } as const;
+const MINUS_ICON = { ios: "minus", android: "remove", web: "remove" } as const;
 
 export default function TrackScreen() {
   const { entries, goals } = useWellnessStore();
@@ -52,17 +60,13 @@ export default function TrackScreen() {
           headerRight: () => (
             <Button
               size="sm"
-              variant="danger-soft"
+              variant="ghost"
               onPress={handleReset}
               accessibilityLabel="Reset Day"
-              className="rounded-xl"
+              className="h-9 rounded-full px-3 border border-red-500/60 bg-red-500/20"
             >
-              <AppIcon
-                name={{ ios: "arrow.counterclockwise", android: "restart_alt", web: "restart_alt" }}
-                color="#ff3b30"
-                size={13}
-              />
-              <Button.Label>Reset</Button.Label>
+              <AppIcon name={RESET_ICON} color="#fb7185" size={14} />
+              <Button.Label className="text-red-300">Reset</Button.Label>
             </Button>
           ),
         }}
@@ -72,7 +76,7 @@ export default function TrackScreen() {
         className="flex-1 bg-background"
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="px-5 pt-1 pb-28 gap-4"
+        contentContainerClassName="px-5 pt-1 pb-20 gap-4"
       >
         <Description>Log your daily wellness</Description>
 
@@ -107,33 +111,30 @@ function NumericCard({
   const goal = goals[metric];
   const pct = Math.round(Math.min(goal > 0 ? value / goal : 0, 1) * 100);
   const mc = METRIC_TW[metric];
-  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
+  const cardStyles = panel();
 
   return (
-    <Card className={surface}>
-      <Card.Body className="p-4 gap-4">
+    <Card className={cardStyles.base()}>
+      <Card.Body className={cardStyles.body({ className: "gap-4" })}>
         <View className="flex-row items-center gap-3">
-          <View
-            className={`w-11 h-11 rounded-[12px] items-center justify-center ${mc.bg10}`}
-            style={{ borderCurve: "continuous" }}
-          >
+          <View className={`${iconBadge()} ${mc.bg10}`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
           </View>
 
           <View className="flex-1 gap-0.5">
-            <Card.Title className="text-[15px]">{config.label}</Card.Title>
-            <Description className="text-[12px]">
+            <Card.Title className="text-lg">{config.label}</Card.Title>
+            <Description>
               Goal: {goal} {config.unit}
             </Description>
           </View>
 
-          <Text className={`text-[14px] font-bold tabular-nums ${pct > 0 ? mc.text : "text-muted"}`}>
+          <Text className={`text-3xl font-bold tabular-nums ${pct > 0 ? mc.text : "text-muted"}`}>
             {pct}%
           </Text>
         </View>
 
-        <View className={`h-[6px] rounded-full ${mc.bg10}`}>
-          <View className={`h-[6px] rounded-full ${mc.bg}`} style={{ width: `${pct}%` }} />
+        <View className={`h-1.5 rounded-full ${mc.bg10}`}>
+          <View className={`h-1.5 rounded-full ${mc.bg}`} style={{ width: `${pct}%` }} />
         </View>
 
         <View className="flex-row items-center justify-between">
@@ -146,14 +147,14 @@ function NumericCard({
             }}
             isDisabled={value <= config.min}
             accessibilityLabel={`Decrease ${config.label}`}
-            className={`w-12 h-12 rounded-[14px] ${mc.bg10}`}
+            className={`${stepperButton({ disabled: value <= config.min })} ${mc.bg10}`}
           >
-            <Button.Label className={`text-[24px] leading-none font-bold ${mc.text}`}>−</Button.Label>
+            <AppIcon name={MINUS_ICON} color={config.color} size={20} />
           </Button>
 
-          <View className="items-center min-w-[84px]">
+          <View className="items-center min-w-20">
             <Text className={numericText({ size: "xl" })}>{value}</Text>
-            <Description className="text-[13px]">{config.unit}</Description>
+            <Description className="text-base">{config.unit}</Description>
           </View>
 
           <Button
@@ -165,9 +166,9 @@ function NumericCard({
             }}
             isDisabled={value >= config.max}
             accessibilityLabel={`Increase ${config.label}`}
-            className={`w-12 h-12 rounded-[14px] ${mc.bg}`}
+            className={`${stepperButton({ disabled: value >= config.max })} ${mc.bg}`}
           >
-            <Button.Label className="text-[24px] leading-none font-bold text-white">+</Button.Label>
+            <AppIcon name={PLUS_ICON} color="#ffffff" size={20} />
           </Button>
         </View>
       </Card.Body>
@@ -178,22 +179,19 @@ function NumericCard({
 function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
   const config = METRIC_CONFIG.mood;
   const mc = METRIC_TW.mood;
-  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
+  const cardStyles = panel();
 
   return (
-    <Card className={surface}>
-      <Card.Body className="p-4 gap-4">
+    <Card className={cardStyles.base()}>
+      <Card.Body className={cardStyles.body({ className: "gap-4" })}>
         <View className="flex-row items-center gap-3">
-          <View
-            className={`w-11 h-11 rounded-[12px] items-center justify-center ${mc.bg10}`}
-            style={{ borderCurve: "continuous" }}
-          >
+          <View className={`${iconBadge()} ${mc.bg10}`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
           </View>
 
           <View className="gap-0.5">
-            <Card.Title className="text-[15px]">How are you feeling?</Card.Title>
-            <Description className="text-[12px]">
+            <Card.Title className="text-lg">How are you feeling?</Card.Title>
+            <Description>
               {value > 0 ? `${MOOD_LABELS[value]} ${MOOD_EMOJIS[value]}` : "Tap to log your mood"}
             </Description>
           </View>
@@ -211,13 +209,13 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
               className="items-center gap-1"
             >
               <View
-                className={`w-12 h-12 rounded-[14px] items-center justify-center ${
-                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : "bg-muted/30"
+                className={`size-12 rounded-2xl items-center justify-center ${
+                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : "bg-muted/40"
                 }`}
               >
-                <Text className="text-[25px]">{MOOD_EMOJIS[mood]}</Text>
+                <Text className="text-3xl">{MOOD_EMOJIS[mood]}</Text>
               </View>
-              <Description className="text-[10px]">{MOOD_LABELS[mood]}</Description>
+              <Description className="text-sm">{MOOD_LABELS[mood]}</Description>
             </Pressable>
           ))}
         </View>

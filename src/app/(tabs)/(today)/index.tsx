@@ -3,15 +3,17 @@ import { ScrollView, Text, View } from "react-native";
 import { Button, Card, Chip, Description, Label } from "heroui-native";
 
 import { AppIcon } from "@/components/ui/app-icon";
-import { METRIC_KEYS, METRIC_CONFIG, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
+import { METRIC_CONFIG, METRIC_KEYS, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
 import {
+  getCompletionRate,
   getEntry,
   getProgress,
   getStreak,
-  getCompletionRate,
 } from "@/features/wellness/domain/analytics";
-import { numericText, METRIC_TW } from "@/lib/metric-theme";
-import { useWellnessStore, incrementMetric } from "@/store/wellness-store";
+import { iconBadge, METRIC_TW, numericText, panel } from "@/lib/metric-theme";
+import { incrementMetric, useWellnessStore } from "@/store/wellness-store";
+
+const PLUS_ICON = { ios: "plus", android: "add", web: "add" } as const;
 
 export default function DashboardScreen() {
   const { entries, goals } = useWellnessStore();
@@ -32,24 +34,21 @@ export default function DashboardScreen() {
   const weeklyRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
   const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
   const greeting = getGreeting();
-  const surface = "rounded-[22px] border border-foreground/10 bg-foreground/[0.03]";
+  const summaryBorder = overall >= 100 ? "border-emerald-400" : "border-primary";
+  const cardStyles = panel();
 
   return (
     <ScrollView
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pt-1 pb-28 gap-4"
+      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
     >
       <Description>{dateLabel}</Description>
 
-      <Card className={surface}>
-        <Card.Body className="p-4 flex-row items-center gap-4">
-          <View
-            className={`size-20 rounded-full border-[5px] items-center justify-center ${
-              overall >= 100 ? "border-emerald-400" : "border-[#0a84ff]"
-            }`}
-          >
+      <Card className={cardStyles.base()}>
+        <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-4" })}>
+          <View className={`size-20 rounded-full border-4 items-center justify-center ${summaryBorder}`}>
             <Text className={numericText({ size: "md" })}>{overall}%</Text>
           </View>
 
@@ -59,12 +58,12 @@ export default function DashboardScreen() {
               {completed}/{METRIC_KEYS.length} goals met today
             </Card.Description>
 
-            <View className="flex-row items-center gap-2 mt-2 flex-wrap">
+            <View className="flex-row flex-wrap items-center gap-2 pt-1">
               <Chip size="sm" variant="secondary" className="rounded-full">
-                <Chip.Label className="text-foreground">Weekly {weeklyRate}%</Chip.Label>
+                <Chip.Label>Weekly {weeklyRate}%</Chip.Label>
               </Chip>
               <Chip size="sm" variant="secondary" className="rounded-full">
-                <Chip.Label className="text-foreground">
+                <Chip.Label>
                   Best {bestStreak} {bestStreak === 1 ? "day" : "days"}
                 </Chip.Label>
               </Chip>
@@ -73,8 +72,8 @@ export default function DashboardScreen() {
         </Card.Body>
       </Card>
 
-      <Card className={surface}>
-        <Card.Body className="p-4 flex-row items-center justify-between">
+      <Card className={cardStyles.base()}>
+        <Card.Body className={cardStyles.body({ className: "flex-row items-center justify-between" })}>
           {METRIC_KEYS.map((key) => {
             const config = METRIC_CONFIG[key];
             const streak = getStreak(entries, goals, { metric: key });
@@ -83,7 +82,7 @@ export default function DashboardScreen() {
               <View key={key} className="items-center gap-1">
                 <AppIcon name={config.icon} color={config.color} size={16} />
                 <Text className={numericText({ size: "xs", className: "font-bold" })}>{streak}</Text>
-                <Description className="text-[10px]">streak</Description>
+                <Description className="text-xs">streak</Description>
               </View>
             );
           })}
@@ -106,13 +105,10 @@ export default function DashboardScreen() {
         const unit = key === "mood" ? "" : `/${goal} ${config.unit}`;
 
         return (
-          <Card key={key} className={surface}>
-            <Card.Body className="p-4 flex-row items-center gap-3">
+          <Card key={key} className={cardStyles.base()}>
+            <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-3" })}>
               <View className="items-center gap-1.5">
-                <View
-                  className={`w-12 h-12 rounded-[14px] items-center justify-center ${mc.bg10}`}
-                  style={{ borderCurve: "continuous" }}
-                >
+                <View className={`${iconBadge({ size: "lg" })} ${mc.bg10}`}>
                   <AppIcon name={config.icon} color={config.color} size={22} />
                 </View>
 
@@ -128,7 +124,7 @@ export default function DashboardScreen() {
                 <Description className="font-medium">{config.label}</Description>
                 <View className="flex-row items-baseline gap-2">
                   <Text className={numericText({ size: "lg" })}>{display}</Text>
-                  <Description className="text-[11px]">{unit}</Description>
+                  <Description className="text-sm">{unit}</Description>
                 </View>
               </View>
 
@@ -140,9 +136,9 @@ export default function DashboardScreen() {
                   incrementMetric(todayStr, key);
                 }}
                 accessibilityLabel={`Quick add ${config.label}`}
-                className={`w-11 h-11 rounded-[14px] ${mc.bg10}`}
+                className={`size-11 rounded-2xl ${mc.bg10}`}
               >
-                <Button.Label className={`text-[22px] font-bold ${mc.text}`}>+</Button.Label>
+                <AppIcon name={PLUS_ICON} color={config.color} size={20} />
               </Button>
             </Card.Body>
           </Card>
