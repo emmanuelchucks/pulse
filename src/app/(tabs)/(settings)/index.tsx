@@ -106,6 +106,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const config = METRIC_CONFIG[metric];
   const current = goals[metric];
   const mc = METRIC_TW[metric];
+  const unitLabel = config.unit || "level";
   const cardStyles = panel();
 
   return (
@@ -132,12 +133,14 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             accessibilityLabel={`Decrease ${config.label} goal`}
             className={`${stepperButton({ disabled: current <= config.step })} size-10 ${mc.bg10}`}
           >
-            <AppIcon name={MINUS_ICON} color={config.color} size={18} />
+            <View className="size-full items-center justify-center">
+              <AppIcon name={MINUS_ICON} color={config.color} size={18} />
+            </View>
           </Button>
 
           <View className="items-center min-w-12">
             <Text className={numericText({ size: "md" })}>{current}</Text>
-            <Description className="text-sm">{config.unit}</Description>
+            <Description className="text-sm">{unitLabel}</Description>
           </View>
 
           <Button
@@ -150,7 +153,9 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             accessibilityLabel={`Increase ${config.label} goal`}
             className={`${stepperButton()} size-10 ${mc.bg}`}
           >
-            <AppIcon name={PLUS_ICON} color="#ffffff" size={18} />
+            <View className="size-full items-center justify-center">
+              <AppIcon name={PLUS_ICON} color="#ffffff" size={18} />
+            </View>
           </Button>
         </View>
       </Card.Body>

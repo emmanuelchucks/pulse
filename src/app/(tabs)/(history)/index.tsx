@@ -37,6 +37,7 @@ export default function HistoryScreen() {
   const { entries, goals } = useWellnessStore();
   const [referenceDate, dispatch] = useReducer(weekReducer, new Date());
   const cardStyles = panel();
+  const compactCard = panel({ density: "sm" });
 
   const completionRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
   const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
@@ -137,8 +138,8 @@ export default function HistoryScreen() {
 
           return (
             <View key={key} className="w-1/2 px-1.5">
-              <Card className={cardStyles.base()}>
-                <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-2" })}>
+              <Card className={compactCard.base()}>
+                <Card.Body className={compactCard.body({ className: "flex-row items-center gap-2" })}>
                   <AppIcon name={config.icon} color={config.color} size={14} />
                   <View>
                     <Description className="text-sm">{config.label}</Description>
@@ -172,7 +173,7 @@ function WeekChart({
   const values = weekDates.map((d) => getEntry(entries, formatDate(d))[metric]);
   const maxVal = Math.max(...values, goal);
   const mc = METRIC_TW[metric];
-  const cardStyles = panel();
+  const cardStyles = panel({ density: "sm" });
 
   const average =
     values.filter((v) => v > 0).length > 0

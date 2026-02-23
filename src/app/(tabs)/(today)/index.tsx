@@ -34,7 +34,7 @@ export default function DashboardScreen() {
   const weeklyRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
   const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
   const greeting = getGreeting();
-  const summaryBorder = overall >= 100 ? "border-emerald-400" : "border-primary";
+  const summaryBorder = overall >= 100 ? "border-emerald-400" : "border-water";
   const cardStyles = panel();
 
   return (
@@ -59,11 +59,11 @@ export default function DashboardScreen() {
             </Card.Description>
 
             <View className="flex-row flex-wrap items-center gap-2 pt-1">
-              <Chip size="sm" variant="secondary" className="rounded-full">
-                <Chip.Label>Weekly {weeklyRate}%</Chip.Label>
+              <Chip size="sm" variant="secondary" className="rounded-full bg-foreground/10">
+                <Chip.Label className="text-foreground">Weekly {weeklyRate}%</Chip.Label>
               </Chip>
-              <Chip size="sm" variant="secondary" className="rounded-full">
-                <Chip.Label>
+              <Chip size="sm" variant="secondary" className="rounded-full bg-foreground/10">
+                <Chip.Label className="text-foreground">
                   Best {bestStreak} {bestStreak === 1 ? "day" : "days"}
                 </Chip.Label>
               </Chip>
@@ -138,7 +138,9 @@ export default function DashboardScreen() {
                 accessibilityLabel={`Quick add ${config.label}`}
                 className={`size-11 rounded-2xl ${mc.bg10}`}
               >
-                <AppIcon name={PLUS_ICON} color={config.color} size={20} />
+                <View className="size-full items-center justify-center">
+                  <AppIcon name={PLUS_ICON} color={config.color} size={20} />
+                </View>
               </Button>
             </Card.Body>
           </Card>

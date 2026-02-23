@@ -60,12 +60,12 @@ export default function TrackScreen() {
           headerRight: () => (
             <Button
               size="sm"
-              variant="ghost"
+              variant="danger-soft"
               onPress={handleReset}
               accessibilityLabel="Reset Day"
-              className="h-9 rounded-full px-3 border border-red-500/60 bg-red-500/20"
+              className="h-9 rounded-full px-3"
             >
-              <AppIcon name={RESET_ICON} color="#fb7185" size={14} />
+              <AppIcon name={RESET_ICON} color="#f87171" size={14} />
               <Button.Label className="text-red-300">Reset</Button.Label>
             </Button>
           ),
@@ -149,12 +149,14 @@ function NumericCard({
             accessibilityLabel={`Decrease ${config.label}`}
             className={`${stepperButton({ disabled: value <= config.min })} ${mc.bg10}`}
           >
-            <AppIcon name={MINUS_ICON} color={config.color} size={20} />
+            <View className="size-full items-center justify-center">
+              <AppIcon name={MINUS_ICON} color={config.color} size={20} />
+            </View>
           </Button>
 
           <View className="items-center min-w-20">
-            <Text className={numericText({ size: "xl" })}>{value}</Text>
-            <Description className="text-base">{config.unit}</Description>
+            <Text className={numericText({ size: "lg" })}>{value}</Text>
+            <Description>{config.unit}</Description>
           </View>
 
           <Button
@@ -168,7 +170,9 @@ function NumericCard({
             accessibilityLabel={`Increase ${config.label}`}
             className={`${stepperButton({ disabled: value >= config.max })} ${mc.bg}`}
           >
-            <AppIcon name={PLUS_ICON} color="#ffffff" size={20} />
+            <View className="size-full items-center justify-center">
+              <AppIcon name={PLUS_ICON} color="#ffffff" size={20} />
+            </View>
           </Button>
         </View>
       </Card.Body>
@@ -210,7 +214,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
             >
               <View
                 className={`size-12 rounded-2xl items-center justify-center ${
-                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : "bg-muted/40"
+                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : "bg-muted/25"
                 }`}
               >
                 <Text className="text-3xl">{MOOD_EMOJIS[mood]}</Text>

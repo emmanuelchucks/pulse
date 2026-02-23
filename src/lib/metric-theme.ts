@@ -6,10 +6,10 @@ export const numericText = tv({
   base: "font-extrabold tabular-nums text-foreground",
   variants: {
     size: {
-      xl: "text-5xl",
-      lg: "text-3xl",
-      md: "text-2xl",
-      sm: "text-xl",
+      xl: "text-4xl",
+      lg: "text-2xl",
+      md: "text-xl",
+      sm: "text-lg",
       xs: "text-base",
     },
   },
@@ -19,12 +19,12 @@ export const numericText = tv({
 export const panel = tv({
   slots: {
     base: "rounded-3xl border border-foreground/10 bg-foreground/5",
-    body: "p-4",
+    body: "p-3"
   },
   variants: {
     density: {
-      sm: { body: "p-3" },
-      md: { body: "p-4" },
+      sm: { body: "p-2" },
+      md: { body: "p-3" },
     },
   },
   defaultVariants: {
