@@ -76,7 +76,7 @@ export default function TrackScreen() {
         className="flex-1 bg-background"
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="px-5 pt-1 pb-20 gap-4"
+        contentContainerClassName="px-4 pt-1 pb-20 gap-3"
       >
         <Description>Log your daily wellness</Description>
 
@@ -115,9 +115,9 @@ function NumericCard({
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "gap-4" })}>
-        <View className="flex-row items-center gap-3">
-          <View className={`${iconBadge()} ${mc.bg10}`}>
+      <Card.Body className={cardStyles.body({ className: "gap-3" })}>
+        <View className="flex-row items-start gap-3">
+          <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
           </View>
 
@@ -128,7 +128,7 @@ function NumericCard({
             </Description>
           </View>
 
-          <Text className={`text-3xl font-bold tabular-nums ${pct > 0 ? mc.text : "text-muted"}`}>
+          <Text className={`text-2xl font-bold tabular-nums ${pct > 0 ? mc.text : "text-muted"}`}>
             {pct}%
           </Text>
         </View>
@@ -149,13 +149,13 @@ function NumericCard({
             accessibilityLabel={`Decrease ${config.label}`}
             className={`${stepperButton({ disabled: value <= config.min })} ${mc.bg10}`}
           >
-            <View className="size-full items-center justify-center">
-              <AppIcon name={MINUS_ICON} color={config.color} size={20} />
+            <View className="size-full items-center justify-center pt-0.5">
+              <AppIcon name={MINUS_ICON} color={config.color} size={18} />
             </View>
           </Button>
 
           <View className="items-center min-w-20">
-            <Text className={numericText({ size: "lg" })}>{value}</Text>
+            <Text className={numericText({ size: "md" })}>{value}</Text>
             <Description>{config.unit}</Description>
           </View>
 
@@ -170,8 +170,8 @@ function NumericCard({
             accessibilityLabel={`Increase ${config.label}`}
             className={`${stepperButton({ disabled: value >= config.max })} ${mc.bg}`}
           >
-            <View className="size-full items-center justify-center">
-              <AppIcon name={PLUS_ICON} color="#ffffff" size={20} />
+            <View className="size-full items-center justify-center pt-0.5">
+              <AppIcon name={PLUS_ICON} color="#ffffff" size={18} />
             </View>
           </Button>
         </View>
@@ -187,9 +187,9 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "gap-4" })}>
-        <View className="flex-row items-center gap-3">
-          <View className={`${iconBadge()} ${mc.bg10}`}>
+      <Card.Body className={cardStyles.body({ className: "gap-3" })}>
+        <View className="flex-row items-start gap-3">
+          <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
           </View>
 
@@ -214,7 +214,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
             >
               <View
                 className={`size-12 rounded-2xl items-center justify-center ${
-                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : "bg-muted/25"
+                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : "bg-foreground/5"
                 }`}
               >
                 <Text className="text-3xl">{MOOD_EMOJIS[mood]}</Text>

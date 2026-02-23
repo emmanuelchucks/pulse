@@ -47,7 +47,7 @@ export default function SettingsScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
+      contentContainerClassName="px-4 pt-1 pb-20 gap-3"
     >
       <Description>Customize your goals</Description>
 
@@ -111,8 +111,8 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-3" })}>
-        <View className={`${iconBadge()} ${mc.bg10}`}>
+      <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-3" })}>
+        <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
           <AppIcon name={config.icon} color={config.color} size={18} />
         </View>
 
@@ -133,7 +133,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             accessibilityLabel={`Decrease ${config.label} goal`}
             className={`${stepperButton({ disabled: current <= config.step })} size-10 ${mc.bg10}`}
           >
-            <View className="size-full items-center justify-center">
+            <View className="size-full items-center justify-center pt-0.5">
               <AppIcon name={MINUS_ICON} color={config.color} size={18} />
             </View>
           </Button>
@@ -153,7 +153,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             accessibilityLabel={`Increase ${config.label} goal`}
             className={`${stepperButton()} size-10 ${mc.bg}`}
           >
-            <View className="size-full items-center justify-center">
+            <View className="size-full items-center justify-center pt-0.5">
               <AppIcon name={PLUS_ICON} color="#ffffff" size={18} />
             </View>
           </Button>

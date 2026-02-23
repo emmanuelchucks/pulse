@@ -52,18 +52,20 @@ export default function HistoryScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
+      contentContainerClassName="px-4 pt-1 pb-20 gap-3"
     >
       <Description>Track your progress over time</Description>
 
       <View className="flex-row gap-3">
         <Card className={`flex-1 ${cardStyles.base()}`}>
-          <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-2" })}>
-            <AppIcon
-              name={{ ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }}
-              color="#0a84ff"
-              size={16}
-            />
+          <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-2" })}>
+            <View className="pt-0.5">
+              <AppIcon
+                name={{ ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }}
+                color="#0a84ff"
+                size={16}
+              />
+            </View>
             <View>
               <Description className="text-sm">Completion</Description>
               <Text className={numericText({ size: "sm" })}>{completionRate}%</Text>
@@ -72,12 +74,14 @@ export default function HistoryScreen() {
         </Card>
 
         <Card className={`flex-1 ${cardStyles.base()}`}>
-          <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-2" })}>
-            <AppIcon
-              name={{ ios: "flame.fill", android: "local_fire_department", web: "local_fire_department" }}
-              color="#ff9f0a"
-              size={16}
-            />
+          <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-2" })}>
+            <View className="pt-0.5">
+              <AppIcon
+                name={{ ios: "flame.fill", android: "local_fire_department", web: "local_fire_department" }}
+                color="#ff9f0a"
+                size={16}
+              />
+            </View>
             <View>
               <Description className="text-sm">Best Streak</Description>
               <Text className={numericText({ size: "sm" })}>
@@ -139,8 +143,10 @@ export default function HistoryScreen() {
           return (
             <View key={key} className="w-1/2 px-1.5">
               <Card className={compactCard.base()}>
-                <Card.Body className={compactCard.body({ className: "flex-row items-center gap-2" })}>
-                  <AppIcon name={config.icon} color={config.color} size={14} />
+                <Card.Body className={compactCard.body({ className: "flex-row items-start gap-2" })}>
+                  <View className="pt-0.5">
+                    <AppIcon name={config.icon} color={config.color} size={14} />
+                  </View>
                   <View>
                     <Description className="text-sm">{config.label}</Description>
                     <Text className={numericText({ size: "xs" })}>
@@ -203,7 +209,7 @@ function WeekChart({
 
                 <View
                   className={`w-5 rounded-md ${met ? mc.bg : mc.bg40}`}
-                  style={{ height: Math.max(h, 3), borderCurve: "continuous" }}
+                  style={{ height: Math.max(h, 6), borderCurve: "continuous" }}
                 />
 
                 <Text className={`text-sm ${current ? `font-semibold ${mc.text}` : "text-muted"}`}>

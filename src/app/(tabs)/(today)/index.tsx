@@ -1,6 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 
-import { Button, Card, Chip, Description, Label } from "heroui-native";
+import { Button, Card, Description, Label } from "heroui-native";
 
 import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_CONFIG, METRIC_KEYS, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
@@ -42,7 +42,7 @@ export default function DashboardScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
+      contentContainerClassName="px-4 pt-1 pb-20 gap-3"
     >
       <Description>{dateLabel}</Description>
 
@@ -59,14 +59,11 @@ export default function DashboardScreen() {
             </Card.Description>
 
             <View className="flex-row flex-wrap items-center gap-2 pt-1">
-              <Chip size="sm" variant="secondary" className="rounded-full bg-foreground/10">
-                <Chip.Label className="text-foreground">Weekly {weeklyRate}%</Chip.Label>
-              </Chip>
-              <Chip size="sm" variant="secondary" className="rounded-full bg-foreground/10">
-                <Chip.Label className="text-foreground">
-                  Best {bestStreak} {bestStreak === 1 ? "day" : "days"}
-                </Chip.Label>
-              </Chip>
+              <Description className="text-foreground/85 font-medium">Weekly {weeklyRate}%</Description>
+              <Description className="text-foreground/55">•</Description>
+              <Description className="text-foreground/85 font-medium">
+                Best {bestStreak} {bestStreak === 1 ? "day" : "days"}
+              </Description>
             </View>
           </View>
         </Card.Body>
@@ -106,7 +103,7 @@ export default function DashboardScreen() {
 
         return (
           <Card key={key} className={cardStyles.base()}>
-            <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-3" })}>
+            <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-3" })}>
               <View className="items-center gap-1.5">
                 <View className={`${iconBadge({ size: "lg" })} ${mc.bg10}`}>
                   <AppIcon name={config.icon} color={config.color} size={22} />
@@ -138,7 +135,7 @@ export default function DashboardScreen() {
                 accessibilityLabel={`Quick add ${config.label}`}
                 className={`size-11 rounded-2xl ${mc.bg10}`}
               >
-                <View className="size-full items-center justify-center">
+                <View className="size-full items-center justify-center pt-0.5">
                   <AppIcon name={PLUS_ICON} color={config.color} size={20} />
                 </View>
               </Button>
