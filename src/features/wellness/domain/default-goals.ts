@@ -1,5 +1,4 @@
 import type { Goals } from "@/db/types";
-
 import { METRIC_CONFIG } from "@/constants/metrics";
 
 export function createDefaultGoals(): Goals {

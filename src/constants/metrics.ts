@@ -1,5 +1,4 @@
 import type { AndroidSymbol, SFSymbol } from "expo-symbols";
-
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 
 export type MetricKey = "water" | "mood" | "sleep" | "exercise";

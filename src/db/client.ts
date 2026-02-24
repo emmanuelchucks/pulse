@@ -1,7 +1,6 @@
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
 import { addDatabaseChangeListener, openDatabaseSync } from "expo-sqlite";
-
 import migrations from "@/db/migrations";
 import { relations } from "@/db/relations";
 import * as schema from "@/db/schema";

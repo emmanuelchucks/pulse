@@ -1,9 +1,7 @@
-import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native";
-
-import { Card, Description, Label } from "heroui-native";
-import Svg, { Circle } from "react-native-svg";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-
+import { Card, Description, Label } from "heroui-native";
+import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_CONFIG, METRIC_KEYS, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
 import {
@@ -14,7 +12,6 @@ import {
 } from "@/features/wellness/domain/analytics";
 import { iconBadge, METRIC_TW, numericText, panel } from "@/lib/metric-theme";
 import { incrementMetric, useWellnessStore } from "@/store/wellness-store";
-
 
 export default function DashboardScreen() {
   const { entries, goals } = useWellnessStore();
@@ -40,7 +37,7 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-background"
+      className="bg-background flex-1"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
       contentContainerClassName="px-5 pt-2 pb-10 gap-4"
@@ -48,7 +45,9 @@ export default function DashboardScreen() {
       <Description>{dateLabel}</Description>
 
       <Card className={cardStyles.base()}>
-        <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-4 px-5 py-3" })}>
+        <Card.Body
+          className={cardStyles.body({ className: "flex-row items-center gap-4 px-5 py-3" })}
+        >
           <ProgressRing
             value={overall}
             color={overall >= 100 ? "#34d399" : "#38bdf8"}
@@ -61,7 +60,7 @@ export default function DashboardScreen() {
               {completed}/{METRIC_KEYS.length} goals met today
             </Card.Description>
 
-            <Description className="pt-1 text-foreground/85 font-medium" numberOfLines={1}>
+            <Description className="text-foreground/85 pt-1 font-medium" numberOfLines={1}>
               Weekly {weeklyRate}% • Best {bestStreak} {bestStreak === 1 ? "day" : "days"}
             </Description>
           </View>
@@ -69,7 +68,11 @@ export default function DashboardScreen() {
       </Card>
 
       <Card className={cardStyles.base()}>
-        <Card.Body className={cardStyles.body({ className: "flex-row items-center justify-between px-4 py-3" })}>
+        <Card.Body
+          className={cardStyles.body({
+            className: "flex-row items-center justify-between px-4 py-3",
+          })}
+        >
           {METRIC_KEYS.map((key) => {
             const config = METRIC_CONFIG[key];
             const streak = getStreak(entries, goals, { metric: key });
@@ -77,7 +80,9 @@ export default function DashboardScreen() {
             return (
               <View key={key} className="items-center gap-1">
                 <AppIcon name={config.icon} color={config.color} size={16} />
-                <Text className={numericText({ size: "xs", className: "font-bold" })}>{streak}</Text>
+                <Text className={numericText({ size: "xs", className: "font-bold" })}>
+                  {streak}
+                </Text>
                 <Description className="text-sm">streak</Description>
               </View>
             );
@@ -102,13 +107,15 @@ export default function DashboardScreen() {
 
         return (
           <Card key={key} className={cardStyles.base()}>
-            <Card.Body className={cardStyles.body({ className: "flex-row items-center gap-3 px-4 py-3.5" })}>
+            <Card.Body
+              className={cardStyles.body({ className: "flex-row items-center gap-3 px-4 py-3.5" })}
+            >
               <View className="items-center gap-2">
                 <View className={`${iconBadge({ size: "lg" })} ${mc.bg10}`}>
                   <AppIcon name={config.icon} color={config.color} size={22} />
                 </View>
 
-                <View className={`w-10 h-1 rounded-full ${mc.bg15}`}>
+                <View className={`h-1 w-10 rounded-full ${mc.bg15}`}>
                   <View
                     className={`h-1 rounded-full ${mc.bg}`}
                     style={{ width: `${Math.round(pct * 100)}%` }}

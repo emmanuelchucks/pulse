@@ -1,11 +1,8 @@
+import { Button, Card, Description, Label } from "heroui-native";
 import { useReducer } from "react";
 import { ScrollView, Text, View } from "react-native";
-
-import { Button, Card, Description, Label } from "heroui-native";
-
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
-
 import { AppIcon } from "@/components/ui/app-icon";
 import {
   formatDate,
@@ -50,7 +47,7 @@ export default function HistoryScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-background"
+      className="bg-background flex-1"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
       contentContainerClassName="px-5 pt-2 pb-10 gap-4"
@@ -62,7 +59,11 @@ export default function HistoryScreen() {
           <Card.Body className={statCard.body({ className: "gap-1.5" })}>
             <View className="flex-row items-center gap-2">
               <AppIcon
-                name={{ ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }}
+                name={{
+                  ios: "checkmark.circle.fill",
+                  android: "check_circle",
+                  web: "check_circle",
+                }}
                 color="#0a84ff"
                 size={16}
               />
@@ -76,7 +77,11 @@ export default function HistoryScreen() {
           <Card.Body className={statCard.body({ className: "gap-1.5" })}>
             <View className="flex-row items-center gap-2">
               <AppIcon
-                name={{ ios: "flame.fill", android: "local_fire_department", web: "local_fire_department" }}
+                name={{
+                  ios: "flame.fill",
+                  android: "local_fire_department",
+                  web: "local_fire_department",
+                }}
                 color="#ff9f0a"
                 size={16}
               />
@@ -90,7 +95,9 @@ export default function HistoryScreen() {
       </View>
 
       <Card className={weekCard.base()}>
-        <Card.Body className={weekCard.body({ className: "py-0 flex-row items-center justify-between" })}>
+        <Card.Body
+          className={weekCard.body({ className: "py-0 flex-row items-center justify-between" })}
+        >
           <Button
             variant="ghost"
             size="sm"
@@ -99,7 +106,11 @@ export default function HistoryScreen() {
             accessibilityLabel="Previous week"
             className="size-11 rounded-xl"
           >
-            <AppIcon name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }} color="#8e8e93" size={14} />
+            <AppIcon
+              name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }}
+              color="#8e8e93"
+              size={14}
+            />
           </Button>
 
           <Description className="text-base font-medium">
@@ -132,7 +143,7 @@ export default function HistoryScreen() {
         <Label className="text-xl font-bold">Weekly Averages</Label>
       </View>
 
-      <View className="flex-row flex-wrap -mx-1.5 gap-y-3">
+      <View className="-mx-1.5 flex-row flex-wrap gap-y-3">
         {METRIC_KEYS.map((key) => {
           const config = METRIC_CONFIG[key];
           const avg = getWeeklyAverage(entries, key, referenceDate);
@@ -189,7 +200,7 @@ function WeekChart({
           <Card.Title className="text-base">{config.label}</Card.Title>
         </View>
 
-        <View className="flex-row items-end justify-between h-24 px-1">
+        <View className="h-24 flex-row items-end justify-between px-1">
           {weekDates.map((date, idx) => {
             const val = values[idx] ?? 0;
             const h = maxVal > 0 ? (val / maxVal) * 68 : 0;
@@ -197,8 +208,8 @@ function WeekChart({
             const met = val >= goal;
 
             return (
-              <View key={idx} className="items-center gap-1 flex-1">
-                <Text className="text-xs tabular-nums text-muted">
+              <View key={idx} className="flex-1 items-center gap-1">
+                <Text className="text-muted text-xs tabular-nums">
                   {val > 0 ? (metric === "sleep" ? val.toFixed(1) : String(val)) : ""}
                 </Text>
 
@@ -219,7 +230,7 @@ function WeekChart({
           <Description className="text-sm">
             Goal: {goal} {config.unit}
           </Description>
-          <Text className="text-sm tabular-nums text-muted">
+          <Text className="text-muted text-sm tabular-nums">
             Avg: {average} {config.unit}
           </Text>
         </View>

@@ -1,6 +1,5 @@
 import type { AndroidSymbol, SFSymbol } from "expo-symbols";
 import type { StyleProp, ViewStyle } from "react-native";
-
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { SymbolView } from "expo-symbols";
 

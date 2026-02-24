@@ -1,12 +1,9 @@
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
-
 import { eq } from "drizzle-orm";
-
 import type { MetricKey } from "@/constants/metrics";
 import type { AppDatabase } from "@/db/client";
 import type * as schema from "@/db/schema";
 import type { Goals } from "@/db/types";
-
 import { METRIC_KEYS } from "@/constants/metrics";
 import { dailyEntries, goals } from "@/db/schema";
 

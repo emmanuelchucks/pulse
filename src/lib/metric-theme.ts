@@ -1,9 +1,8 @@
 import { tv } from "tailwind-variants";
-
 import type { MetricKey } from "@/constants/metrics";
 
 export const numericText = tv({
-  base: "font-extrabold tabular-nums text-foreground",
+  base: "text-foreground font-extrabold tabular-nums",
   variants: {
     size: {
       xl: "text-4xl",
@@ -18,7 +17,7 @@ export const numericText = tv({
 
 export const panel = tv({
   slots: {
-    base: "rounded-3xl border border-foreground/10 bg-foreground/5",
+    base: "border-foreground/10 bg-foreground/5 rounded-3xl border",
     body: "p-4",
   },
   variants: {
@@ -33,7 +32,7 @@ export const panel = tv({
 });
 
 export const iconBadge = tv({
-  base: "rounded-2xl items-center justify-center",
+  base: "items-center justify-center rounded-2xl",
   variants: {
     size: {
       sm: "size-10",
@@ -47,7 +46,7 @@ export const iconBadge = tv({
 });
 
 export const stepperButton = tv({
-  base: "size-11 rounded-2xl items-center justify-center",
+  base: "size-11 items-center justify-center rounded-2xl",
   variants: {
     disabled: {
       true: "opacity-35",

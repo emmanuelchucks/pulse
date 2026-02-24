@@ -1,12 +1,9 @@
 import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
-import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
-
 import { Card, Description } from "heroui-native";
-
+import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
-
 import { AppIcon } from "@/components/ui/app-icon";
 import {
   METRIC_CONFIG,
@@ -60,11 +57,13 @@ export default function TrackScreen() {
               onPress={handleReset}
               accessibilityRole="button"
               accessibilityLabel="Reset Day"
-              className="h-9 px-4 rounded-full border border-red-500/15 bg-red-500/6 items-center justify-center"
+              className="h-9 items-center justify-center rounded-full border border-red-500/15 bg-red-500/6 px-4"
             >
               <View className="flex-row items-center justify-center gap-1.5">
                 <AppIcon name={RESET_ICON} color="#fca5a5" size={14} />
-                <Text className="text-red-500/70 dark:text-red-300 text-[17px] font-semibold">Reset</Text>
+                <Text className="text-[17px] font-semibold text-red-500/70 dark:text-red-300">
+                  Reset
+                </Text>
               </View>
             </Pressable>
           ),
@@ -72,7 +71,7 @@ export default function TrackScreen() {
       />
 
       <ScrollView
-        className="flex-1 bg-background"
+        className="bg-background flex-1"
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-5 pt-2 pb-10 gap-4"
@@ -149,7 +148,7 @@ function NumericCard({
             <StepperGlyph kind="minus" color={config.color} />
           </Pressable>
 
-          <View className="items-center min-w-20">
+          <View className="min-w-20 items-center">
             <Text className={numericText({ size: "md" })}>{value}</Text>
             <Description>{config.unit}</Description>
           </View>
@@ -173,7 +172,7 @@ function NumericCard({
 
 function StepperGlyph({ kind, color }: { kind: "plus" | "minus"; color: string }) {
   return (
-    <View className="size-5 relative">
+    <View className="relative size-5">
       <View
         className="absolute rounded-full"
         style={{ backgroundColor: color, width: 14, height: 2, left: 3, top: 9 }}
@@ -221,8 +220,8 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
               className="items-center gap-1"
             >
               <View
-                className={`size-11 rounded-2xl items-center justify-center border-2 ${
-                  value === mood ? `${mc.bg10} ${mc.border}` : "border-transparent bg-foreground/5"
+                className={`size-11 items-center justify-center rounded-2xl border-2 ${
+                  value === mood ? `${mc.bg10} ${mc.border}` : "bg-foreground/5 border-transparent"
                 }`}
               >
                 <Text className="text-2xl">{MOOD_EMOJIS[mood]}</Text>

@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-
 import { METRIC_KEYS } from "@/constants/metrics";
 import { dailyEntries, goals } from "@/db/schema";
 import { createDefaultGoals } from "@/features/wellness/domain/default-goals";

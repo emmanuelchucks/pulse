@@ -1,8 +1,6 @@
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
-
 import { METRIC_KEYS } from "@/constants/metrics";
 import { db } from "@/db/client";
 import { dailyEntries, goals as goalsTable } from "@/db/schema";

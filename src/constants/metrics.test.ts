@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { formatDate, getWeekDates, isToday } from "@/constants/metrics";
 
 describe("metrics date utilities", () => {

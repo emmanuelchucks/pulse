@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-
 import type { DailyEntry, Goals } from "@/db/types";
-
 import { formatDate } from "@/constants/metrics";
 import {
   createEmptyEntry,

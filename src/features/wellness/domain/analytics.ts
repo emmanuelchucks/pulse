@@ -1,6 +1,5 @@
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
-
 import { METRIC_KEYS, formatDate } from "@/constants/metrics";
 
 export function createEmptyEntry(dateStr: string): DailyEntry {

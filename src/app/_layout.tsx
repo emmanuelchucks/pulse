@@ -1,13 +1,11 @@
 import type { HeroUINativeConfig } from "heroui-native";
-
-import { HeroUINativeProvider } from "heroui-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { HeroUINativeProvider } from "heroui-native";
 import { useEffect, useState } from "react";
 import { LogBox, Pressable, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
 import { runMigrations } from "@/db/client";
 import { initializeWellnessData } from "@/store/wellness-store";
 import "@/theme.css";
@@ -28,14 +26,14 @@ type BootStatus = "loading" | "ready" | "error";
 
 function BootErrorScreen({ onRetry }: { onRetry: () => void }) {
   return (
-    <View className="flex-1 items-center justify-center bg-background px-6">
+    <View className="bg-background flex-1 items-center justify-center px-6">
       <Text className="text-foreground text-center text-lg font-semibold">
         Failed to initialize database
       </Text>
       <Text className="text-muted-foreground mt-2 text-center">
         Please retry. Your existing local data was not modified.
       </Text>
-      <Pressable className="mt-5 rounded-xl bg-danger px-4 py-2" onPress={onRetry}>
+      <Pressable className="bg-danger mt-5 rounded-xl px-4 py-2" onPress={onRetry}>
         <Text className="text-danger-foreground font-medium">Retry</Text>
       </Pressable>
     </View>

@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-
 import { goals } from "@/db/schema";
 import { createWellnessService } from "@/features/wellness/application/wellness-service";
 import { createDefaultGoals } from "@/features/wellness/domain/default-goals";

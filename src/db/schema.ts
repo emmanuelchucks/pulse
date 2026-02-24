@@ -1,8 +1,7 @@
 import { sqliteTable, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const createId = () =>
-  globalThis.crypto?.randomUUID?.() ??
-  `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 export const dailyEntries = sqliteTable(
   "daily_entries",

@@ -1,6 +1,5 @@
 import type { MetricKey } from "@/constants/metrics";
 import type { WellnessRepository } from "@/features/wellness/infra/wellness-repository";
-
 import { METRIC_CONFIG } from "@/constants/metrics";
 import { parseMetricValue, parseMetricWrite } from "@/db/validation";
 import { createDefaultGoals } from "@/features/wellness/domain/default-goals";

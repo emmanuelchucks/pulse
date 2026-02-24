@@ -1,16 +1,12 @@
 import * as Haptics from "expo-haptics";
-import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
-
 import { Button, Card, Description, Label } from "heroui-native";
-
+import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import type { MetricKey } from "@/constants/metrics";
 import type { Goals } from "@/db/types";
-
 import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_CONFIG, METRIC_KEYS } from "@/constants/metrics";
 import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
 import { clearAllData, updateGoal, useWellnessStore } from "@/store/wellness-store";
-
 
 export default function SettingsScreen() {
   const { entries, goals } = useWellnessStore();
@@ -42,7 +38,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-background"
+      className="bg-background flex-1"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
       contentContainerClassName="px-5 pt-2 pb-10 gap-4"
@@ -77,7 +73,7 @@ export default function SettingsScreen() {
             accessibilityLabel="Clear All Data"
             className="h-11 rounded-xl border border-red-500/15 bg-red-500/6"
           >
-            <Button.Label className="text-red-500/70 dark:text-red-300 font-semibold">
+            <Button.Label className="font-semibold text-red-500/70 dark:text-red-300">
               Clear All Data
             </Button.Label>
           </Button>
@@ -104,7 +100,7 @@ export default function SettingsScreen() {
 
 function StepperGlyph({ kind, color }: { kind: "plus" | "minus"; color: string }) {
   return (
-    <View className="size-5 relative">
+    <View className="relative size-5">
       <View
         className="absolute rounded-full"
         style={{ backgroundColor: color, width: 14, height: 2, left: 3, top: 9 }}
@@ -128,23 +124,25 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "flex-row items-center justify-between py-4" })}>
-        <View className="flex-row items-center gap-3 flex-1 min-w-0 pr-2">
+      <Card.Body
+        className={cardStyles.body({ className: "flex-row items-center justify-between py-4" })}
+      >
+        <View className="min-w-0 flex-1 flex-row items-center gap-3 pr-2">
           <View className={`${iconBadge({ size: "sm" })} ${mc.bg10}`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
           </View>
 
-          <View className="flex-1 min-w-0 gap-0.5">
+          <View className="min-w-0 flex-1 gap-0.5">
             <Card.Title className="text-lg" numberOfLines={1} ellipsizeMode="tail">
               {config.label}
             </Card.Title>
-            <Text className="text-sm text-muted" numberOfLines={1}>
+            <Text className="text-muted text-sm" numberOfLines={1}>
               Daily goal
             </Text>
           </View>
         </View>
 
-        <View className="flex-row items-center gap-2 w-38">
+        <View className="w-38 flex-row items-center gap-2">
           <Pressable
             onPress={() => {
               updateGoal(metric, Math.max(config.step, current - config.step));
@@ -157,9 +155,9 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             <StepperGlyph kind="minus" color={config.color} />
           </Pressable>
 
-          <View className="items-center w-12">
+          <View className="w-12 items-center">
             <Text className={numericText({ size: "md" })}>{current}</Text>
-            <Text className="text-xs text-muted" numberOfLines={1}>
+            <Text className="text-muted text-xs" numberOfLines={1}>
               {unitLabel}
             </Text>
           </View>
