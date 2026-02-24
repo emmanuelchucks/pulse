@@ -26,19 +26,6 @@ const config: HeroUINativeConfig = {
 
 type BootStatus = "loading" | "ready" | "error";
 
-function BootScreen({ onRetry }: { onRetry?: () => void }) {
-  return (
-    <View className="flex-1 items-center justify-center bg-background px-6">
-      <Text className="text-foreground text-lg font-semibold">Preparing Pulse…</Text>
-      {onRetry ? (
-        <Pressable className="mt-5 rounded-xl bg-accent px-4 py-2" onPress={onRetry}>
-          <Text className="text-accent-foreground font-medium">Retry initialization</Text>
-        </Pressable>
-      ) : null}
-    </View>
-  );
-}
-
 function BootErrorScreen({ onRetry }: { onRetry: () => void }) {
   return (
     <View className="flex-1 items-center justify-center bg-background px-6">
@@ -78,7 +65,7 @@ export default function RootLayout() {
   }, []);
 
   if (status === "loading") {
-    return <BootScreen />;
+    return null;
   }
 
   if (status === "error") {

@@ -45,11 +45,11 @@ export default function SettingsScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
+      contentContainerClassName="px-5 pt-2 pb-10 gap-4"
     >
       <Description>Customize your goals</Description>
 
-      <View className="px-1 gap-0.5">
+      <View className="mt-5 gap-1">
         <Label className="text-xl font-bold">Daily Goals</Label>
         <Description>Adjust targets for each metric</Description>
       </View>
@@ -58,7 +58,7 @@ export default function SettingsScreen() {
         <GoalCard key={key} metric={key} goals={goals} />
       ))}
 
-      <View className="px-1 mt-1">
+      <View className="mt-5">
         <Label className="text-xl font-bold">Data</Label>
       </View>
 
@@ -75,14 +75,16 @@ export default function SettingsScreen() {
             variant="ghost"
             onPress={handleClearData}
             accessibilityLabel="Clear All Data"
-            className="h-11 rounded-xl border border-red-500/60 bg-red-500/20"
+            className="h-11 rounded-xl border border-red-500/15 bg-red-500/6"
           >
-            <Button.Label className="text-red-200 font-semibold">Clear All Data</Button.Label>
+            <Button.Label className="text-red-500/70 dark:text-red-300 font-semibold">
+              Clear All Data
+            </Button.Label>
           </Button>
         </Card.Body>
       </Card>
 
-      <View className="px-1 mt-1">
+      <View className="mt-5">
         <Label className="text-xl font-bold">About</Label>
       </View>
 
@@ -126,17 +128,23 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-3" })}>
-        <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
-          <AppIcon name={config.icon} color={config.color} size={18} />
+      <Card.Body className={cardStyles.body({ className: "flex-row items-center justify-between py-4" })}>
+        <View className="flex-row items-center gap-3 flex-1 min-w-0 pr-2">
+          <View className={`${iconBadge({ size: "sm" })} ${mc.bg10}`}>
+            <AppIcon name={config.icon} color={config.color} size={18} />
+          </View>
+
+          <View className="flex-1 min-w-0 gap-0.5">
+            <Card.Title className="text-lg" numberOfLines={1} ellipsizeMode="tail">
+              {config.label}
+            </Card.Title>
+            <Text className="text-sm text-muted" numberOfLines={1}>
+              Daily goal
+            </Text>
+          </View>
         </View>
 
-        <View className="flex-1 gap-0.5">
-          <Card.Title className="text-lg">{config.label}</Card.Title>
-          <Description className="text-sm">Daily goal</Description>
-        </View>
-
-        <View className="flex-row items-center gap-2">
+        <View className="flex-row items-center gap-2 w-38">
           <Pressable
             onPress={() => {
               updateGoal(metric, Math.max(config.step, current - config.step));
@@ -144,14 +152,16 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             disabled={current <= config.step}
             accessibilityRole="button"
             accessibilityLabel={`Decrease ${config.label} goal`}
-            className={`${stepperButton({ disabled: current <= config.step })} size-10 ${mc.bg10}`}
+            className={`${stepperButton({ disabled: current <= config.step })} ${mc.bg10}`}
           >
             <StepperGlyph kind="minus" color={config.color} />
           </Pressable>
 
-          <View className="items-center min-w-12">
+          <View className="items-center w-12">
             <Text className={numericText({ size: "md" })}>{current}</Text>
-            <Description className="text-sm">{unitLabel}</Description>
+            <Text className="text-xs text-muted" numberOfLines={1}>
+              {unitLabel}
+            </Text>
           </View>
 
           <Pressable
@@ -160,7 +170,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
             }}
             accessibilityRole="button"
             accessibilityLabel={`Increase ${config.label} goal`}
-            className={`${stepperButton()} size-10 ${mc.bg}`}
+            className={`${stepperButton()} ${mc.bg}`}
           >
             <StepperGlyph kind="plus" color="#ffffff" />
           </Pressable>

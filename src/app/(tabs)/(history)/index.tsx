@@ -36,8 +36,9 @@ function weekReducer(state: Date, action: WeekAction): Date {
 export default function HistoryScreen() {
   const { entries, goals } = useWellnessStore();
   const [referenceDate, dispatch] = useReducer(weekReducer, new Date());
-  const cardStyles = panel();
   const compactCard = panel({ density: "sm" });
+  const statCard = panel({ density: "sm" });
+  const weekCard = panel({ density: "sm" });
 
   const completionRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
   const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
@@ -52,60 +53,56 @@ export default function HistoryScreen() {
       className="flex-1 bg-background"
       contentInsetAdjustmentBehavior="automatic"
       showsVerticalScrollIndicator={false}
-      contentContainerClassName="px-5 pt-1 pb-20 gap-4"
+      contentContainerClassName="px-5 pt-2 pb-10 gap-4"
     >
       <Description>Track your progress over time</Description>
 
       <View className="flex-row gap-3">
-        <Card className={`flex-1 ${cardStyles.base()}`}>
-          <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-2" })}>
-            <View className="pt-0.5">
+        <Card className={`flex-1 ${statCard.base()}`}>
+          <Card.Body className={statCard.body({ className: "gap-1.5" })}>
+            <View className="flex-row items-center gap-2">
               <AppIcon
                 name={{ ios: "checkmark.circle.fill", android: "check_circle", web: "check_circle" }}
                 color="#0a84ff"
                 size={16}
               />
-            </View>
-            <View>
               <Description className="text-sm">Completion</Description>
-              <Text className={numericText({ size: "sm" })}>{completionRate}%</Text>
             </View>
+            <Text className={numericText({ size: "sm" })}>{completionRate}%</Text>
           </Card.Body>
         </Card>
 
-        <Card className={`flex-1 ${cardStyles.base()}`}>
-          <Card.Body className={cardStyles.body({ className: "flex-row items-start gap-2" })}>
-            <View className="pt-0.5">
+        <Card className={`flex-1 ${statCard.base()}`}>
+          <Card.Body className={statCard.body({ className: "gap-1.5" })}>
+            <View className="flex-row items-center gap-2">
               <AppIcon
                 name={{ ios: "flame.fill", android: "local_fire_department", web: "local_fire_department" }}
                 color="#ff9f0a"
                 size={16}
               />
-            </View>
-            <View>
               <Description className="text-sm">Best Streak</Description>
-              <Text className={numericText({ size: "sm" })}>
-                {bestStreak} {bestStreak === 1 ? "day" : "days"}
-              </Text>
             </View>
+            <Text className={numericText({ size: "sm" })}>
+              {bestStreak} {bestStreak === 1 ? "day" : "days"}
+            </Text>
           </Card.Body>
         </Card>
       </View>
 
-      <Card className={cardStyles.base()}>
-        <Card.Body className={cardStyles.body({ className: "py-2.5 flex-row items-center justify-between" })}>
+      <Card className={weekCard.base()}>
+        <Card.Body className={weekCard.body({ className: "py-0 flex-row items-center justify-between" })}>
           <Button
             variant="ghost"
             size="sm"
             isIconOnly
             onPress={() => dispatch({ type: "prev" })}
             accessibilityLabel="Previous week"
-            className="size-9 rounded-xl"
+            className="size-11 rounded-xl"
           >
             <AppIcon name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }} color="#8e8e93" size={14} />
           </Button>
 
-          <Description className="text-lg font-medium">
+          <Description className="text-base font-medium">
             {fmt(weekStart)} – {fmt(weekEnd)}
           </Description>
 
@@ -116,7 +113,7 @@ export default function HistoryScreen() {
             onPress={() => dispatch({ type: "next" })}
             isDisabled={!canGoNext}
             accessibilityLabel="Next week"
-            className="size-9 rounded-xl"
+            className="size-11 rounded-xl"
           >
             <AppIcon
               name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }}
@@ -131,7 +128,7 @@ export default function HistoryScreen() {
         <WeekChart key={key} metric={key} weekDates={weekDates} entries={entries} goals={goals} />
       ))}
 
-      <View className="px-1">
+      <View className="mt-5">
         <Label className="text-xl font-bold">Weekly Averages</Label>
       </View>
 
@@ -143,16 +140,14 @@ export default function HistoryScreen() {
           return (
             <View key={key} className="w-1/2 px-1.5">
               <Card className={compactCard.base()}>
-                <Card.Body className={compactCard.body({ className: "flex-row items-start gap-2" })}>
-                  <View className="pt-0.5">
+                <Card.Body className={compactCard.body({ className: "gap-1.5" })}>
+                  <View className="flex-row items-center gap-2">
                     <AppIcon name={config.icon} color={config.color} size={14} />
-                  </View>
-                  <View>
                     <Description className="text-sm">{config.label}</Description>
-                    <Text className={numericText({ size: "xs" })}>
-                      {avg.toFixed(1)} {config.unit}
-                    </Text>
                   </View>
+                  <Text className={numericText({ size: "xs" })}>
+                    {avg.toFixed(1)} {config.unit}
+                  </Text>
                 </Card.Body>
               </Card>
             </View>

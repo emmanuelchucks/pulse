@@ -60,11 +60,11 @@ export default function TrackScreen() {
               onPress={handleReset}
               accessibilityRole="button"
               accessibilityLabel="Reset Day"
-              className="h-9 px-4 rounded-full border border-red-500/30 bg-red-500/10 items-center justify-center"
+              className="h-9 px-4 rounded-full border border-red-500/15 bg-red-500/6 items-center justify-center"
             >
               <View className="flex-row items-center justify-center gap-1.5">
-                <AppIcon name={RESET_ICON} color="#f87171" size={14} />
-                <Text className="text-red-300 text-[17px] font-semibold">Reset</Text>
+                <AppIcon name={RESET_ICON} color="#fca5a5" size={14} />
+                <Text className="text-red-500/70 dark:text-red-300 text-[17px] font-semibold">Reset</Text>
               </View>
             </Pressable>
           ),
@@ -75,7 +75,7 @@ export default function TrackScreen() {
         className="flex-1 bg-background"
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="px-5 pt-1 pb-20 gap-4"
+        contentContainerClassName="px-5 pt-2 pb-10 gap-4"
       >
         <Description>Log your daily wellness</Description>
 
@@ -114,7 +114,7 @@ function NumericCard({
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "gap-3 px-4 py-4" })}>
+      <Card.Body className={cardStyles.body({ className: "gap-2.5 px-4 py-3" })}>
         <View className="flex-row items-start gap-3">
           <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
@@ -132,11 +132,11 @@ function NumericCard({
           </Text>
         </View>
 
-        <View className={`h-1.5 rounded-full ${mc.bg10}`}>
+        <View className={`h-1.5 rounded-full ${mc.bg10} mt-1.5`}>
           <View className={`h-1.5 rounded-full ${mc.bg}`} style={{ width: `${pct}%` }} />
         </View>
 
-        <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center justify-between pt-1.5">
           <Pressable
             onPress={() => {
               decrementMetric(todayStr, metric);
@@ -195,7 +195,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
 
   return (
     <Card className={cardStyles.base()}>
-      <Card.Body className={cardStyles.body({ className: "gap-3 px-4 py-4" })}>
+      <Card.Body className={cardStyles.body({ className: "gap-2.5 px-4 py-3" })}>
         <View className="flex-row items-start gap-3">
           <View className={`${iconBadge()} ${mc.bg10} mt-0.5`}>
             <AppIcon name={config.icon} color={config.color} size={18} />
@@ -209,7 +209,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
           </View>
         </View>
 
-        <View className="flex-row items-start justify-between">
+        <View className="flex-row items-start justify-between pt-0.5">
           {[1, 2, 3, 4, 5].map((mood) => (
             <Pressable
               key={mood}
@@ -221,11 +221,11 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
               className="items-center gap-1"
             >
               <View
-                className={`size-12 rounded-2xl items-center justify-center ${
-                  value === mood ? `${mc.bg10} border-2 ${mc.border}` : "bg-foreground/5"
+                className={`size-11 rounded-2xl items-center justify-center border-2 ${
+                  value === mood ? `${mc.bg10} ${mc.border}` : "border-transparent bg-foreground/5"
                 }`}
               >
-                <Text className="text-3xl">{MOOD_EMOJIS[mood]}</Text>
+                <Text className="text-2xl">{MOOD_EMOJIS[mood]}</Text>
               </View>
               <Description className="text-sm">{MOOD_LABELS[mood]}</Description>
             </Pressable>

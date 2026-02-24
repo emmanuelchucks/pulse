@@ -47,7 +47,7 @@ export const iconBadge = tv({
 });
 
 export const stepperButton = tv({
-  base: "size-12 rounded-2xl items-center justify-center",
+  base: "size-11 rounded-2xl items-center justify-center",
   variants: {
     disabled: {
       true: "opacity-35",
