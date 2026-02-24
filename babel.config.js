@@ -1,3 +1,4 @@
+/** @param {import("@babel/core").ConfigAPI} api */
 export default function (api) {
   api.cache(true);
 
