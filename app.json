@@ -10,7 +10,6 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.pulse.app",
-      "appleTeamId": "[REDACTED_TEAM_ID]",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -54,11 +53,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "[REDACTED_EAS_PROJECT_ID]"
-      }
-    },
-    "owner": "oss"
+      "router": {}
+    }
   }
 }
