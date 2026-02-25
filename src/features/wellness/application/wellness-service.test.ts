@@ -42,18 +42,64 @@ describe("wellness service", () => {
     runtime.sqlite.close();
   });
 
-  it("rejects invalid goal updates through metric validation", () => {
+  it("clamps goal updates to metric bounds", () => {
     const { runtime, service } = createRuntime();
 
     service.initializeWellnessData();
+    service.updateGoal("mood", 10);
 
-    const before = runtime.db.select().from(goals).where(eq(goals.metric, "mood")).get();
+    const afterMax = runtime.db.select().from(goals).where(eq(goals.metric, "mood")).get();
+    expect(afterMax?.value).toBe(5);
 
-    expect(() => service.updateGoal("mood", 10)).toThrow();
+    service.updateGoal("mood", 0);
+    const afterMin = runtime.db.select().from(goals).where(eq(goals.metric, "mood")).get();
+    expect(afterMin?.value).toBe(1);
 
-    const after = runtime.db.select().from(goals).where(eq(goals.metric, "mood")).get();
-    expect(after?.value).toBe(before?.value);
-    expect(after?.value).toBe(5);
+    runtime.sqlite.close();
+  });
+
+  it("does not throw when incrementing repeatedly past max", () => {
+    const { runtime, repository, service, defaults } = createRuntime();
+
+    repository.clearAllData(defaults);
+
+    expect(() => {
+      for (let i = 0; i < 30; i++) {
+        service.incrementMetric("2026-02-11", "water");
+      }
+    }).not.toThrow();
+
+    expect(repository.getMetricValue("2026-02-11", "water")).toBe(20);
+
+    runtime.sqlite.close();
+  });
+
+  it("does not throw when decrementing repeatedly below min", () => {
+    const { runtime, repository, service, defaults } = createRuntime();
+
+    repository.clearAllData(defaults);
+
+    expect(() => {
+      for (let i = 0; i < 10; i++) {
+        service.decrementMetric("2026-02-11", "water");
+      }
+    }).not.toThrow();
+
+    expect(repository.getMetricValue("2026-02-11", "water")).toBe(0);
+
+    runtime.sqlite.close();
+  });
+
+  it("clamps direct metric updates to metric bounds", () => {
+    const { runtime, repository, service, defaults } = createRuntime();
+
+    repository.clearAllData(defaults);
+
+    service.updateMetric("2026-02-11", "mood", 99);
+    expect(repository.getMetricValue("2026-02-11", "mood")).toBe(5);
+
+    service.updateMetric("2026-02-11", "mood", -10);
+    expect(repository.getMetricValue("2026-02-11", "mood")).toBe(1);
 
     runtime.sqlite.close();
   });

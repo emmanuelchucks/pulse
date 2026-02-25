@@ -14,6 +14,11 @@ export interface WellnessService {
   clearAllData(): void;
 }
 
+function clampMetricValue(metric: MetricKey, value: number): number {
+  const config = METRIC_CONFIG[metric];
+  return Math.min(config.max, Math.max(config.min, value));
+}
+
 export function createWellnessService(repository: WellnessRepository): WellnessService {
   const defaultGoals = createDefaultGoals();
   let initialized = false;
@@ -26,25 +31,26 @@ export function createWellnessService(repository: WellnessRepository): WellnessS
     },
 
     updateMetric(date, metric, value) {
-      const parsed = parseMetricWrite(date, metric, value);
+      const clamped = clampMetricValue(metric, value);
+      const parsed = parseMetricWrite(date, metric, clamped);
       repository.upsertMetric(parsed.date, parsed.metric, parsed.value);
     },
 
     incrementMetric(date, metric) {
       const current = repository.getMetricValue(date, metric);
-      const nextValue = parseMetricValue(metric, current + METRIC_CONFIG[metric].step);
+      const nextValue = clampMetricValue(metric, current + METRIC_CONFIG[metric].step);
       this.updateMetric(date, metric, nextValue);
     },
 
     decrementMetric(date, metric) {
       const current = repository.getMetricValue(date, metric);
-      const nextValue = parseMetricValue(metric, current - METRIC_CONFIG[metric].step);
+      const nextValue = clampMetricValue(metric, current - METRIC_CONFIG[metric].step);
       this.updateMetric(date, metric, nextValue);
     },
 
     updateGoal(metric, value) {
-      const nextValue = parseMetricValue(metric, value);
-      repository.upsertGoal(metric, nextValue);
+      const nextValue = clampMetricValue(metric, value);
+      repository.upsertGoal(metric, parseMetricValue(metric, nextValue));
     },
 
     resetDay(date) {
