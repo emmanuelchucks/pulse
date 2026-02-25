@@ -1,7 +1,9 @@
 import type { AndroidSymbol, SFSymbol } from "expo-symbols";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 
-export type MetricKey = "water" | "mood" | "sleep" | "exercise";
+export const METRIC_KEYS = ["water", "mood", "sleep", "exercise"] as const;
+
+export type MetricKey = (typeof METRIC_KEYS)[number];
 
 type MetricConfig = {
   key: MetricKey;
@@ -19,9 +21,7 @@ type MetricConfig = {
   max: number;
 };
 
-export const METRIC_KEYS: MetricKey[] = ["water", "mood", "sleep", "exercise"];
-
-export const METRIC_CONFIG: Record<MetricKey, MetricConfig> = {
+export const METRIC_CONFIG = {
   water: {
     key: "water",
     label: "Water",
@@ -82,7 +82,7 @@ export const METRIC_CONFIG: Record<MetricKey, MetricConfig> = {
     min: 0,
     max: 180,
   },
-};
+} satisfies Record<MetricKey, MetricConfig>;
 
 export const MOOD_LABELS = ["", "Awful", "Bad", "Okay", "Good", "Great"];
 export const MOOD_EMOJIS = ["", "😞", "😔", "😐", "😊", "😄"];
