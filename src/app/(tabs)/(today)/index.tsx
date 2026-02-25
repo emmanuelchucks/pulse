@@ -4,34 +4,45 @@ import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native"
 import Svg, { Circle } from "react-native-svg";
 import { AppIcon } from "@/components/ui/app-icon";
 import { METRIC_CONFIG, METRIC_KEYS, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
-import {
-  getCompletionRate,
-  getEntry,
-  getProgress,
-  getStreak,
-} from "@/features/wellness/domain/analytics";
+import { getStreak, toEntriesMap } from "@/features/wellness/domain/analytics";
 import { iconBadge, METRIC_TW, numericText, panel } from "@/lib/metric-theme";
-import { incrementMetric, useWellnessStore } from "@/store/wellness-store";
+import { showSaveErrorAlert } from "@/lib/save-error-alert";
+import {
+  incrementMetric,
+  useCompletionRateInRange,
+  useEntriesInRange,
+  useEntryByDate,
+  useGoals,
+  useTodaySummary,
+} from "@/store/wellness-store";
 
 export default function DashboardScreen() {
-  const { entries, goals } = useWellnessStore();
+  const goals = useGoals();
 
   const isDark = useColorScheme() === "dark";
   const today = new Date();
   const todayStr = formatDate(today);
+  const todayEntry = useEntryByDate(todayStr);
+
+  const last7Start = new Date(today);
+  last7Start.setDate(last7Start.getDate() - 6);
+
+  const streakStart = new Date(today);
+  streakStart.setDate(streakStart.getDate() - 365);
+
+  const streakRows = useEntriesInRange(formatDate(streakStart), todayStr);
+  const streakEntries = toEntriesMap(streakRows);
   const dateLabel = today.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
 
-  const progresses = METRIC_KEYS.map((k) =>
-    getProgress(entries, goals, { dateStr: todayStr, metric: k }),
+  const { completedMetrics, overallPercent } = useTodaySummary(todayStr);
+  const weeklyRate = Math.round(useCompletionRateInRange(formatDate(last7Start), todayStr) * 100);
+  const bestStreak = Math.max(
+    ...METRIC_KEYS.map((k) => getStreak(streakEntries, goals, { metric: k })),
   );
-  const overall = Math.round((progresses.reduce((a, b) => a + b, 0) / progresses.length) * 100);
-  const completed = progresses.filter((p) => p >= 1).length;
-  const weeklyRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
-  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
   const greeting = getGreeting();
   const cardStyles = panel();
 
@@ -49,15 +60,15 @@ export default function DashboardScreen() {
           className={cardStyles.body({ className: "flex-row items-center gap-4 px-5 py-3" })}
         >
           <ProgressRing
-            value={overall}
-            color={overall >= 100 ? "#34d399" : "#38bdf8"}
+            value={overallPercent}
+            color={overallPercent >= 100 ? "#34d399" : "#38bdf8"}
             trackColor={isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)"}
           />
 
           <View className="flex-1 gap-0.5">
             <Card.Title>{greeting}</Card.Title>
             <Card.Description>
-              {completed}/{METRIC_KEYS.length} goals met today
+              {completedMetrics}/{METRIC_KEYS.length} goals met today
             </Card.Description>
 
             <Description className="text-foreground/85 pt-1 font-medium" numberOfLines={1}>
@@ -75,7 +86,7 @@ export default function DashboardScreen() {
         >
           {METRIC_KEYS.map((key) => {
             const config = METRIC_CONFIG[key];
-            const streak = getStreak(entries, goals, { metric: key });
+            const streak = getStreak(streakEntries, goals, { metric: key });
 
             return (
               <View key={key} className="items-center gap-1">
@@ -98,8 +109,7 @@ export default function DashboardScreen() {
       {METRIC_KEYS.map((key) => {
         const config = METRIC_CONFIG[key];
         const mc = METRIC_TW[key];
-        const entry = getEntry(entries, todayStr);
-        const value = entry[key];
+        const value = todayEntry[key];
         const goal = goals[key];
         const pct = Math.min(goal > 0 ? value / goal : 0, 1);
         const display = key === "mood" && value > 0 ? MOOD_EMOJIS[value] : `${value}`;
@@ -133,11 +143,14 @@ export default function DashboardScreen() {
 
               <Pressable
                 onPress={() => {
-                  incrementMetric(todayStr, key);
+                  if (!incrementMetric(todayStr, key)) {
+                    showSaveErrorAlert();
+                  }
                 }}
+                disabled={value >= config.max}
                 accessibilityRole="button"
                 accessibilityLabel={`Quick add ${config.label}`}
-                className={`size-11 rounded-2xl ${mc.bg10} items-center justify-center self-center`}
+                className={`size-11 rounded-2xl ${mc.bg10} items-center justify-center self-center ${value >= config.max ? "opacity-45" : ""}`}
               >
                 <MaterialIcons name="add" color={config.color} size={22} />
               </Pressable>

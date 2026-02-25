@@ -12,14 +12,14 @@ import {
   METRIC_CONFIG,
   METRIC_KEYS,
 } from "@/constants/metrics";
-import {
-  getCompletionRate,
-  getEntry,
-  getStreak,
-  getWeeklyAverage,
-} from "@/features/wellness/domain/analytics";
+import { getEntry, getStreak, toEntriesMap } from "@/features/wellness/domain/analytics";
 import { METRIC_TW, numericText, panel } from "@/lib/metric-theme";
-import { useWellnessStore } from "@/store/wellness-store";
+import {
+  useCompletionRateInRange,
+  useEntriesInRange,
+  useGoals,
+  useMetricAveragesInRange,
+} from "@/store/wellness-store";
 
 type WeekAction = { type: "prev" } | { type: "next" };
 
@@ -31,18 +31,38 @@ function weekReducer(state: Date, action: WeekAction): Date {
 }
 
 export default function HistoryScreen() {
-  const { entries, goals } = useWellnessStore();
+  const goals = useGoals();
   const [referenceDate, dispatch] = useReducer(weekReducer, new Date());
   const compactCard = panel({ density: "sm" });
   const statCard = panel({ density: "sm" });
   const weekCard = panel({ density: "sm" });
 
-  const completionRate = Math.round(getCompletionRate(entries, goals, { days: 7 }) * 100);
-  const bestStreak = Math.max(...METRIC_KEYS.map((k) => getStreak(entries, goals, { metric: k })));
   const weekDates = getWeekDates(referenceDate);
   const weekStart = weekDates[0] ?? referenceDate;
   const weekEnd = weekDates[6] ?? referenceDate;
-  const canGoNext = weekEnd < new Date();
+  const weekStartStr = formatDate(weekStart);
+  const weekEndStr = formatDate(weekEnd);
+
+  const today = new Date();
+  const todayStr = formatDate(today);
+  const last7Start = new Date(today);
+  last7Start.setDate(last7Start.getDate() - 6);
+
+  const streakStart = new Date(today);
+  streakStart.setDate(streakStart.getDate() - 365);
+
+  const weekRows = useEntriesInRange(weekStartStr, weekEndStr);
+  const streakRows = useEntriesInRange(formatDate(streakStart), todayStr);
+  const weeklyAverages = useMetricAveragesInRange(weekStartStr, weekEndStr);
+
+  const weekEntries = toEntriesMap(weekRows);
+  const streakEntries = toEntriesMap(streakRows);
+
+  const completionRate = Math.round(useCompletionRateInRange(formatDate(last7Start), todayStr) * 100);
+  const bestStreak = Math.max(
+    ...METRIC_KEYS.map((k) => getStreak(streakEntries, goals, { metric: k })),
+  );
+  const canGoNext = weekEnd < today;
   const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
   return (
@@ -136,7 +156,13 @@ export default function HistoryScreen() {
       </Card>
 
       {METRIC_KEYS.map((key) => (
-        <WeekChart key={key} metric={key} weekDates={weekDates} entries={entries} goals={goals} />
+        <WeekChart
+          key={key}
+          metric={key}
+          weekDates={weekDates}
+          entries={weekEntries}
+          goals={goals}
+        />
       ))}
 
       <View className="mt-5">
@@ -146,7 +172,7 @@ export default function HistoryScreen() {
       <View className="-mx-1.5 flex-row flex-wrap gap-y-3">
         {METRIC_KEYS.map((key) => {
           const config = METRIC_CONFIG[key];
-          const avg = getWeeklyAverage(entries, key, referenceDate);
+          const avg = weeklyAverages[key];
 
           return (
             <View key={key} className="w-1/2 px-1.5">
