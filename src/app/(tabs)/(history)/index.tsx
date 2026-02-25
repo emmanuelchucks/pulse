@@ -58,7 +58,9 @@ export default function HistoryScreen() {
   const weekEntries = toEntriesMap(weekRows);
   const streakEntries = toEntriesMap(streakRows);
 
-  const completionRate = Math.round(useCompletionRateInRange(formatDate(last7Start), todayStr) * 100);
+  const completionRate = Math.round(
+    useCompletionRateInRange(formatDate(last7Start), todayStr) * 100,
+  );
   const bestStreak = Math.max(
     ...METRIC_KEYS.map((k) => getStreak(streakEntries, goals, { metric: k })),
   );
