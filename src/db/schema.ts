@@ -1,9 +1,10 @@
 import { sqliteTable, uniqueIndex } from "drizzle-orm/sqlite-core";
+import * as ExpoCrypto from "expo-crypto";
 
 export const dailyEntries = sqliteTable(
   "daily_entries",
   (t) => ({
-    id: t.text("id").primaryKey().$defaultFn(() => globalThis.crypto.randomUUID()),
+    id: t.text("id").primaryKey().$defaultFn(ExpoCrypto.randomUUID),
     date: t.text("date").notNull(),
     water: t.real("water").notNull().default(0),
     mood: t.integer("mood").notNull().default(0),
@@ -24,7 +25,7 @@ export const dailyEntries = sqliteTable(
 export const goals = sqliteTable(
   "goals",
   (t) => ({
-    id: t.text("id").primaryKey().$defaultFn(() => globalThis.crypto.randomUUID()),
+    id: t.text("id").primaryKey().$defaultFn(ExpoCrypto.randomUUID),
     metric: t.text("metric").notNull(),
     value: t.real("value").notNull(),
     createdAt: t
