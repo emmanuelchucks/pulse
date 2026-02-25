@@ -3,8 +3,8 @@ import { Stack } from "expo-router";
 import { Card, Description } from "heroui-native";
 import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import type { MetricKey } from "@/constants/metrics";
-import type { DailyEntry, Goals } from "@/db/types";
 import { AppIcon } from "@/components/ui/app-icon";
+import { StepperGlyph } from "@/components/ui/stepper-glyph";
 import {
   METRIC_CONFIG,
   METRIC_KEYS,
@@ -12,14 +12,15 @@ import {
   MOOD_LABELS,
   formatDate,
 } from "@/constants/metrics";
-import { getEntry } from "@/features/wellness/domain/analytics";
 import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
+import { showSaveErrorAlert } from "@/lib/save-error-alert";
 import {
   decrementMetric,
   incrementMetric,
   resetDay,
   updateMetric,
-  useWellnessStore,
+  useEntryByDate,
+  useGoals,
 } from "@/store/wellness-store";
 
 const RESET_ICON = {
@@ -29,8 +30,9 @@ const RESET_ICON = {
 } as const;
 
 export default function TrackScreen() {
-  const { entries, goals } = useWellnessStore();
+  const goals = useGoals();
   const todayStr = formatDate(new Date());
+  const todayEntry = useEntryByDate(todayStr);
 
   const handleReset = () => {
     Alert.alert("Reset Day", "Reset all metrics for today?", [
@@ -42,7 +44,9 @@ export default function TrackScreen() {
           if (Platform.OS === "ios") {
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           }
-          resetDay(todayStr);
+          if (!resetDay(todayStr)) {
+            showSaveErrorAlert();
+          }
         },
       },
     ]);
@@ -81,9 +85,14 @@ export default function TrackScreen() {
         {METRIC_KEYS.map((key) => (
           <View key={key}>
             {key === "mood" ? (
-              <MoodCard value={getEntry(entries, todayStr).mood} todayStr={todayStr} />
+              <MoodCard value={todayEntry.mood} todayStr={todayStr} />
             ) : (
-              <NumericCard metric={key} todayStr={todayStr} entries={entries} goals={goals} />
+              <NumericCard
+                metric={key}
+                todayStr={todayStr}
+                value={todayEntry[key]}
+                goal={goals[key]}
+              />
             )}
           </View>
         ))}
@@ -95,18 +104,15 @@ export default function TrackScreen() {
 function NumericCard({
   metric,
   todayStr,
-  entries,
-  goals,
+  value,
+  goal,
 }: {
   metric: MetricKey;
   todayStr: string;
-  entries: Record<string, DailyEntry>;
-  goals: Goals;
+  value: number;
+  goal: number;
 }) {
   const config = METRIC_CONFIG[metric];
-  const entry = getEntry(entries, todayStr);
-  const value = entry[metric];
-  const goal = goals[metric];
   const pct = Math.round(Math.min(goal > 0 ? value / goal : 0, 1) * 100);
   const mc = METRIC_TW[metric];
   const cardStyles = panel();
@@ -138,7 +144,9 @@ function NumericCard({
         <View className="flex-row items-center justify-between pt-1.5">
           <Pressable
             onPress={() => {
-              decrementMetric(todayStr, metric);
+              if (!decrementMetric(todayStr, metric)) {
+                showSaveErrorAlert();
+              }
             }}
             disabled={value <= config.min}
             accessibilityRole="button"
@@ -155,7 +163,9 @@ function NumericCard({
 
           <Pressable
             onPress={() => {
-              incrementMetric(todayStr, metric);
+              if (!incrementMetric(todayStr, metric)) {
+                showSaveErrorAlert();
+              }
             }}
             disabled={value >= config.max}
             accessibilityRole="button"
@@ -167,23 +177,6 @@ function NumericCard({
         </View>
       </Card.Body>
     </Card>
-  );
-}
-
-function StepperGlyph({ kind, color }: { kind: "plus" | "minus"; color: string }) {
-  return (
-    <View className="relative size-5">
-      <View
-        className="absolute rounded-full"
-        style={{ backgroundColor: color, width: 14, height: 2, left: 3, top: 9 }}
-      />
-      {kind === "plus" ? (
-        <View
-          className="absolute rounded-full"
-          style={{ backgroundColor: color, width: 2, height: 14, left: 9, top: 3 }}
-        />
-      ) : null}
-    </View>
   );
 }
 
@@ -213,7 +206,9 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
             <Pressable
               key={mood}
               onPress={() => {
-                updateMetric(todayStr, "mood", mood);
+                if (!updateMetric(todayStr, "mood", mood)) {
+                  showSaveErrorAlert();
+                }
               }}
               accessibilityRole="button"
               accessibilityLabel={`Mood ${MOOD_LABELS[mood]}`}

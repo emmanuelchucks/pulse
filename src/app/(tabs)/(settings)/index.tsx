@@ -4,12 +4,14 @@ import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native
 import type { MetricKey } from "@/constants/metrics";
 import type { Goals } from "@/db/types";
 import { AppIcon } from "@/components/ui/app-icon";
+import { StepperGlyph } from "@/components/ui/stepper-glyph";
 import { METRIC_CONFIG, METRIC_KEYS } from "@/constants/metrics";
 import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
-import { clearAllData, updateGoal, useWellnessStore } from "@/store/wellness-store";
+import { showSaveErrorAlert } from "@/lib/save-error-alert";
+import { clearAllData, updateGoal, useEntryCount, useGoals } from "@/store/wellness-store";
 
 export default function SettingsScreen() {
-  const { entries, goals } = useWellnessStore();
+  const goals = useGoals();
   const cardStyles = panel();
 
   const handleClearData = () => {
@@ -22,7 +24,9 @@ export default function SettingsScreen() {
           text: "Clear Data",
           style: "destructive",
           onPress: () => {
-            clearAllData();
+            if (!clearAllData()) {
+              showSaveErrorAlert();
+            }
             if (Platform.OS === "ios") {
               void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(
                 () => {},
@@ -34,7 +38,7 @@ export default function SettingsScreen() {
     );
   };
 
-  const totalEntries = Object.keys(entries).length;
+  const totalEntries = useEntryCount();
 
   return (
     <ScrollView
@@ -98,23 +102,6 @@ export default function SettingsScreen() {
   );
 }
 
-function StepperGlyph({ kind, color }: { kind: "plus" | "minus"; color: string }) {
-  return (
-    <View className="relative size-5">
-      <View
-        className="absolute rounded-full"
-        style={{ backgroundColor: color, width: 14, height: 2, left: 3, top: 9 }}
-      />
-      {kind === "plus" ? (
-        <View
-          className="absolute rounded-full"
-          style={{ backgroundColor: color, width: 2, height: 14, left: 9, top: 3 }}
-        />
-      ) : null}
-    </View>
-  );
-}
-
 function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
   const config = METRIC_CONFIG[metric];
   const current = goals[metric];
@@ -145,12 +132,14 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
         <View className="w-38 flex-row items-center gap-2">
           <Pressable
             onPress={() => {
-              updateGoal(metric, Math.max(config.step, current - config.step));
+              if (!updateGoal(metric, Math.max(config.min, current - config.step))) {
+                showSaveErrorAlert();
+              }
             }}
-            disabled={current <= config.step}
+            disabled={current <= config.min}
             accessibilityRole="button"
             accessibilityLabel={`Decrease ${config.label} goal`}
-            className={`${stepperButton({ disabled: current <= config.step })} ${mc.bg10}`}
+            className={`${stepperButton({ disabled: current <= config.min })} ${mc.bg10}`}
           >
             <StepperGlyph kind="minus" color={config.color} />
           </Pressable>
@@ -164,11 +153,14 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
 
           <Pressable
             onPress={() => {
-              updateGoal(metric, current + config.step);
+              if (!updateGoal(metric, Math.min(config.max, current + config.step))) {
+                showSaveErrorAlert();
+              }
             }}
+            disabled={current >= config.max}
             accessibilityRole="button"
             accessibilityLabel={`Increase ${config.label} goal`}
-            className={`${stepperButton()} ${mc.bg}`}
+            className={`${stepperButton({ disabled: current >= config.max })} ${mc.bg}`}
           >
             <StepperGlyph kind="plus" color="#ffffff" />
           </Pressable>

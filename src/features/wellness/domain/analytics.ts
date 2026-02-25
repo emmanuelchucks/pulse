@@ -6,6 +6,13 @@ export function createEmptyEntry(dateStr: string): DailyEntry {
   return { date: dateStr, water: 0, mood: 0, sleep: 0, exercise: 0 };
 }
 
+export function toEntriesMap(rows: DailyEntry[]): Record<string, DailyEntry> {
+  return rows.reduce<Record<string, DailyEntry>>((accumulator, row) => {
+    accumulator[row.date] = row;
+    return accumulator;
+  }, {});
+}
+
 export function getEntry(entries: Record<string, DailyEntry>, dateStr: string): DailyEntry {
   return entries[dateStr] ?? createEmptyEntry(dateStr);
 }
