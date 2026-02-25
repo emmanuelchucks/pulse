@@ -2,15 +2,16 @@ import type { HeroUINativeConfig } from "heroui-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { polyfillWebCrypto } from "expo-standard-web-crypto";
 import { HeroUINativeProvider } from "heroui-native";
 import { useEffect, useState } from "react";
-import { LogBox, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { runMigrations } from "@/db/client";
 import { initializeWellnessData } from "@/store/wellness-store";
 import "@/theme.css";
 
-LogBox.ignoreLogs(["ReactNativeCss:", "RNScreens", "RCTEventEmitter.receiveEvent"]);
+polyfillWebCrypto();
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore if already hidden.
