@@ -24,13 +24,14 @@ A local-first wellness tracker built with Expo + React Native.
 
 ## Quick start
 
-This project runs in a native dev client (not Expo Go).
+Use Expo Go by default.
 
 ```bash
 pnpm install
-pnpm ios    # or: pnpm android
 pnpm dev
 ```
+
+Then press `i` (iOS simulator) or `a` (Android emulator) in the Expo CLI.
 
 ## Useful scripts
 
