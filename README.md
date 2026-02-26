@@ -7,11 +7,11 @@ A local-first wellness tracker built with Expo + React Native.
 <video src="https://github.com/user-attachments/assets/28e8deb4-0bd1-42b9-8e73-83c823d0ff05" controls width="100%" poster="https://github.com/user-attachments/assets/d1d50a5f-72ad-45c3-8e3e-0359ec7db362"></video>
 
 <picture>
-  <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://github.com/user-attachments/assets/d89ea218-4d8c-4631-b86e-3c43b38de3ee">
-  <source media="(prefers-color-scheme: dark) and (min-width: 768px)" srcset="https://github.com/user-attachments/assets/1c04bf5d-edb0-4672-837d-0654a7cb4872">
-  <source media="(prefers-color-scheme: light) and (max-width: 767px)" srcset="https://github.com/user-attachments/assets/4e81440f-6f14-4622-b01a-b1f03ff670e7">
-  <source media="(prefers-color-scheme: light) and (min-width: 768px)" srcset="https://github.com/user-attachments/assets/702af28e-6205-48ca-996b-6df36e4719df">
-  <img alt="Pulse app screenshots in light and dark mode" src="https://github.com/user-attachments/assets/702af28e-6205-48ca-996b-6df36e4719df" width="100%">
+  <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://github.com/user-attachments/assets/6b62fa50-86ac-43bd-b310-37fd374fe742">
+  <source media="(prefers-color-scheme: dark) and (min-width: 768px)" srcset="https://github.com/user-attachments/assets/faa6a005-15be-4ab0-847d-b3efa336cb32">
+  <source media="(prefers-color-scheme: light) and (max-width: 767px)" srcset="https://github.com/user-attachments/assets/acf0f9b8-c5de-4ade-b4e4-9335a4e25cc1">
+  <source media="(prefers-color-scheme: light) and (min-width: 768px)" srcset="https://github.com/user-attachments/assets/dc561b63-3364-4a51-a997-d5b59b3bdc68">
+  <img alt="Pulse app screenshots in light and dark mode" src="https://github.com/user-attachments/assets/dc561b63-3364-4a51-a997-d5b59b3bdc68" width="100%">
 </picture>
 
 ## Tech
