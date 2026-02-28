@@ -54,7 +54,10 @@ export default function SettingsScreen() {
         <Card.Body className={cardStyles.body({ className: "gap-3.5" })}>
           <View className="flex-row items-center justify-between">
             <Description>Days tracked</Description>
-            <Text className={numericText({ size: "xs", className: "font-semibold" })}>
+            <Text
+              testID="settings-days-tracked"
+              className={numericText({ size: "xs", className: "font-semibold" })}
+            >
               {totalEntries}
             </Text>
           </View>
@@ -62,6 +65,7 @@ export default function SettingsScreen() {
           <Button
             variant="ghost"
             onPress={handleClearData}
+            testID="settings-clear-all-data"
             accessibilityLabel="Clear All Data"
             className="h-11 rounded-xl border border-red-500/15 bg-red-500/6"
           >
@@ -131,7 +135,9 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
           </Pressable>
 
           <View className="w-12 items-center">
-            <Text className={numericText({ size: "md" })}>{current}</Text>
+            <Text testID={`settings-${metric}-goal-value`} className={numericText({ size: "md" })}>
+              {current}
+            </Text>
             <Text className="text-muted text-xs" numberOfLines={1}>
               {unitLabel}
             </Text>
