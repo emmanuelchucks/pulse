@@ -1,20 +1,22 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { format as formatDateFns, subDays } from "date-fns";
+import { SymbolView } from "expo-symbols";
 import { Card, Description, Label } from "heroui-native";
 import { Pressable, ScrollView, Text, View, useColorScheme } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import { AppIcon } from "@/components/ui/app-icon";
+import { ProgressRing } from "@/components/ui/progress-ring";
 import { METRIC_CONFIG, METRIC_KEYS, MOOD_EMOJIS, formatDate } from "@/constants/metrics";
 import { getStreak, toEntriesMap } from "@/features/wellness/domain/analytics";
+import { getBestStreak } from "@/features/wellness/domain/streak-summary";
 import { iconBadge, METRIC_TW, numericText, panel } from "@/lib/metric-theme";
-import { showSaveErrorAlert } from "@/lib/save-error-alert";
+import { runOrAlert } from "@/lib/run-or-alert";
+import { incrementMetric } from "@/store/wellness-actions";
 import {
-  incrementMetric,
   useCompletionRateInRange,
   useEntriesInRange,
   useEntryByDate,
   useGoals,
   useTodaySummary,
-} from "@/store/wellness-store";
+} from "@/store/wellness-queries";
 
 export default function DashboardScreen() {
   const goals = useGoals();
@@ -24,25 +26,16 @@ export default function DashboardScreen() {
   const todayStr = formatDate(today);
   const todayEntry = useEntryByDate(todayStr);
 
-  const last7Start = new Date(today);
-  last7Start.setDate(last7Start.getDate() - 6);
-
-  const streakStart = new Date(today);
-  streakStart.setDate(streakStart.getDate() - 365);
+  const last7Start = subDays(today, 6);
+  const streakStart = subDays(today, 365);
 
   const streakRows = useEntriesInRange(formatDate(streakStart), todayStr);
   const streakEntries = toEntriesMap(streakRows);
-  const dateLabel = today.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const dateLabel = formatDateFns(today, "EEEE, MMMM d");
 
   const { completedMetrics, overallPercent } = useTodaySummary(todayStr);
   const weeklyRate = Math.round(useCompletionRateInRange(formatDate(last7Start), todayStr) * 100);
-  const bestStreak = Math.max(
-    ...METRIC_KEYS.map((k) => getStreak(streakEntries, goals, { metric: k })),
-  );
+  const bestStreak = getBestStreak(streakEntries, goals);
   const greeting = getGreeting();
   const cardStyles = panel();
 
@@ -143,72 +136,24 @@ export default function DashboardScreen() {
 
               <Pressable
                 onPress={() => {
-                  if (!incrementMetric(todayStr, key)) {
-                    showSaveErrorAlert();
-                  }
+                  runOrAlert(() => incrementMetric(todayStr, key));
                 }}
                 disabled={value >= config.max}
                 accessibilityRole="button"
                 accessibilityLabel={`Quick add ${config.label}`}
                 className={`size-11 rounded-2xl ${mc.bg10} items-center justify-center self-center ${value >= config.max ? "opacity-45" : ""}`}
               >
-                <MaterialIcons name="add" color={config.color} size={22} />
+                <SymbolView
+                  name={{ ios: "plus", android: "add", web: "add" }}
+                  tintColor={config.color}
+                  style={{ width: 22, height: 22 }}
+                />
               </Pressable>
             </Card.Body>
           </Card>
         );
       })}
     </ScrollView>
-  );
-}
-
-function ProgressRing({
-  value,
-  color,
-  trackColor,
-  size = 80,
-  stroke = 4,
-}: {
-  value: number;
-  color: string;
-  trackColor: string;
-  size?: number;
-  stroke?: number;
-}) {
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const clamped = Math.max(0, Math.min(value, 100));
-  const offset = circumference * (1 - clamped / 100);
-
-  return (
-    <View style={{ width: size, height: size }} className="items-center justify-center">
-      <Svg width={size} height={size}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={trackColor}
-          strokeWidth={stroke}
-          fill="transparent"
-        />
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={color}
-          strokeWidth={stroke}
-          fill="transparent"
-          strokeLinecap="round"
-          strokeDasharray={`${circumference} ${circumference}`}
-          strokeDashoffset={offset}
-          rotation={-90}
-          origin={`${size / 2}, ${size / 2}`}
-        />
-      </Svg>
-      <View className="absolute items-center justify-center">
-        <Text className={numericText({ size: "md" })}>{Math.round(clamped)}%</Text>
-      </View>
-    </View>
   );
 }
 

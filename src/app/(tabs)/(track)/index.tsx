@@ -1,7 +1,6 @@
-import * as Haptics from "expo-haptics";
 import { Stack } from "expo-router";
 import { Card, Description } from "heroui-native";
-import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import type { MetricKey } from "@/constants/metrics";
 import { AppIcon } from "@/components/ui/app-icon";
 import { StepperGlyph } from "@/components/ui/stepper-glyph";
@@ -13,15 +12,10 @@ import {
   formatDate,
 } from "@/constants/metrics";
 import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
-import { showSaveErrorAlert } from "@/lib/save-error-alert";
-import {
-  decrementMetric,
-  incrementMetric,
-  resetDay,
-  updateMetric,
-  useEntryByDate,
-  useGoals,
-} from "@/store/wellness-store";
+import { confirmDestructiveAction } from "@/lib/confirm-destructive-action";
+import { runOrAlert } from "@/lib/run-or-alert";
+import { decrementMetric, incrementMetric, resetDay, updateMetric } from "@/store/wellness-actions";
+import { useEntryByDate, useGoals } from "@/store/wellness-queries";
 
 const RESET_ICON = {
   ios: "arrow.counterclockwise",
@@ -35,21 +29,14 @@ export default function TrackScreen() {
   const todayEntry = useEntryByDate(todayStr);
 
   const handleReset = () => {
-    Alert.alert("Reset Day", "Reset all metrics for today?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Reset",
-        style: "destructive",
-        onPress: () => {
-          if (Platform.OS === "ios") {
-            void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          }
-          if (!resetDay(todayStr)) {
-            showSaveErrorAlert();
-          }
-        },
+    confirmDestructiveAction({
+      title: "Reset Day",
+      message: "Reset all metrics for today?",
+      confirmText: "Reset",
+      onConfirm: () => {
+        runOrAlert(() => resetDay(todayStr));
       },
-    ]);
+    });
   };
 
   return (
@@ -144,9 +131,7 @@ function NumericCard({
         <View className="flex-row items-center justify-between pt-1.5">
           <Pressable
             onPress={() => {
-              if (!decrementMetric(todayStr, metric)) {
-                showSaveErrorAlert();
-              }
+              runOrAlert(() => decrementMetric(todayStr, metric));
             }}
             disabled={value <= config.min}
             accessibilityRole="button"
@@ -163,9 +148,7 @@ function NumericCard({
 
           <Pressable
             onPress={() => {
-              if (!incrementMetric(todayStr, metric)) {
-                showSaveErrorAlert();
-              }
+              runOrAlert(() => incrementMetric(todayStr, metric));
             }}
             disabled={value >= config.max}
             accessibilityRole="button"
@@ -206,9 +189,7 @@ function MoodCard({ value, todayStr }: { value: number; todayStr: string }) {
             <Pressable
               key={mood}
               onPress={() => {
-                if (!updateMetric(todayStr, "mood", mood)) {
-                  showSaveErrorAlert();
-                }
+                runOrAlert(() => updateMetric(todayStr, "mood", mood));
               }}
               accessibilityRole="button"
               accessibilityLabel={`Mood ${MOOD_LABELS[mood]}`}

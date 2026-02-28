@@ -1,15 +1,14 @@
-import { and, count, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { differenceInCalendarDays, isValid, parseISO } from "date-fns";
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
 import { METRIC_KEYS } from "@/constants/metrics";
 import { db } from "@/db/client";
 import { dailyEntries, goals as goalsTable } from "@/db/schema";
-import { createWellnessService } from "@/features/wellness/application/wellness-service";
 import { createDefaultGoals } from "@/features/wellness/domain/default-goals";
-import { createDrizzleWellnessRepository } from "@/features/wellness/infra/wellness-repository";
+import { useWellnessQueryVersion } from "@/store/wellness-query-invalidation";
 
-const wellnessService = createWellnessService(createDrizzleWellnessRepository(db));
 const DEFAULT_GOALS = createDefaultGoals();
 
 const WATER_GOAL_SQL = sql<number>`coalesce((select ${goalsTable.value} from ${goalsTable} where ${goalsTable.metric} = 'water' limit 1), ${DEFAULT_GOALS.water})`;
@@ -39,7 +38,7 @@ const OVERALL_PERCENT_SQL = sql<number>`
   )
 `;
 
-export type TodaySummary = {
+type TodaySummary = {
   completedMetrics: number;
   overallPercent: number;
 };
@@ -48,88 +47,25 @@ function isMetricKey(value: string): value is MetricKey {
   return METRIC_KEYS.some((metric) => metric === value);
 }
 
-function parseDateToEpochDay(dateStr: string): number | null {
-  const parts = dateStr.split("-");
-  if (parts.length !== 3) return null;
-
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const day = Number(parts[2]);
-
-  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
-    return null;
-  }
-
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    return null;
-  }
-
-  return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
-}
-
 function getInclusiveDayCount(startDate: string, endDate: string): number {
-  const startDay = parseDateToEpochDay(startDate);
-  const endDay = parseDateToEpochDay(endDate);
+  const start = parseISO(startDate);
+  const end = parseISO(endDate);
 
-  if (startDay === null || endDay === null || endDay < startDay) {
+  if (!isValid(start) || !isValid(end)) {
     return 0;
   }
 
-  return endDay - startDay + 1;
-}
-
-export function initializeWellnessData() {
-  wellnessService.initializeWellnessData();
-}
-
-function runAction(actionName: string, action: () => void): boolean {
-  try {
-    action();
-    return true;
-  } catch (error) {
-    globalThis.console.error(`Wellness action failed: ${actionName}`, error);
-    return false;
+  const dayDiff = differenceInCalendarDays(end, start);
+  if (dayDiff < 0) {
+    return 0;
   }
-}
 
-export function updateMetric(date: string, metric: MetricKey, value: number) {
-  return runAction("updateMetric", () => {
-    wellnessService.updateMetric(date, metric, value);
-  });
-}
-
-export function incrementMetric(date: string, metric: MetricKey) {
-  return runAction("incrementMetric", () => {
-    wellnessService.incrementMetric(date, metric);
-  });
-}
-
-export function decrementMetric(date: string, metric: MetricKey) {
-  return runAction("decrementMetric", () => {
-    wellnessService.decrementMetric(date, metric);
-  });
-}
-
-export function updateGoal(metric: MetricKey, value: number) {
-  return runAction("updateGoal", () => {
-    wellnessService.updateGoal(metric, value);
-  });
-}
-
-export function resetDay(date: string) {
-  return runAction("resetDay", () => {
-    wellnessService.resetDay(date);
-  });
-}
-
-export function clearAllData() {
-  return runAction("clearAllData", () => {
-    wellnessService.clearAllData();
-  });
+  return dayDiff + 1;
 }
 
 export function useGoals() {
-  const goalsQuery = useLiveQuery(db.select().from(goalsTable));
+  const version = useWellnessQueryVersion();
+  const goalsQuery = useLiveQuery(db.select().from(goalsTable), [version]);
   const base: Goals = { ...DEFAULT_GOALS };
 
   for (const row of goalsQuery.data ?? []) {
@@ -141,13 +77,28 @@ export function useGoals() {
 }
 
 export function useEntryCount() {
-  const query = useLiveQuery(db.select({ total: count() }).from(dailyEntries));
-  return query.data?.[0]?.total ?? 0;
+  const version = useWellnessQueryVersion();
+  const query = useLiveQuery(
+    db.select({
+      water: dailyEntries.water,
+      mood: dailyEntries.mood,
+      sleep: dailyEntries.sleep,
+      exercise: dailyEntries.exercise,
+    }).from(dailyEntries),
+    [version],
+  );
+
+  const rows = query.data ?? [];
+
+  return rows.filter((row) => row.water > 0 || row.mood > 0 || row.sleep > 0 || row.exercise > 0)
+    .length;
 }
 
 export function useEntryByDate(date: string): DailyEntry {
+  const version = useWellnessQueryVersion();
   const query = useLiveQuery(
     db.select().from(dailyEntries).where(eq(dailyEntries.date, date)).limit(1),
+    [date, version],
   );
   const row = query.data?.[0];
 
@@ -161,17 +112,20 @@ export function useEntryByDate(date: string): DailyEntry {
 }
 
 export function useEntriesInRange(startDate: string, endDate: string) {
+  const version = useWellnessQueryVersion();
   const query = useLiveQuery(
     db
       .select()
       .from(dailyEntries)
       .where(and(gte(dailyEntries.date, startDate), lte(dailyEntries.date, endDate))),
+    [startDate, endDate, version],
   );
 
   return query.data ?? [];
 }
 
 export function useCompletionRateInRange(startDate: string, endDate: string): number {
+  const version = useWellnessQueryVersion();
   const dayCount = getInclusiveDayCount(startDate, endDate);
 
   const query = useLiveQuery(
@@ -181,6 +135,7 @@ export function useCompletionRateInRange(startDate: string, endDate: string): nu
       })
       .from(dailyEntries)
       .where(and(gte(dailyEntries.date, startDate), lte(dailyEntries.date, endDate))),
+    [startDate, endDate, version],
   );
 
   if (dayCount === 0) return 0;
@@ -192,6 +147,7 @@ export function useCompletionRateInRange(startDate: string, endDate: string): nu
 }
 
 export function useTodaySummary(date: string): TodaySummary {
+  const version = useWellnessQueryVersion();
   const query = useLiveQuery(
     db
       .select({
@@ -201,6 +157,7 @@ export function useTodaySummary(date: string): TodaySummary {
       .from(dailyEntries)
       .where(eq(dailyEntries.date, date))
       .limit(1),
+    [date, version],
   );
 
   return {
@@ -213,6 +170,7 @@ export function useMetricAveragesInRange(
   startDate: string,
   endDate: string,
 ): Record<MetricKey, number> {
+  const version = useWellnessQueryVersion();
   const query = useLiveQuery(
     db
       .select({
@@ -223,6 +181,7 @@ export function useMetricAveragesInRange(
       })
       .from(dailyEntries)
       .where(and(gte(dailyEntries.date, startDate), lte(dailyEntries.date, endDate))),
+    [startDate, endDate, version],
   );
 
   const row = query.data?.[0];

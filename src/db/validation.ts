@@ -1,13 +1,8 @@
-import { createInsertSchema, createUpdateSchema } from "drizzle-orm/valibot";
 import { maxValue, minValue, number, object, parse, picklist, pipe, string } from "valibot";
 import type { MetricKey } from "@/constants/metrics";
 import { METRIC_CONFIG, METRIC_KEYS } from "@/constants/metrics";
-import { dailyEntries, goals } from "@/db/schema";
 
-export const insertDailyEntrySchema = createInsertSchema(dailyEntries);
-export const updateGoalSchema = createUpdateSchema(goals);
-
-export const metricWriteSchema = object({
+const metricWriteSchema = object({
   date: string(),
   metric: picklist(METRIC_KEYS),
   value: number(),

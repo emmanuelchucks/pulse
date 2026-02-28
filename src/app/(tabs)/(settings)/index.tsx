@@ -1,41 +1,29 @@
-import * as Haptics from "expo-haptics";
 import { Button, Card, Description, Label } from "heroui-native";
-import { Alert, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import type { MetricKey } from "@/constants/metrics";
 import type { Goals } from "@/db/types";
 import { AppIcon } from "@/components/ui/app-icon";
 import { StepperGlyph } from "@/components/ui/stepper-glyph";
 import { METRIC_CONFIG, METRIC_KEYS } from "@/constants/metrics";
+import { confirmDestructiveAction } from "@/lib/confirm-destructive-action";
 import { iconBadge, METRIC_TW, numericText, panel, stepperButton } from "@/lib/metric-theme";
-import { showSaveErrorAlert } from "@/lib/save-error-alert";
-import { clearAllData, updateGoal, useEntryCount, useGoals } from "@/store/wellness-store";
+import { runOrAlert } from "@/lib/run-or-alert";
+import { clearAllData, updateGoal } from "@/store/wellness-actions";
+import { useEntryCount, useGoals } from "@/store/wellness-queries";
 
 export default function SettingsScreen() {
   const goals = useGoals();
   const cardStyles = panel();
 
   const handleClearData = () => {
-    Alert.alert(
-      "Clear All Data",
-      "This will permanently delete all your wellness entries. This cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Clear Data",
-          style: "destructive",
-          onPress: () => {
-            if (!clearAllData()) {
-              showSaveErrorAlert();
-            }
-            if (Platform.OS === "ios") {
-              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(
-                () => {},
-              );
-            }
-          },
-        },
-      ],
-    );
+    confirmDestructiveAction({
+      title: "Clear All Data",
+      message: "This will permanently delete all your wellness entries. This cannot be undone.",
+      confirmText: "Clear Data",
+      onConfirm: () => {
+        runOrAlert(clearAllData);
+      },
+    });
   };
 
   const totalEntries = useEntryCount();
@@ -132,9 +120,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
         <View className="w-38 flex-row items-center gap-2">
           <Pressable
             onPress={() => {
-              if (!updateGoal(metric, Math.max(config.min, current - config.step))) {
-                showSaveErrorAlert();
-              }
+              runOrAlert(() => updateGoal(metric, Math.max(config.min, current - config.step)));
             }}
             disabled={current <= config.min}
             accessibilityRole="button"
@@ -153,9 +139,7 @@ function GoalCard({ metric, goals }: { metric: MetricKey; goals: Goals }) {
 
           <Pressable
             onPress={() => {
-              if (!updateGoal(metric, Math.min(config.max, current + config.step))) {
-                showSaveErrorAlert();
-              }
+              runOrAlert(() => updateGoal(metric, Math.min(config.max, current + config.step)));
             }}
             disabled={current >= config.max}
             accessibilityRole="button"

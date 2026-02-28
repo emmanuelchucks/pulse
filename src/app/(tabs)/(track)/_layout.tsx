@@ -1,17 +1,5 @@
-import { Stack } from "expo-router/stack";
-import { useColorScheme } from "react-native";
+import { TabStackLayout } from "@/components/navigation/tab-stack-layout";
 
 export default function TrackLayout() {
-  const isDark = useColorScheme() === "dark";
-
-  return (
-    <Stack
-      screenOptions={{
-        headerLargeTitle: true,
-        headerTintColor: isDark ? "#ffffff" : "#000000",
-      }}
-    >
-      <Stack.Screen name="index" options={{ title: "Track" }} />
-    </Stack>
-  );
+  return <TabStackLayout title="Track" />;
 }

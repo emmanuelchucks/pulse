@@ -22,7 +22,6 @@
     "clean": "git clean -xdf"
   },
   "dependencies": {
-    "@expo/vector-icons": "^15.1.1",
     "@gorhom/bottom-sheet": "^5.2.8",
     "@react-navigation/bottom-tabs": "^7.10.1",
     "@react-navigation/elements": "^2.9.5",

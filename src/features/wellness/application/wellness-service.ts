@@ -4,7 +4,7 @@ import { METRIC_CONFIG } from "@/constants/metrics";
 import { parseMetricValue, parseMetricWrite } from "@/db/validation";
 import { createDefaultGoals } from "@/features/wellness/domain/default-goals";
 
-export interface WellnessService {
+interface WellnessService {
   initializeWellnessData(): void;
   updateMetric(date: string, metric: MetricKey, value: number): void;
   incrementMetric(date: string, metric: MetricKey): void;

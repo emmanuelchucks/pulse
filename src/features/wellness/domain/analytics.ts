@@ -1,3 +1,4 @@
+import { subDays } from "date-fns";
 import type { MetricKey } from "@/constants/metrics";
 import type { DailyEntry, Goals } from "@/db/types";
 import { METRIC_KEYS, formatDate } from "@/constants/metrics";
@@ -35,7 +36,7 @@ export function getStreak(
 ): number {
   let streak = 0;
   const today = params.today ?? new Date();
-  const cursor = new Date(today);
+  let cursor = new Date(today);
 
   while (true) {
     const dateStr = formatDate(cursor);
@@ -43,7 +44,7 @@ export function getStreak(
     if (!entry || entry[params.metric] === 0) break;
     if (entry[params.metric] / goals[params.metric] < 1) break;
     streak++;
-    cursor.setDate(cursor.getDate() - 1);
+    cursor = subDays(cursor, 1);
   }
 
   return streak;
@@ -56,16 +57,15 @@ export function getWeeklyAverage(
 ): number {
   let total = 0;
   let count = 0;
-  const cursor = new Date(referenceDate);
 
   for (let i = 0; i < 7; i++) {
+    const cursor = subDays(referenceDate, i);
     const dateStr = formatDate(cursor);
     const entry = entries[dateStr];
     if (entry && entry[metric] > 0) {
       total += entry[metric];
       count++;
     }
-    cursor.setDate(cursor.getDate() - 1);
   }
 
   return count > 0 ? total / count : 0;
@@ -83,8 +83,7 @@ export function getCompletionRate(
   const totalMetrics = days * METRIC_KEYS.length;
 
   for (let i = 0; i < days; i++) {
-    const cursor = new Date(today);
-    cursor.setDate(today.getDate() - i);
+    const cursor = subDays(today, i);
     const dateStr = formatDate(cursor);
     const entry = entries[dateStr];
     if (!entry) continue;

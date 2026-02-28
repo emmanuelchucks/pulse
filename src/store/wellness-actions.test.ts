@@ -22,8 +22,14 @@ vi.mock("@/features/wellness/infra/wellness-repository", () => ({
   createDrizzleWellnessRepository: () => ({}),
 }));
 
+const bumpWellnessQueryVersion = vi.fn();
+
 vi.mock("@/db/client", () => ({
   db: {},
+}));
+
+vi.mock("@/store/wellness-query-invalidation", () => ({
+  bumpWellnessQueryVersion,
 }));
 
 describe("wellness store action wrappers", () => {
@@ -32,10 +38,11 @@ describe("wellness store action wrappers", () => {
   });
 
   it("returns true when updateMetric succeeds", async () => {
-    const { updateMetric } = await import("@/store/wellness-store");
+    const { updateMetric } = await import("@/store/wellness-actions");
 
     expect(updateMetric("2026-02-11", "water", 3)).toBe(true);
     expect(mockService.updateMetric).toHaveBeenCalledWith("2026-02-11", "water", 3);
+    expect(bumpWellnessQueryVersion).toHaveBeenCalledTimes(1);
   });
 
   it("returns false when incrementMetric throws", async () => {
@@ -44,10 +51,11 @@ describe("wellness store action wrappers", () => {
       throw new Error("db failure");
     });
 
-    const { incrementMetric } = await import("@/store/wellness-store");
+    const { incrementMetric } = await import("@/store/wellness-actions");
 
     expect(incrementMetric("2026-02-11", "water")).toBe(false);
     expect(errorSpy).toHaveBeenCalled();
+    expect(bumpWellnessQueryVersion).not.toHaveBeenCalled();
 
     errorSpy.mockRestore();
   });
@@ -58,21 +66,23 @@ describe("wellness store action wrappers", () => {
       throw new Error("validation failure");
     });
 
-    const { updateGoal } = await import("@/store/wellness-store");
+    const { updateGoal } = await import("@/store/wellness-actions");
 
     expect(updateGoal("mood", 10)).toBe(false);
     expect(errorSpy).toHaveBeenCalled();
+    expect(bumpWellnessQueryVersion).not.toHaveBeenCalled();
 
     errorSpy.mockRestore();
   });
 
   it("delegates reset and clear actions", async () => {
-    const { resetDay, clearAllData } = await import("@/store/wellness-store");
+    const { resetDay, clearAllData } = await import("@/store/wellness-actions");
 
     expect(resetDay("2026-02-11")).toBe(true);
     expect(clearAllData()).toBe(true);
 
     expect(mockService.resetDay).toHaveBeenCalledWith("2026-02-11");
     expect(mockService.clearAllData).toHaveBeenCalledTimes(1);
+    expect(bumpWellnessQueryVersion).toHaveBeenCalledTimes(2);
   });
 });
