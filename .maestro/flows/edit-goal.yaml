@@ -1,4 +1,8 @@
 appId: com.pulsewellness.app
+name: Edit water goal with stepper controls
+tags:
+  - e2e
+  - regression
 ---
 - launchApp
 - runFlow: _reset-state.yaml

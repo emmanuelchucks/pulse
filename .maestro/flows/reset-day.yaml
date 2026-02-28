@@ -1,4 +1,8 @@
 appId: com.pulsewellness.app
+name: Reset day clears tracked water value
+tags:
+  - e2e
+  - smoke
 ---
 - launchApp
 - runFlow: _reset-state.yaml

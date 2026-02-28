@@ -1,4 +1,8 @@
 appId: com.pulsewellness.app
+name: Quick add updates today's water metric
+tags:
+  - e2e
+  - smoke
 ---
 - launchApp
 - runFlow: _reset-state.yaml

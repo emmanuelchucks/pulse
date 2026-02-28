@@ -1,4 +1,8 @@
 appId: com.pulsewellness.app
+name: History week navigation updates visible averages
+tags:
+  - e2e
+  - regression
 ---
 - launchApp
 - runFlow: _reset-state.yaml

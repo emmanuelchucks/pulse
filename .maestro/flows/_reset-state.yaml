@@ -1,4 +1,7 @@
 appId: com.pulsewellness.app
+name: Utility reset app data state
+tags:
+  - util
 ---
 - tapOn: "Settings"
 - scrollUntilVisible:
