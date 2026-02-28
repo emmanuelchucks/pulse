@@ -10,8 +10,10 @@ tags:
 - assertVisible:
     id: "today-water-value"
     text: "0"
-- tapOn: "Quick add Water"
-- tapOn: "Quick add Water"
+- repeat:
+    times: 2
+    commands:
+      - tapOn: "Quick add Water"
 - assertVisible:
     id: "today-water-value"
     text: "2"

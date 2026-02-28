@@ -10,8 +10,10 @@ tags:
 - assertVisible:
     id: "track-water-value"
     text: "0"
-- tapOn: "Increase Water"
-- tapOn: "Increase Water"
+- repeat:
+    times: 2
+    commands:
+      - tapOn: "Increase Water"
 - assertVisible:
     id: "track-water-value"
     text: "2"

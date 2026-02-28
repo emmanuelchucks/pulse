@@ -7,8 +7,10 @@ tags:
 - launchApp
 - runFlow: _reset-state.yaml
 - tapOn: "Today"
-- tapOn: "Quick add Water"
-- tapOn: "Quick add Water"
+- repeat:
+    times: 2
+    commands:
+      - tapOn: "Quick add Water"
 - tapOn: "History"
 - assertVisible:
     id: "history-week-range"
