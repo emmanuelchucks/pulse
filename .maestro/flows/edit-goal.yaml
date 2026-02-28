@@ -1,8 +1,16 @@
 appId: com.pulse.app
 ---
 - launchApp
+- runFlow: .maestro/flows/_reset-state.yaml
 - tapOn: "Settings"
-- assertVisible: "Daily Goals"
+- assertVisible:
+    id: "settings-water-goal-value"
+    text: "8"
 - tapOn: "Increase Water goal"
+- assertVisible:
+    id: "settings-water-goal-value"
+    text: "9"
 - tapOn: "Decrease Water goal"
-- assertVisible: "Water"
+- assertVisible:
+    id: "settings-water-goal-value"
+    text: "8"

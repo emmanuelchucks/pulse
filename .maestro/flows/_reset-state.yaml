@@ -1,0 +1,16 @@
+appId: com.pulse.app
+---
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element:
+      id: "settings-clear-all-data"
+    direction: DOWN
+- tapOn:
+    id: "settings-clear-all-data"
+- tapOn: "Clear Data"
+- assertVisible:
+    id: "settings-days-tracked"
+    text: "0"
+- assertVisible:
+    id: "settings-water-goal-value"
+    text: "8"

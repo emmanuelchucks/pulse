@@ -1,8 +1,20 @@
 appId: com.pulse.app
 ---
 - launchApp
+- runFlow: .maestro/flows/_reset-state.yaml
+- tapOn: "Today"
+- tapOn: "Quick add Water"
+- tapOn: "Quick add Water"
 - tapOn: "History"
-- assertVisible: "Track your progress over time"
-- tapOn: "Previous week"
-- tapOn: "Next week"
 - assertVisible: "Weekly Averages"
+- assertVisible:
+    id: "history-water-average"
+    text: "2.0"
+- tapOn: "Previous week"
+- assertVisible:
+    id: "history-water-average"
+    text: "0.0"
+- tapOn: "Next week"
+- assertVisible:
+    id: "history-water-average"
+    text: "2.0"

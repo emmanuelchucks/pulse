@@ -1,9 +1,18 @@
 appId: com.pulse.app
 ---
 - launchApp
+- runFlow: .maestro/flows/_reset-state.yaml
 - tapOn: "Track"
-- assertVisible: "Log your daily wellness"
+- assertVisible:
+    id: "track-water-value"
+    text: "0"
 - tapOn: "Increase Water"
+- tapOn: "Increase Water"
+- assertVisible:
+    id: "track-water-value"
+    text: "2"
 - tapOn: "Reset Day"
 - tapOn: "Reset"
-- assertVisible: "Water"
+- assertVisible:
+    id: "track-water-value"
+    text: "0"
