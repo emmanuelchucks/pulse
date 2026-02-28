@@ -1,8 +1,19 @@
-appId: com.pulse.app
+appId: com.pulsewellness.app
+name: Quick add updates today's water metric
+tags:
+  - e2e
+  - smoke
 ---
 - launchApp
+- runFlow: _reset-state.yaml
 - tapOn: "Today"
-- assertVisible: "Today's Metrics"
-- tapOn: "Quick add Water"
-- tapOn: "Quick add Water"
-- assertVisible: "Water"
+- assertVisible:
+    id: "today-water-value"
+    text: "0"
+- repeat:
+    times: 2
+    commands:
+      - tapOn: "Quick add Water"
+- assertVisible:
+    id: "today-water-value"
+    text: "2"

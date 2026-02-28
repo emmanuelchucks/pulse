@@ -142,7 +142,9 @@ function NumericCard({
           </Pressable>
 
           <View className="min-w-20 items-center">
-            <Text className={numericText({ size: "md" })}>{value}</Text>
+            <Text testID={`track-${metric}-value`} className={numericText({ size: "md" })}>
+              {value}
+            </Text>
             <Description>{config.unit}</Description>
           </View>
 

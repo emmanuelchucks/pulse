@@ -1,9 +1,24 @@
-appId: com.pulse.app
+appId: com.pulsewellness.app
+name: Reset day clears tracked water value
+tags:
+  - e2e
+  - smoke
 ---
 - launchApp
+- runFlow: _reset-state.yaml
 - tapOn: "Track"
-- assertVisible: "Log your daily wellness"
-- tapOn: "Increase Water"
+- assertVisible:
+    id: "track-water-value"
+    text: "0"
+- repeat:
+    times: 2
+    commands:
+      - tapOn: "Increase Water"
+- assertVisible:
+    id: "track-water-value"
+    text: "2"
 - tapOn: "Reset Day"
 - tapOn: "Reset"
-- assertVisible: "Water"
+- assertVisible:
+    id: "track-water-value"
+    text: "0"

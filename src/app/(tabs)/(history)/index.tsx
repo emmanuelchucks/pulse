@@ -121,7 +121,7 @@ export default function HistoryScreen() {
             />
           </Button>
 
-          <Description className="text-base font-medium">
+          <Description testID="history-week-range" className="text-base font-medium">
             {fmt(weekStart)} – {fmt(weekEnd)}
           </Description>
 
@@ -170,7 +170,7 @@ export default function HistoryScreen() {
                     <AppIcon name={config.icon} color={config.color} size={14} />
                     <Description className="text-sm">{config.label}</Description>
                   </View>
-                  <Text className={numericText({ size: "xs" })}>
+                  <Text testID={`history-${key}-average`} className={numericText({ size: "xs" })}>
                     {avg.toFixed(1)} {config.unit}
                   </Text>
                 </Card.Body>

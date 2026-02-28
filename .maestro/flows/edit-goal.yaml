@@ -1,8 +1,24 @@
-appId: com.pulse.app
+appId: com.pulsewellness.app
+name: Edit water goal with stepper controls
+tags:
+  - e2e
+  - regression
 ---
 - launchApp
+- runFlow: _reset-state.yaml
 - tapOn: "Settings"
-- assertVisible: "Daily Goals"
+- scrollUntilVisible:
+    element:
+      id: "settings-water-goal-value"
+    direction: UP
+- assertVisible:
+    id: "settings-water-goal-value"
+    text: "8"
 - tapOn: "Increase Water goal"
+- assertVisible:
+    id: "settings-water-goal-value"
+    text: "9"
 - tapOn: "Decrease Water goal"
-- assertVisible: "Water"
+- assertVisible:
+    id: "settings-water-goal-value"
+    text: "8"

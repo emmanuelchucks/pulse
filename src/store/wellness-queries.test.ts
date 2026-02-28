@@ -2,7 +2,16 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 type LiveQueryResult = { data?: unknown[] };
 
-const useLiveQueryMock = vi.fn<(query: unknown) => LiveQueryResult>();
+type LiveQueryCall = { query: unknown; deps?: unknown[] };
+
+const liveQueryCalls: LiveQueryCall[] = [];
+
+const useLiveQueryMock = vi.fn<(query: unknown, deps?: unknown[]) => LiveQueryResult>(
+  (query, deps) => {
+    liveQueryCalls.push({ query, deps });
+    return { data: [] };
+  },
+);
 
 vi.mock("drizzle-orm/expo-sqlite", () => ({
   useLiveQuery: useLiveQueryMock,
@@ -32,6 +41,12 @@ vi.mock("@/db/client", () => ({
   },
 }));
 
+let useGoals: () => {
+  water: number;
+  mood: number;
+  sleep: number;
+  exercise: number;
+};
 let useEntryCount: () => number;
 let useEntryByDate: (date: string) => {
   date: string;
@@ -40,6 +55,7 @@ let useEntryByDate: (date: string) => {
   sleep: number;
   exercise: number;
 };
+let useEntriesInRange: (startDate: string, endDate: string) => unknown[];
 let useCompletionRateInRange: (startDate: string, endDate: string) => number;
 let useTodaySummary: (date: string) => { completedMetrics: number; overallPercent: number };
 let useMetricAveragesInRange: (startDate: string, endDate: string) => {
@@ -52,14 +68,27 @@ let useMetricAveragesInRange: (startDate: string, endDate: string) => {
 describe("wellness store query hooks", () => {
   beforeAll(async () => {
     const queries = await import("@/store/wellness-queries");
+    useGoals = queries.useGoals;
     useEntryCount = queries.useEntryCount;
     useEntryByDate = queries.useEntryByDate;
+    useEntriesInRange = queries.useEntriesInRange;
     useCompletionRateInRange = queries.useCompletionRateInRange;
     useTodaySummary = queries.useTodaySummary;
     useMetricAveragesInRange = queries.useMetricAveragesInRange;
   });
   beforeEach(() => {
-    useLiveQueryMock.mockReset();
+    useLiveQueryMock.mockClear();
+    useLiveQueryMock.mockImplementation((query, deps) => {
+      liveQueryCalls.push({ query, deps });
+      return { data: [] };
+    });
+    liveQueryCalls.length = 0;
+  });
+
+  it("returns default goals when table is empty", () => {
+    useLiveQueryMock.mockReturnValue({ data: [] });
+
+    expect(useGoals()).toEqual({ water: 8, mood: 5, sleep: 8, exercise: 30 });
   });
 
   it("counts only days with at least one non-zero metric", () => {
@@ -146,5 +175,54 @@ describe("wellness store query hooks", () => {
     const averages = useMetricAveragesInRange("2026-02-10", "2026-02-16");
 
     expect(averages).toEqual({ water: 0, mood: 0, sleep: 0, exercise: 0 });
+  });
+
+  it("subscribes goals query with invalidation deps", () => {
+    useGoals();
+
+    const call = liveQueryCalls.at(-1);
+    expect(call?.deps).toEqual([0]);
+  });
+
+  it("subscribes tracked-day query with invalidation deps", () => {
+    useEntryCount();
+
+    const call = liveQueryCalls.at(-1);
+    expect(call?.deps).toEqual([0]);
+  });
+
+  it("subscribes entry-by-date query with date and invalidation deps", () => {
+    useEntryByDate("2026-02-11");
+
+    const call = liveQueryCalls.at(-1);
+    expect(call?.deps).toEqual(["2026-02-11", 0]);
+  });
+
+  it("subscribes range query with bounds and invalidation deps", () => {
+    useEntriesInRange("2026-02-10", "2026-02-16");
+
+    const call = liveQueryCalls.at(-1);
+    expect(call?.deps).toEqual(["2026-02-10", "2026-02-16", 0]);
+  });
+
+  it("subscribes completion-rate query with range and invalidation deps", () => {
+    useCompletionRateInRange("2026-02-10", "2026-02-16");
+
+    const call = liveQueryCalls.at(-1);
+    expect(call?.deps).toEqual(["2026-02-10", "2026-02-16", 0]);
+  });
+
+  it("subscribes today summary query with date and invalidation deps", () => {
+    useTodaySummary("2026-02-11");
+
+    const call = liveQueryCalls.at(-1);
+    expect(call?.deps).toEqual(["2026-02-11", 0]);
+  });
+
+  it("subscribes metric-averages query with range and invalidation deps", () => {
+    useMetricAveragesInRange("2026-02-10", "2026-02-16");
+
+    const call = liveQueryCalls.at(-1);
+    expect(call?.deps).toEqual(["2026-02-10", "2026-02-16", 0]);
   });
 });

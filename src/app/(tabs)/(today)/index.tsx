@@ -129,7 +129,9 @@ export default function DashboardScreen() {
               <View className="flex-1 gap-0.5">
                 <Description className="font-medium">{config.label}</Description>
                 <View className="flex-row items-baseline gap-2">
-                  <Text className={numericText({ size: "lg" })}>{display}</Text>
+                  <Text testID={`today-${key}-value`} className={numericText({ size: "lg" })}>
+                    {display}
+                  </Text>
                   <Description className="text-sm">{unit}</Description>
                 </View>
               </View>
