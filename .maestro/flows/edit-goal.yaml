@@ -3,6 +3,10 @@ appId: com.pulsewellness.app
 - launchApp
 - runFlow: _reset-state.yaml
 - tapOn: "Settings"
+- scrollUntilVisible:
+    element:
+      id: "settings-water-goal-value"
+    direction: UP
 - assertVisible:
     id: "settings-water-goal-value"
     text: "8"

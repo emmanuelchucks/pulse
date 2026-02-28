@@ -11,6 +11,3 @@ appId: com.pulsewellness.app
 - assertVisible:
     id: "settings-days-tracked"
     text: "0"
-- assertVisible:
-    id: "settings-water-goal-value"
-    text: "8"

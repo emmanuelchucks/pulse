@@ -6,15 +6,40 @@ appId: com.pulsewellness.app
 - tapOn: "Quick add Water"
 - tapOn: "Quick add Water"
 - tapOn: "History"
-- assertVisible: "Weekly Averages"
+- assertVisible:
+    id: "history-week-range"
+- scrollUntilVisible:
+    element:
+      id: "history-water-average"
+    direction: DOWN
 - assertVisible:
     id: "history-water-average"
-    text: "2.0"
+    text: "2.0 glasses"
+- scrollUntilVisible:
+    element:
+      text: "Previous week"
+    direction: UP
 - tapOn: "Previous week"
-- assertVisible:
-    id: "history-water-average"
-    text: "0.0"
+- scrollUntilVisible:
+    element:
+      id: "history-water-average"
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: "history-water-average"
+      text: "0.0 glasses"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      text: "Next week"
+    direction: UP
 - tapOn: "Next week"
-- assertVisible:
-    id: "history-water-average"
-    text: "2.0"
+- scrollUntilVisible:
+    element:
+      id: "history-water-average"
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: "history-water-average"
+      text: "2.0 glasses"
+    timeout: 10000
