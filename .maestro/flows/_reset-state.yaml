@@ -1,4 +1,4 @@
-appId: com.pulse.app
+appId: com.pulsewellness.app
 ---
 - tapOn: "Settings"
 - scrollUntilVisible:

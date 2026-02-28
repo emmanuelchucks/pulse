@@ -1,7 +1,7 @@
-appId: com.pulse.app
+appId: com.pulsewellness.app
 ---
 - launchApp
-- runFlow: .maestro/flows/_reset-state.yaml
+- runFlow: _reset-state.yaml
 - tapOn: "Settings"
 - assertVisible:
     id: "settings-water-goal-value"
