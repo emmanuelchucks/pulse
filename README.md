@@ -6,8 +6,6 @@ A local-first wellness tracker built with Expo + React Native.
 
 https://github.com/user-attachments/assets/7abd3c67-cd81-42bf-b455-ab77da4cbd4f
 
-<video src="./media/readme/demo.mp4" controls width="100%" poster="./media/readme/poster.png"></video>
-
 <picture>
   <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="./media/readme/screenshot-dark-mobile.png">
   <source media="(prefers-color-scheme: dark) and (min-width: 768px)" srcset="./media/readme/screenshot-dark-desktop.png">
