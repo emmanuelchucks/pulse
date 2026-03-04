@@ -4,14 +4,14 @@ A local-first wellness tracker built with Expo + React Native.
 
 ## Demo
 
-<video src="https://github.com/user-attachments/assets/28e8deb4-0bd1-42b9-8e73-83c823d0ff05" controls width="100%" poster="https://github.com/user-attachments/assets/d1d50a5f-72ad-45c3-8e3e-0359ec7db362"></video>
+<video src="./media/readme/demo.mp4" controls width="100%" poster="./media/readme/poster.png"></video>
 
 <picture>
-  <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://github.com/user-attachments/assets/acf0f9b8-c5de-4ade-b4e4-9335a4e25cc1">
-  <source media="(prefers-color-scheme: dark) and (min-width: 768px)" srcset="https://github.com/user-attachments/assets/dc561b63-3364-4a51-a997-d5b59b3bdc68">
-  <source media="(prefers-color-scheme: light) and (max-width: 767px)" srcset="https://github.com/user-attachments/assets/6b62fa50-86ac-43bd-b310-37fd374fe742">
-  <source media="(prefers-color-scheme: light) and (min-width: 768px)" srcset="https://github.com/user-attachments/assets/faa6a005-15be-4ab0-847d-b3efa336cb32">
-  <img alt="Pulse app screenshots in light and dark mode" src="https://github.com/user-attachments/assets/faa6a005-15be-4ab0-847d-b3efa336cb32" width="100%">
+  <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="./media/readme/screenshot-dark-mobile.png">
+  <source media="(prefers-color-scheme: dark) and (min-width: 768px)" srcset="./media/readme/screenshot-dark-desktop.png">
+  <source media="(prefers-color-scheme: light) and (max-width: 767px)" srcset="./media/readme/screenshot-light-mobile.png">
+  <source media="(prefers-color-scheme: light) and (min-width: 768px)" srcset="./media/readme/screenshot-light-desktop.png">
+  <img alt="Pulse app screenshots in light and dark mode" src="./media/readme/screenshot-light-desktop.png" width="100%">
 </picture>
 
 ## Tech
